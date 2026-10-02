@@ -31,6 +31,35 @@
 <path class="laneInner" d="M -100 315 H 875 C 935 315 955 330 955 365 C 955 400 935 415 875 415 H -100"/>
 <path class="laneInner" d="M -100 445 H 875 C 935 445 955 460 955 495 C 955 530 935 545 875 545 H -100"/>
 </svg>
+<script>
+(function(){
+ const svg=document.querySelector(".serpentineLane");
+ const paths=[...svg.querySelectorAll(".laneInner")];
+ if(!svg||!paths.length)return;
+ const items=["🍣","🍤","🍙","🍣","🍤","🍣","🍙","🍣","🍤","🍣","🍙","🍣"];
+ const sushi=items.map((emoji,i)=>{
+   const el=document.createElementNS("http://www.w3.org/2000/svg","text");
+   el.setAttribute("class","sushiOnLane");
+   el.textContent=emoji;
+   svg.appendChild(el);
+   const path=paths[i%paths.length];
+   return {el,path,pos:(i/paths.length)*path.getTotalLength()+i*35,speed:55+(i%3)*12};
+ });
+ let last=performance.now();
+ function loop(now){
+   const dt=Math.min(0.05,(now-last)/1000);last=now;
+   sushi.forEach(s=>{
+     const len=s.path.getTotalLength();
+     s.pos=(s.pos+s.speed*dt)%len;
+     const p=s.path.getPointAtLength(s.pos);
+     s.el.setAttribute("x",p.x);
+     s.el.setAttribute("y",p.y);
+   });
+   requestAnimationFrame(loop);
+ }
+ requestAnimationFrame(loop);
+})();
+</script>
 </div>
 <div class="gameHud"><div class="hudTitle">Sushi</div><div class="hudMoney" id="money">¥0</div></div>
 </div></div>
