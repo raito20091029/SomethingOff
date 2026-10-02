@@ -32,7 +32,7 @@ const upgrades=[
 {id:"seat",name:"🪑 席を増やす",desc:"お客さん +1人",cost:400},{id:"shop",name:"🏮 店舗改装",desc:"1皿の売上 +¥100",cost:1000}];
 const levels={knife:0,chef:0,seat:0,shop:0};
 const sushiTypes=["🍣","🍤","🥚","🍙","🐟","🥑"],customerTypes=["👩","👨","🧑","👵","👨‍🍳","🧑‍💼"];
-let sushiTimer=null,customerTimer=null,sushis=[],customers=[],lastFrame=performance.now(),spawnElapsed=0;
+let sushiTimer=null,customerTimer=null,sushis=[],customers=[],lastFrame=performance.now();
 const moneyEl=document.getElementById("money"),incomeEl=document.getElementById("income"),popEl=document.getElementById("popularity");
 function yen(n){return "¥"+Math.floor(n).toLocaleString("ja-JP")}
 function customerCount(){return 3+levels.seat}
@@ -46,10 +46,10 @@ function makeCustomers(){
  }
  document.getElementById("customers").textContent=n+"人";
 }
-function spawnSushi(){
+function spawnSushi(angle=null){
  const lane=document.getElementById("lane"),plate=document.createElement("div");plate.className="plate";
  plate.textContent=sushiTypes[Math.floor(Math.random()*sushiTypes.length)];lane.appendChild(plate);
- const s={el:plate,angle:Math.random()*Math.PI*2,value:income};sushis.push(s);
+ const s={el:plate,angle:angle===null?Math.random()*Math.PI*2:angle,value:income};sushis.push(s);
 }
 function moveSushi(dt){
  const lane=document.getElementById("lane"),cx=lane.clientWidth/2,cy=lane.clientHeight/2,r=135;
@@ -79,13 +79,12 @@ function customersEat(){
 function startLane(){
  if(sushiTimer)clearInterval(sushiTimer);
  if(customerTimer)cancelAnimationFrame(customerTimer);
- sushis.forEach(s=>s.el.remove());sushis=[];spawnElapsed=0;lastFrame=performance.now();
- for(let i=0;i<7;i++)setTimeout(spawnSushi,i*500);
- setTimeout(makeCustomers,50);
+ sushis.forEach(s=>s.el.remove());sushis=[];lastFrame=performance.now();
+ const count=10;
+ for(let i=0;i<count;i++)spawnSushi((Math.PI*2*i)/count);
+ makeCustomers();
  const loop=(now)=>{
   const dt=Math.min(40,now-lastFrame);lastFrame=now;
-  spawnElapsed+=dt;
-  if(spawnElapsed>=2200){spawnElapsed-=2200;spawnSushi();}
   moveSushi(dt);
   customersEat();
   customerTimer=requestAnimationFrame(loop);
