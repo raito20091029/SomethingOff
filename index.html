@@ -53,34 +53,35 @@ function spawnSushi(angle=null){
 }
 function moveSushi(dt){
  const lane=document.getElementById("lane"),cx=lane.clientWidth/2,cy=lane.clientHeight/2;
- const w=430,h=270,r=100;
- const straightX=w/2-r, straightY=h/2-r;
- const perimeter=2*straightX+2*straightY+2*Math.PI*r;
+ const halfW=215,halfH=135,r=100;
+ const straightX=halfW-r, straightY=halfH-r;
+ const L=2*straightX+2*straightY+2*Math.PI*r;
  sushis=sushis.filter(s=>{
   if(!s.el.isConnected)return false;
-  s.distance=(s.distance||0)+0.075*dt;
-  const d=((s.distance%perimeter)+perimeter)%perimeter;
+  s.distance=((s.distance||0)+0.075*dt)%L;
+  const d=s.distance;
   let x,y;
-  if(d<straightX){
-   x=-straightX/2+d; y=-h/2+r;
-  }else if(d<straightX+Math.PI*r/2){
-   const a=-Math.PI/2+(d-straightX)/r;
+  const topLen=straightX, arcLen=Math.PI*r/2, sideLen=straightY;
+  if(d<topLen){
+   x=-straightX/2+d; y=-straightY;
+  }else if(d<topLen+arcLen){
+   const a=-Math.PI/2+(d-topLen)/r;
    x=straightX/2+r*Math.cos(a); y=-straightY+r*Math.sin(a);
-  }else if(d<straightX+Math.PI*r/2+straightY){
-   const q=d-(straightX+Math.PI*r/2);
-   x=straightX/2; y=-straightY+q;
-  }else if(d<straightX+Math.PI*r/2+straightY+Math.PI*r/2){
-   const a=0+(d-(straightX+Math.PI*r/2+straightY))/r;
+  }else if(d<topLen+arcLen+sideLen){
+   x=straightX/2+r; y=-straightY+(d-topLen-arcLen);
+  }else if(d<topLen+2*arcLen+sideLen){
+   const a=0+(d-topLen-arcLen-sideLen)/r;
    x=straightX/2+r*Math.cos(a); y=straightY+r*Math.sin(a);
-  }else if(d<straightX+Math.PI*r+straightY+Math.PI*r/2){
-   const q=d-(straightX+Math.PI*r/2+straightY+Math.PI*r/2);
-   x=straightX/2-q; y=straightY+r;
-  }else if(d<straightX+Math.PI*r+straightY+Math.PI*r){
-   const a=Math.PI/2+(d-(straightX+Math.PI*r+straightY+Math.PI*r/2))/r;
+  }else if(d<topLen+2*arcLen+sideLen+straightX){
+   x=straightX/2-(d-topLen-2*arcLen-sideLen); y=straightY;
+  }else if(d<topLen+3*arcLen+sideLen+straightX){
+   const a=Math.PI/2+(d-topLen-2*arcLen-sideLen-straightX)/r;
    x=-straightX/2+r*Math.cos(a); y=straightY+r*Math.sin(a);
+  }else if(d<topLen+4*arcLen+sideLen+straightX){
+   x=-straightX/2-r; y=straightY-(d-topLen-3*arcLen-sideLen-straightX);
   }else{
-   const q=d-(straightX+Math.PI*r+straightY+Math.PI*r);
-   x=-straightX/2; y=straightY-q;
+   const a=Math.PI+(d-topLen-3*arcLen-sideLen-straightX)/r;
+   x=-straightX/2+r*Math.cos(a); y=-straightY+r*Math.sin(a);
   }
   s.el.style.left=(cx+x-36)+"px";
   s.el.style.top=(cy+y-36)+"px";
@@ -88,6 +89,7 @@ function moveSushi(dt){
   return true;
  });
 }
+
 function customersEat(){
  const lane=document.getElementById("lane"),cx=lane.clientWidth/2,cy=lane.clientHeight/2;
  customers.forEach(c=>{
