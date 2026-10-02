@@ -40,4 +40,14 @@ function resumeGame(){menu.style.display='none';$('#mainButtons').classList.remo
 $('#start').onclick=()=>start();$('#load').onclick=()=>start(true);$('#pauseQuick').onclick=togglePause;$('#resume').onclick=()=>resumeGame();$('#pauseSave').onclick=()=>save();$('#titleBack').onclick=()=>{S.started=false;showMainMenu();render();msg('タイトル画面に戻りました。')};
 addEventListener('keydown',e=>{const k=(e.key||'').toLowerCase();if(e.code==='Escape'||k==='escape'){togglePause(e);return}if(!S.started||S.ending)return;if(k==='e')inspect();if(e.key==='F5'){e.preventDefault();save()}if(['w','a','s','d'].includes(k)){if(Math.random()<.025&&S.anomaly>0){anomaly();msg('歩くたびに、足音が一つ多い。')}}},{capture:true});
 render();
-</script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script></body></html>
+</script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register('./sw.js?v=6').catch(()=>{});}</script><script>
+function removeLegacyLoadButton(){
+  document.querySelectorAll('button').forEach(b=>{
+    const t=(b.textContent||'').trim();
+    if(t==='セーブを読む'||t==='セーブを読み込む') b.remove();
+  });
+}
+document.addEventListener('DOMContentLoaded',removeLegacyLoadButton);
+removeLegacyLoadButton();
+</script>
+</body></html>
