@@ -12,11 +12,9 @@ header{display:flex;justify-content:space-between;align-items:center;max-width:1
 .money{font-size:26px;font-weight:700}
 main{max-width:1100px;margin:24px auto;display:grid;grid-template-columns:1.4fr .8fr;gap:20px}
 .card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 5px 20px #0001}
-.shop{min-height:420px;text-align:center}
+.shop{min-height:420px;text-align:center}.lane{height:190px;margin:28px -22px 18px;position:relative;overflow:hidden;background:repeating-linear-gradient(0deg,#8b5a2b 0 8px,#6f431f 8px 16px);border-top:10px solid #3b2415;border-bottom:10px solid #3b2415;box-shadow:inset 0 8px 20px #0005}.laneTrack{position:absolute;left:0;right:0;top:72px;height:55px;background:#333;border-top:4px solid #555;border-bottom:4px solid #222}.plate{position:absolute;top:48px;width:92px;height:92px;border-radius:50%;background:#eee;border:7px solid #ddd;box-shadow:0 5px 8px #0005;display:flex;align-items:center;justify-content:center;font-size:43px;cursor:pointer;z-index:2;transition:transform .1s}.plate:hover{transform:scale(1.08)}
 .sushi{font-size:110px;margin:30px 0 12px}
 .order{font-size:20px;margin-bottom:20px}
-.work{background:#222;color:#fff;padding:16px 50px;border-radius:12px;font-size:20px}
-.work:hover{transform:translateY(-2px)}
 .upgrade{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eee}
 .upgrade:last-child{border:0}
 .upgrade small{display:block;color:#777;margin-top:4px}
@@ -32,10 +30,9 @@ main{max-width:1100px;margin:24px auto;display:grid;grid-template-columns:1.4fr 
 <header><div><strong>🍣 すし屋「いちばん」</strong><div style="color:#777">今日もお客さんを満足させよう！</div></div><div class="money" id="money">¥0</div></header>
 <main>
 <section class="card shop">
-<h2>今日の注文</h2>
-<div class="sushi" id="sushi">🍣</div>
-<div class="order" id="order">まぐろを1皿お願いします！</div>
-<button class="work" id="serve">🍣 寿司を握る</button>
+<h2>🍣 回転レーン</h2>
+<div class="lane" id="lane"><div class="laneTrack"></div></div>
+<div class="order" id="order">流れてくるお寿司をクリックして取ろう！</div>
 <div class="stats">
 <div class="stat">1皿の売上<br><b id="income">¥10</b></div>
 <div class="stat">提供速度<br><b id="speed">普通</b></div>
@@ -58,7 +55,29 @@ const upgrades=[
 ];
 const levels={knife:0,chef:0,seat:0,shop:0};
 const moneyEl=document.getElementById("money"),incomeEl=document.getElementById("income"),popEl=document.getElementById("popularity"),speedEl=document.getElementById("speed");
+const sushiTypes=["🍣","🍤","🥚","🍙","🐟","🥑"];
+let sushiTimer;
 function yen(n){return "¥"+Math.floor(n).toLocaleString("ja-JP")}
+function spawnSushi(){
+ const lane=document.getElementById("lane");
+ const plate=document.createElement("button");
+ plate.className="plate";
+ plate.textContent=sushiTypes[Math.floor(Math.random()*sushiTypes.length)];
+ plate.style.left="-100px";
+ const value=income;
+ plate.title="¥"+value+"のお寿司";
+ plate.onclick=()=>{money+=value;popularity=Math.min(5,popularity+0.05);plate.remove();document.getElementById("order").textContent="お寿司を取った！ +"+yen(value);render();};
+ lane.appendChild(plate);
+ let x=-100;
+ const speed=1.6+speed*0.15;
+ clearInterval(plate._timer);
+ plate._timer=setInterval(()=>{
+   x+=speed;
+   plate.style.left=x+"px";
+   if(x>lane.clientWidth+100){clearInterval(plate._timer);plate.remove();}
+ },16);
+}
+function startLane(){clearInterval(sushiTimer);spawnSushi();sushiTimer=setInterval(spawnSushi,1800);}
 function render(){
  moneyEl.textContent=yen(money);incomeEl.textContent=yen(income);
  popEl.textContent="★".repeat(Math.min(5,popularity))+"☆".repeat(5-Math.min(5,popularity));
@@ -68,12 +87,6 @@ function render(){
    return '<div class="upgrade"><div><b>'+u.name+' Lv.'+lv+'</b><small>'+u.desc+'<br>次の価格 '+yen(cost)+'</small></div><button class="buy" '+(money<cost?"disabled":"")+' data-id="'+u.id+'">購入</button></div>';
  }).join("");
  document.querySelectorAll(".buy").forEach(b=>b.onclick=()=>buy(b.dataset.id));
-}
-function serve(){
- money+=income;
- if(Math.random()<.15) popularity=Math.min(5,popularity+1);
- document.getElementById("order").textContent=["まぐろ","サーモン","えび","たまご","いくら"][Math.floor(Math.random()*5)]+"を1皿お願いします！";
- render();
 }
 function buy(id){
  const u=upgrades.find(x=>x.id===id),lv=levels[id],cost=Math.floor(u.cost*Math.pow(1.65,lv));
@@ -85,7 +98,7 @@ function buy(id){
  if(id==="shop")income+=100;
  render();
 }
-document.getElementById("serve").onclick=serve;
+startLane();
 render();
 </script>
 </body>
