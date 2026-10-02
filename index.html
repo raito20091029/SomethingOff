@@ -107,12 +107,11 @@ function buy(id){
  money-=cost;levels[id]++;if(id==="knife")income+=10;if(id==="chef")income+=25;if(id==="seat"){popularity=Math.min(5,popularity+1);makeCustomers()}if(id==="shop")income+=100;render();
 }
 
-
-};
+}
 </script>
 <script>
 const home=document.getElementById("homeScreen"),game=document.getElementById("gameScreen");
-function startGame(){window.location.href="./?game=16";}
+function startGame(){document.getElementById("homeScreen").style.display="none";document.getElementById("gameScreen").style.display="block";}
 document.getElementById("startText").onclick=startGame;
 home.onclick=e=>{if(e.target!==document.getElementById("startText"))startGame();};
 </script></body></html>
