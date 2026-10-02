@@ -9,6 +9,7 @@
 .fullLane{position:absolute;inset:0;width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(ellipse at center,#b47b43,#7a461f 70%);border:0}
 .fullLane:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 48px,#ffffff09 49px 50px);pointer-events:none}
 .laneTrack{position:absolute;left:50%;top:50%;width:min(82vw,1100px);height:min(70vh,700px);transform:translate(-50%,-50%);border-radius:180px;border:48px solid #191919;background:repeating-linear-gradient(90deg,#707070 0 28px,#5b5b5b 28px 56px);box-shadow:0 0 0 6px #050505,0 18px 35px #0009,inset 0 0 0 4px #aaa,inset 0 0 0 12px #303030}
+.laneTrack:after{content:"";position:absolute;left:50%;bottom:-54px;transform:translateX(-50%);width:180px;height:110px;border-radius:18px;background:linear-gradient(180deg,#9a6332,#74431f);box-shadow:0 10px 18px #0005;z-index:5}
 .gameHud{position:absolute;z-index:50;top:0;left:0;right:0;padding:25px 32px;display:flex;justify-content:space-between;color:#fff;text-shadow:0 3px 8px #000;pointer-events:none}
 .hudTitle{font:800 30px Georgia,serif;letter-spacing:4px}.hudMoney{font-size:28px;font-weight:800}
 </style></head><body>
