@@ -1,4 +1,4 @@
-const CACHE='somethingoff-v13';
+const CACHE='somethingoff-v14';
 const ASSETS=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',e=>{
