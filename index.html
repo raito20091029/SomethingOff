@@ -58,7 +58,7 @@ function moveSushi(dt){
   s.angle+=(0.0024+speed*0.00025)*dt;
   s.el.style.left=(cx+Math.cos(s.angle)*r-36)+"px";
   s.el.style.top=(cy+Math.sin(s.angle)*r-36)+"px";
-  s.el.style.zIndex=Math.sin(s.angle)>0?3:2;
+  s.el.style.zIndex=5;
   return true;
  });
 }
