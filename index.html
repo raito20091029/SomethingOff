@@ -69,10 +69,10 @@ function spawnSushi(){
  plate.onclick=()=>{money+=value;popularity=Math.min(5,popularity+0.05);plate.remove();document.getElementById("order").textContent="お寿司を取った！ +"+yen(value);render();};
  lane.appendChild(plate);
  let x=-100;
- const speed=1.6+speed*0.15;
+ const moveSpeed=1.6+speed*0.15;
  clearInterval(plate._timer);
  plate._timer=setInterval(()=>{
-   x+=speed;
+   x+=moveSpeed;
    plate.style.left=x+"px";
    if(x>lane.clientWidth+100){clearInterval(plate._timer);plate.remove();}
  },16);
