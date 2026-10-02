@@ -26,7 +26,7 @@ function updatePlayer(){
 }
 function render(){status.innerHTML='正気度　'+S.sanity+'%<br>違和感　'+S.anomaly;inv.textContent='所持品：'+(S.items.join(' / ')||'なし');if(S.sanity<40)game.classList.add('low');else game.classList.remove('low')}
 function anomaly(n=1){S.anomaly+=n;S.sanity=Math.max(0,S.sanity-(n*5));render();game.classList.add('glitch');setTimeout(()=>game.classList.remove('glitch'),800)}
-function start(load=false){if(load&&saved){try{S={...S,...JSON.parse(saved),started:true};menu.style.display='none';render();msg('……セーブした時より、部屋が少し広い。');return}catch{}}S.started=true;S.player={x:0,y:0};$('.room').style.transform='translate(0,0)';menu.style.display='none';msg('目が覚めた。知らない部屋だ。出口は一つしかない。');render()}
+function startLegacy(load=false){if(load&&saved){try{S={...S,...JSON.parse(saved),started:true};menu.style.display='none';render();msg('……セーブした時より、部屋が少し広い。');return}catch{}}S.started=true;S.player={x:0,y:0};$('.room').style.transform='translate(0,0)';menu.style.display='none';msg('目が覚めた。知らない部屋だ。出口は一つしかない。');render()}
 function save(){localStorage.setItem('kik_save',JSON.stringify({...S,started:false}));msg('セーブしました。')}
 function inspect(){
  if(S.ending)return;
@@ -77,7 +77,7 @@ window.startGame=function(){
   b.addEventListener('click',launch);
 })();
 render();
-</script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register('./sw.js?v=6').catch(()=>{});}</script><script>
+</script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register('./sw.js?v=8').catch(()=>{});}</script><script>
 function removeLegacyLoadButton(){
   document.querySelectorAll('button').forEach(b=>{
     const t=(b.textContent||'').trim();
