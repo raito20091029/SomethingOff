@@ -52,35 +52,38 @@ function spawnSushi(angle=null){
  const s={el:plate,angle:angle===null?Math.random()*Math.PI*2:angle,value:income};sushis.push(s);
 }
 function moveSushi(dt){
- const lane=document.getElementById("lane"),cx=lane.clientWidth/2,cy=lane.clientHeight/2;
- // Match the visible conveyor's center line exactly.
- const r=73, hx=198, hy=118;
- const top= hx-r, side=hy-r;
- const q=2*top+2*side+2*Math.PI*r;
+ const lane=document.getElementById("lane");
+ const cx=lane.clientWidth/2, cy=lane.clientHeight/2;
+ // The visible track is 430x270 with a 34px border.
+ // Its centerline is therefore 362x202, with a 73px corner radius.
+ const hx=181, hy=101, r=73;
+ const sx=hx-r, sy=hy-r;
+ const straightTop=sx, straightSide=sy, arc=Math.PI*r/2;
+ const perimeter=2*sx+2*sy+4*arc;
  sushis=sushis.filter(s=>{
   if(!s.el.isConnected)return false;
-  s.distance=((s.distance||0)+0.075*dt)%q;
+  s.distance=((s.distance||0)+0.075*dt)%perimeter;
   let d=s.distance,x,y;
-  if(d<top){
-   x=-top/2+d; y=-hy;
-  }else if(d<top+Math.PI*r/2){
-   const t=(d-top)/r-Math.PI/2;
-   x=top/2+r*Math.cos(t); y=-side+r*Math.sin(t);
-  }else if(d<top+Math.PI*r/2+side){
-   x=hx; y=-side+(d-top-Math.PI*r/2);
-  }else if(d<top+Math.PI*r+side){
-   const t=(d-top-Math.PI*r/2-side)/r;
-   x=top/2+r*Math.cos(t); y=side+r*Math.sin(t);
-  }else if(d<2*top+Math.PI*r+side){
-   x=top/2-(d-top-Math.PI*r-side); y=hy;
-  }else if(d<2*top+3*Math.PI*r/2+side){
-   const t=(d-top-Math.PI*r-side-top)/r+Math.PI/2;
-   x=-top/2+r*Math.cos(t); y=side+r*Math.sin(t);
-  }else if(d<2*top+3*Math.PI*r/2+2*side){
-   x=-hx; y=side-(d-2*top-3*Math.PI*r/2-side);
+  if(d<sx){
+   x=-sx+d; y=-hy;
+  }else if(d<sx+arc){
+   const t=-Math.PI/2+(d-sx)/r;
+   x=sx+r*Math.cos(t); y=-sy+r*Math.sin(t);
+  }else if(d<sx+arc+sy){
+   x=hx; y=-sy+(d-sx-arc);
+  }else if(d<sx+2*arc+sy){
+   const t=(d-sx-arc-sy)/r;
+   x=sx+r*Math.cos(t); y=sy+r*Math.sin(t);
+  }else if(d<2*sx+2*arc+sy){
+   x=sx-(d-sx-2*arc-sy); y=hy;
+  }else if(d<2*sx+3*arc+sy){
+   const t=Math.PI/2+(d-sx-2*arc-sy)/r;
+   x=-sx+r*Math.cos(t); y=sy+r*Math.sin(t);
+  }else if(d<2*sx+3*arc+2*sy){
+   x=-hx; y=sy-(d-sx-3*arc-sy);
   }else{
-   const t=(d-2*top-3*Math.PI*r/2-2*side)/r+Math.PI;
-   x=-top/2+r*Math.cos(t); y=-side+r*Math.sin(t);
+   const t=Math.PI+(d-sx-3*arc-2*sy)/r;
+   x=-sx+r*Math.cos(t); y=-sy+r*Math.sin(t);
   }
   s.el.style.left=(cx+x-36)+"px";
   s.el.style.top=(cy+y-36)+"px";
