@@ -103,10 +103,8 @@ function customersEat(){
 }
 function startLane(){
  if(customerTimer)cancelAnimationFrame(customerTimer);
- sushis.forEach(s=>s.el.remove());sushis=[];lastFrame=performance.now();
- const count=10,hx=198,hy=118,r=73;
- const perimeter=2*(2*(hx-r))+2*(2*(hy-r))+2*Math.PI*r;
- for(let i=0;i<count;i++){spawnSushi();sushis[i].distance=(i/count)*perimeter;}
+ document.querySelectorAll(".plate").forEach(el=>el.remove());
+ sushis=[];lastFrame=performance.now();
  makeCustomers();
  const loop=(now)=>{
   const dt=Math.min(40,now-lastFrame);lastFrame=now;
