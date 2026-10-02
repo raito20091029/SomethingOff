@@ -22,14 +22,14 @@
 <div id="gameScreen"><div class="fullGame">
 <div class="fullLane" id="lane">
 <svg class="serpentineLane" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
-<path class="laneOuter" d="M -100 55 H 875 C 935 55 955 70 955 105 C 955 140 935 155 875 155 H -100"/>
-<path class="laneOuter" d="M -100 185 H 875 C 935 185 955 200 955 235 C 955 270 935 285 875 285 H -100"/>
-<path class="laneOuter" d="M -100 315 H 875 C 935 315 955 330 955 365 C 955 400 935 415 875 415 H -100"/>
-<path class="laneOuter" d="M -100 445 H 875 C 935 445 955 460 955 495 C 955 530 935 545 875 545 H -100"/>
-<path class="laneInner" d="M -100 55 H 875 C 935 55 955 70 955 105 C 955 140 935 155 875 155 H -100"/>
-<path class="laneInner" d="M -100 185 H 875 C 935 185 955 200 955 235 C 955 270 935 285 875 285 H -100"/>
-<path class="laneInner" d="M -100 315 H 875 C 935 315 955 330 955 365 C 955 400 935 415 875 415 H -100"/>
-<path class="laneInner" d="M -100 445 H 875 C 935 445 955 460 955 495 C 955 530 935 545 875 545 H -100"/>
+<path class="laneOuter" d="M -100 45 H 875 C 935 45 945 70 945 105 C 945 140 935 145 875 145 H -100"/>
+<path class="laneOuter" d="M -100 210 H 875 C 935 210 945 200 945 235 C 945 270 935 285 875 285 H -100"/>
+<path class="laneOuter" d="M -100 375 H 875 C 935 375 945 330 945 365 C 945 400 935 415 875 415 H -100"/>
+<path class="laneOuter" d="M -100 540 H 875 C 935 540 945 460 945 495 C 945 530 935 545 875 545 H -100"/>
+<path class="laneInner" d="M -100 45 H 875 C 935 45 945 70 945 105 C 945 140 935 145 875 145 H -100"/>
+<path class="laneInner" d="M -100 210 H 875 C 935 210 945 200 945 235 C 945 270 935 285 875 285 H -100"/>
+<path class="laneInner" d="M -100 375 H 875 C 935 375 945 330 945 365 C 945 400 935 415 875 415 H -100"/>
+<path class="laneInner" d="M -100 540 H 875 C 935 540 945 460 945 495 C 945 530 935 545 875 545 H -100"/>
 </svg>
 <script>
 (function(){
@@ -48,7 +48,7 @@
    g.appendChild(base);g.appendChild(fish);svg.appendChild(g);
    const path=paths[i%paths.length];
    const len=path.getTotalLength();
-   sushi.push({g,path,pos:(i*len/12)%len,speed:55+(i%3)*10});
+   sushi.push({g,path,pos:(i*len/12)%len,speed:45+(i%3)*10});
  }
  let last=performance.now();
  function loop(now){
