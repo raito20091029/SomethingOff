@@ -19,14 +19,27 @@ main{max-width:1100px;margin:24px auto;display:grid;grid-template-columns:1.4fr 
 .upgrade{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eee}.upgrade:last-child{border:0}.upgrade small{display:block;color:#777;margin-top:4px}
 .buy{background:#e85d3f;color:#fff;padding:9px 14px;border-radius:9px}.buy:disabled{background:#bbb;cursor:not-allowed}
 @media(max-width:800px){main{grid-template-columns:1fr}#app{padding:12px}.lane{height:360px}}
+
+#homeScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#f7ead7,#d9b27a);user-select:none}
+.homeTitle{font-family:Georgia,"Times New Roman",serif;font-size:clamp(72px,14vw,150px);font-weight:800;letter-spacing:8px;color:#21150e;text-shadow:0 5px 0 #fff6,0 10px 24px #0003}
+.startText{margin-top:28px;font-size:clamp(20px,3vw,32px);font-weight:600;color:#33231a;cursor:pointer;transition:opacity .2s,transform .2s}
+.startText:hover{opacity:.65;transform:translateY(2px)}
 </style></head>
-<body><div id="app">
-<header><div><strong>🍣 すし屋「いちばん」</strong><span style="display:inline-block;margin-left:10px;padding:4px 8px;border-radius:999px;background:#222;color:#fff;font-size:11px;letter-spacing:.5px">REAL v11</span><div style="color:#777">お客さんにお寿司を食べてもらおう！</div></div><div class="money" id="money">¥0</div></header>
-<main><section class="card shop"><h2>🍣 回転レーン</h2>
-<div class="lane" id="lane"><div class="laneTrack"></div></div>
-<div class="order" id="order">お客さんがお寿司を取っています…</div>
-<div class="stats"><div class="stat">1皿の売上<br><b id="income">¥10</b></div><div class="stat">お客さん<br><b id="customers">3人</b></div><div class="stat">人気<br><b id="popularity">★☆☆☆☆</b></div></div>
-</section><section class="card"><h2>🛠️ お店をアップグレード</h2><div id="upgrades"></div></section></main></div>
+<body>
+<div id="homeScreen">
+  <div class="homeTitle">Sushi</div>
+  <div class="startText" id="startText">クリックしてスタート</div>
+</div>
+<div id="gameScreen" style="display:none">
+  <div id="app">
+    <header><div><strong>🍣 すし屋「いちばん」</strong><span style="display:inline-block;margin-left:10px;padding:4px 8px;border-radius:999px;background:#222;color:#fff;font-size:11px;letter-spacing:.5px">REAL v13</span><div style="color:#777">お客さんにお寿司を食べてもらおう！</div></div><div class="money" id="money">¥0</div></header>
+    <main><section class="card shop"><h2>🍣 回転レーン</h2>
+    <div class="lane" id="lane"><div class="laneTrack"></div></div>
+    <div class="order" id="order">お客さんがお寿司を取っています…</div>
+    <div class="stats"><div class="stat">1皿の売上<br><b id="income">¥10</b></div><div class="stat">お客さん<br><b id="customers">3人</b></div><div class="stat">人気<br><b id="popularity">★☆☆☆☆</b></div></div>
+    </section><section class="card"><h2>🛠️ お店をアップグレード</h2><div id="upgrades"></div></section></main>
+  </div>
+</div>
 <script>
 let money=0,income=10,speed=1,popularity=1;
 const upgrades=[
@@ -120,4 +133,9 @@ function buy(id){
  money-=cost;levels[id]++;if(id==="knife")income+=10;if(id==="chef")income+=25;if(id==="seat"){popularity=Math.min(5,popularity+1);makeCustomers()}if(id==="shop")income+=100;render();
 }
 startLane();render();
+
+const homeScreen=document.getElementById("homeScreen"),gameScreen=document.getElementById("gameScreen");
+function startGame(){homeScreen.style.display="none";gameScreen.style.display="block";startLane();render();}
+document.getElementById("startText").onclick=startGame;
+homeScreen.onclick=(e)=>{if(e.target!==document.getElementById("startText"))startGame();};
 </script></body></html>
