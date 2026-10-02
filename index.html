@@ -75,8 +75,6 @@ window.startGame=function(){
   if(!b)return;
   const launch=e=>{e.preventDefault();window.startGame();};
   b.addEventListener('click',launch);
-  b.addEventListener('pointerup',launch);
-  b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){launch(e);}});
 })();
 render();
 </script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register('./sw.js?v=6').catch(()=>{});}</script><script>
