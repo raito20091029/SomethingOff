@@ -18,7 +18,7 @@
 .gameHud{position:absolute;z-index:50;top:0;left:0;right:0;padding:25px 32px;display:flex;justify-content:space-between;color:#fff;text-shadow:0 3px 8px #000;pointer-events:none}
 .hudTitle{font:800 30px Georgia,serif;letter-spacing:4px}.hudMoney{font-size:28px;font-weight:800}
 </style></head><body>
-<div id="homeScreen"><div class="homeTitle">Sushi</div><div class="startText" id="startText">クリックしてスタート</div></div>
+<div id="homeScreen"><div class="homeTitle">Sushi</div><div class="startText" id="startText" onclick="document.getElementById('homeScreen').style.display='none';document.getElementById('gameScreen').style.display='block';">クリックしてスタート</div></div>
 <div id="gameScreen"><div class="fullGame">
 <div class="fullLane" id="lane">
 <svg class="serpentineLane" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
