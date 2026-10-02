@@ -13,7 +13,7 @@
 .laneOuter{fill:none;stroke:#111;stroke-width:68;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 16px 18px #0008)}
 .laneInner{fill:none;stroke:#666;stroke-width:44;stroke-linecap:round;stroke-linejoin:round}
 .laneInner{stroke-dasharray:38 22}
-.fullLane{cursor:grab;touch-action:none;clip-path:inset(0 0 0 14%)}
+.fullLane{cursor:grab;touch-action:none}.fullLane:after{content:"";position:absolute;z-index:40;left:0;top:0;bottom:0;width:14%;background:#70421f;pointer-events:none}
 .fullLane.dragging{cursor:grabbing}
 .gameHud{position:absolute;z-index:50;top:0;left:0;right:0;padding:25px 32px;display:flex;justify-content:space-between;color:#fff;text-shadow:0 3px 8px #000;pointer-events:none}
 .hudTitle{font:800 30px Georgia,serif;letter-spacing:4px}.hudMoney{font-size:28px;font-weight:800}
@@ -172,9 +172,10 @@ home.onclick=e=>{if(e.target!==document.getElementById("startText"))startGame();
  if(!game||!lane||!view)return;
  let down=false,sx=0,sy=0,ox=0,oy=0,x=0,y=0,scale=1;
  function update(){view.style.left="calc(-20% + "+x+"px)";view.style.top="calc(-20% + "+y+"px)";view.style.transform="scale("+scale+")";view.style.transformOrigin="center center";}
- game.addEventListener("mousedown",e=>{if(game.style.display==="none"||e.button!==0)return;down=true;sx=e.clientX;sy=e.clientY;ox=x;oy=y;lane.classList.add("dragging");e.preventDefault()});
- window.addEventListener("mousemove",e=>{if(!down)return;x=Math.max(0,ox+e.clientX-sx);y=oy+e.clientY-sy;update()});
- window.addEventListener("mouseup",()=>{if(down){down=false;lane.classList.remove("dragging")}});
- game.addEventListener("wheel",e=>{if(game.style.display==="none")return;e.preventDefault();scale=Math.max(.65,Math.min(2.2,scale+(e.deltaY<0?.1:-.1)));update()},{passive:false});
+ game.onmousedown=function(e){if(game.style.display==="none"||e.button!==0)return;down=true;sx=e.clientX;sy=e.clientY;ox=x;oy=y;lane.classList.add("dragging");e.preventDefault();};
+ window.onmousemove=function(e){if(!down)return;x=Math.max(0,ox+e.clientX-sx);y=oy+e.clientY-sy;update();};
+ window.onmouseup=function(){down=false;lane.classList.remove("dragging");};
+ game.onwheel=function(e){if(game.style.display==="none")return;e.preventDefault();scale=Math.max(.65,Math.min(2.2,scale+(e.deltaY<0?.1:-.1)));update();};
+ update();
 })();
 </script></body></html>
