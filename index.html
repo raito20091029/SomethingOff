@@ -32,7 +32,7 @@ const upgrades=[
 {id:"seat",name:"🪑 席を増やす",desc:"お客さん +1人",cost:400},{id:"shop",name:"🏮 店舗改装",desc:"1皿の売上 +¥100",cost:1000}];
 const levels={knife:0,chef:0,seat:0,shop:0};
 const sushiTypes=["🍣","🍤","🥚","🍙","🐟","🥑"],customerTypes=["👩","👨","🧑","👵","👨‍🍳","🧑‍💼"];
-let sushiTimer,customerTimer,sushis=[],customers=[];
+let sushiTimer=null,customerTimer=null,sushis=[],customers=[],lastFrame=performance.now(),spawnElapsed=0;
 const moneyEl=document.getElementById("money"),incomeEl=document.getElementById("income"),popEl=document.getElementById("popularity");
 function yen(n){return "¥"+Math.floor(n).toLocaleString("ja-JP")}
 function customerCount(){return 3+levels.seat}
@@ -51,9 +51,16 @@ function spawnSushi(){
  plate.textContent=sushiTypes[Math.floor(Math.random()*sushiTypes.length)];lane.appendChild(plate);
  const s={el:plate,angle:Math.random()*Math.PI*2,value:income};sushis.push(s);
 }
-function moveSushi(){
+function moveSushi(dt){
  const lane=document.getElementById("lane"),cx=lane.clientWidth/2,cy=lane.clientHeight/2,r=135;
- sushis=sushis.filter(s=>{if(!s.el.isConnected)return false;s.angle+=0.018+speed*0.002;s.el.style.left=(cx+Math.cos(s.angle)*r-36)+"px";s.el.style.top=(cy+Math.sin(s.angle)*r-36)+"px";s.el.style.zIndex=Math.sin(s.angle)>0?3:2;return true});
+ sushis=sushis.filter(s=>{
+  if(!s.el.isConnected)return false;
+  s.angle+=(0.00105+speed*0.00012)*dt;
+  s.el.style.left=(cx+Math.cos(s.angle)*r-36)+"px";
+  s.el.style.top=(cy+Math.sin(s.angle)*r-36)+"px";
+  s.el.style.zIndex=Math.sin(s.angle)>0?3:2;
+  return true;
+ });
 }
 function customersEat(){
  const lane=document.getElementById("lane"),cx=lane.clientWidth/2,cy=lane.clientHeight/2;
@@ -70,10 +77,20 @@ function customersEat(){
  });
 }
 function startLane(){
- clearInterval(sushiTimer);clearInterval(customerTimer);sushis.forEach(s=>s.el.remove());sushis=[];
- for(let i=0;i<7;i++)setTimeout(spawnSushi,i*650);
- sushiTimer=setInterval(spawnSushi,2200);customerTimer=setInterval(()=>{moveSushi();customersEat()},16);
+ if(sushiTimer)clearInterval(sushiTimer);
+ if(customerTimer)cancelAnimationFrame(customerTimer);
+ sushis.forEach(s=>s.el.remove());sushis=[];spawnElapsed=0;lastFrame=performance.now();
+ for(let i=0;i<7;i++)setTimeout(spawnSushi,i*500);
  setTimeout(makeCustomers,50);
+ const loop=(now)=>{
+  const dt=Math.min(40,now-lastFrame);lastFrame=now;
+  spawnElapsed+=dt;
+  if(spawnElapsed>=2200){spawnElapsed-=2200;spawnSushi();}
+  moveSushi(dt);
+  customersEat();
+  customerTimer=requestAnimationFrame(loop);
+ };
+ customerTimer=requestAnimationFrame(loop);
 }
 function render(){
  moneyEl.textContent=yen(money);incomeEl.textContent=yen(income);popEl.textContent="★".repeat(Math.min(5,Math.floor(popularity)))+"☆".repeat(5-Math.min(5,Math.floor(popularity)));
