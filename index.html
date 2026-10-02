@@ -20,6 +20,11 @@ main{max-width:1100px;margin:24px auto;display:grid;grid-template-columns:1.4fr 
 .buy{background:#e85d3f;color:#fff;padding:9px 14px;border-radius:9px}.buy:disabled{background:#bbb;cursor:not-allowed}
 @media(max-width:800px){main{grid-template-columns:1fr}#app{padding:12px}.lane{height:360px}}
 
+.fullGame{position:relative;width:100vw;height:100vh;overflow:hidden;background:#6b3f1f}
+.fullGame>.fullLane{position:absolute;inset:0;width:100vw;height:100vh;margin:0;border:0;border-radius:0}
+.gameHud{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;padding:24px 32px;color:#fff;text-shadow:0 2px 5px #000;pointer-events:none;z-index:20}
+.hudTitle{font-family:Georgia,serif;font-size:28px;font-weight:800;letter-spacing:3px}.hudMoney{font-size:26px;font-weight:800}
+.fullLane .laneTrack{width:min(78vw,900px);height:min(62vh,600px);border-width:46px;border-radius:150px}
 #homeScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#f7ead7,#d9b27a);user-select:none}
 .homeTitle{font-family:Georgia,"Times New Roman",serif;font-size:clamp(72px,14vw,150px);font-weight:800;letter-spacing:8px;color:#21150e;text-shadow:0 5px 0 #fff6,0 10px 24px #0003}
 .startText{margin-top:28px;font-size:clamp(20px,3vw,32px);font-weight:600;color:#33231a;cursor:pointer;transition:opacity .2s,transform .2s}
@@ -31,13 +36,12 @@ main{max-width:1100px;margin:24px auto;display:grid;grid-template-columns:1.4fr 
   <div class="startText" id="startText">クリックしてスタート</div>
 </div>
 <div id="gameScreen" style="display:none">
-  <div id="app">
-    <header><div><strong>🍣 すし屋「いちばん」</strong><span style="display:inline-block;margin-left:10px;padding:4px 8px;border-radius:999px;background:#222;color:#fff;font-size:11px;letter-spacing:.5px">REAL v13</span><div style="color:#777">お客さんにお寿司を食べてもらおう！</div></div><div class="money" id="money">¥0</div></header>
-    <main><section class="card shop"><h2>🍣 回転レーン</h2>
-    <div class="lane" id="lane"><div class="laneTrack"></div></div>
-    <div class="order" id="order">お客さんがお寿司を取っています…</div>
-    <div class="stats"><div class="stat">1皿の売上<br><b id="income">¥10</b></div><div class="stat">お客さん<br><b id="customers">3人</b></div><div class="stat">人気<br><b id="popularity">★☆☆☆☆</b></div></div>
-    </section><section class="card"><h2>🛠️ お店をアップグレード</h2><div id="upgrades"></div></section></main>
+  <div id="app" class="fullGame">
+    <div class="fullLane" id="lane"><div class="laneTrack"></div></div>
+    <div class="gameHud">
+      <div class="hudTitle">Sushi</div>
+      <div class="hudMoney" id="money">¥0</div>
+    </div>
   </div>
 </div>
 <script>
