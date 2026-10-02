@@ -133,4 +133,31 @@ function startGame(){document.getElementById("homeScreen").style.display="none";
 document.getElementById("startText").onclick=startGame;
 home.onclick=e=>{if(e.target!==document.getElementById("startText"))startGame();};
 </script>
-</body></html>
+<script>
+(function(){
+ const lane=document.getElementById("lane");
+ const view=document.querySelector(".serpentineLane");
+ if(!lane||!view)return;
+ let dragging=false,startX=0,startY=0,baseX=0,baseY=0,x=0,y=0;
+ function apply(){
+  view.style.transform="translate3d("+x+"px,"+y+"px,0)";
+ }
+ function down(e){
+  if(document.getElementById("gameScreen").style.display==="none")return;
+  dragging=true;startX=e.clientX;startY=e.clientY;baseX=x;baseY=y;
+  lane.classList.add("dragging");lane.setPointerCapture?.(e.pointerId);
+ }
+ function move(e){
+  if(!dragging)return;
+  x=baseX+(e.clientX-startX);y=baseY+(e.clientY-startY);apply();
+ }
+ function up(e){
+  if(!dragging)return;
+  dragging=false;lane.classList.remove("dragging");lane.releasePointerCapture?.(e.pointerId);
+ }
+ lane.addEventListener("pointerdown",down);
+ lane.addEventListener("pointermove",move);
+ lane.addEventListener("pointerup",up);
+ lane.addEventListener("pointercancel",up);
+})();
+</script></body></html>
