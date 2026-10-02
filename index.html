@@ -8,17 +8,21 @@
 .fullGame{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:linear-gradient(135deg,#6f401e,#a86d37 50%,#593117)}
 .fullLane{position:absolute;inset:0;width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(ellipse at center,#b47b43,#7a461f 70%);border:0}
 .fullLane:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 48px,#ffffff09 49px 50px);pointer-events:none}
-.laneTrack{position:absolute;left:50%;top:50%;width:calc(100vw + 520px);height:min(70vh,700px);transform:translate(-50%,-50%);border-radius:240px;border:48px solid #191919;background:repeating-linear-gradient(90deg,#707070 0 28px,#5b5b5b 28px 56px);box-shadow:0 0 0 6px #050505,0 18px 35px #0009,inset 0 0 0 4px #aaa,inset 0 0 0 12px #303030}
-
-
-.laneTrack2{top:calc(50% + 230px);}
-.laneTrack3{top:calc(50% - 230px);}
+.serpentineLane{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.laneOuter{fill:none;stroke:#111;stroke-width:92;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 16px 18px #0008)}
+.laneInner{fill:none;stroke:#666;stroke-width:64;stroke-linecap:round;stroke-linejoin:round}
+.laneInner{stroke-dasharray:38 22}
 .gameHud{position:absolute;z-index:50;top:0;left:0;right:0;padding:25px 32px;display:flex;justify-content:space-between;color:#fff;text-shadow:0 3px 8px #000;pointer-events:none}
 .hudTitle{font:800 30px Georgia,serif;letter-spacing:4px}.hudMoney{font-size:28px;font-weight:800}
 </style></head><body>
 <div id="homeScreen"><div class="homeTitle">Sushi</div><div class="startText" id="startText">クリックしてスタート</div></div>
 <div id="gameScreen"><div class="fullGame">
-<div class="fullLane" id="lane"><div class="laneTrack"></div><div class="laneTrack laneTrack2"></div><div class="laneTrack laneTrack3"></div></div>
+<div class="fullLane" id="lane">
+<svg class="serpentineLane" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
+<path class="laneOuter" d="M -80 75 H 900 C 980 75 980 175 900 175 H 100 C 20 175 20 275 100 275 H 900 C 980 275 980 375 900 375 H 100 C 20 375 20 475 100 475 H 1080"/>
+<path class="laneInner" d="M -80 75 H 900 C 980 75 980 175 900 175 H 100 C 20 175 20 275 100 275 H 900 C 980 275 980 375 900 375 H 100 C 20 375 20 475 100 475 H 1080"/>
+</svg>
+</div>
 <div class="gameHud"><div class="hudTitle">Sushi</div><div class="hudMoney" id="money">¥0</div></div>
 </div></div>
 <script>
