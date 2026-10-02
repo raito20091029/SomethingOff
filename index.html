@@ -33,7 +33,7 @@ const upgrades=[
 {id:"knife",name:"🔪 包丁",desc:"1皿の売上 +¥10",cost:50},{id:"chef",name:"👨‍🍳 職人の腕",desc:"1皿の売上 +¥25",cost:150},
 {id:"seat",name:"🪑 席を増やす",desc:"お客さん +1人",cost:400},{id:"shop",name:"🏮 店舗改装",desc:"1皿の売上 +¥100",cost:1000}];
 const levels={knife:0,chef:0,seat:0,shop:0};
-const sushiTypes=["🍣","🍤","🥚","🍙","🐟","🥑"],customerTypes=["👩","👨","🧑","👵","👨‍🍳","🧑‍💼"];
+const sushiTypes=[],customerTypes=["👩","👨","🧑","👵","👨‍🍳","🧑‍💼"];
 let sushiTimer=null,customerTimer=null,sushis=[],customers=[],lastFrame=performance.now();
 const moneyEl=document.getElementById("money"),incomeEl=document.getElementById("income"),popEl=document.getElementById("popularity");
 function yen(n){return "¥"+Math.floor(n).toLocaleString("ja-JP")}
