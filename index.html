@@ -9,7 +9,7 @@ button{font:inherit;cursor:pointer;border:0}#app{min-height:100vh;padding:24px}
 header{display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:auto;background:#fff;border-radius:18px;padding:18px 24px;box-shadow:0 5px 20px #0001}.money{font-size:26px;font-weight:700}
 main{max-width:1100px;margin:24px auto;display:grid;grid-template-columns:1.4fr .8fr;gap:20px}.card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 5px 20px #0001}
 .shop{min-height:550px;text-align:center}.lane{height:390px;margin:20px -10px 18px;position:relative;overflow:hidden;background:radial-gradient(circle,#eadcc8 0 35%,#c49a67 36% 43%,#6f431f 44% 100%);border:10px solid #3b2415;border-radius:28px;box-shadow:inset 0 8px 20px #0005}
-.laneTrack{position:absolute;left:50%;top:50%;width:275px;height:275px;transform:translate(-50%,-50%);border-radius:50%;border:34px solid #333;box-shadow:0 0 0 6px #666,0 0 0 10px #222,inset 0 0 0 6px #555}
+.laneTrack{position:absolute;left:50%;top:50%;width:430px;height:270px;transform:translate(-50%,-50%);border-radius:90px;border:34px solid #333;box-shadow:0 0 0 6px #666,0 0 0 10px #222,inset 0 0 0 6px #555}
 .plate{position:absolute;width:72px;height:72px;border-radius:50%;background:#eee;border:7px solid #ddd;box-shadow:0 5px 8px #0005;display:flex;align-items:center;justify-content:center;font-size:34px;z-index:2;pointer-events:none}
 .customer{position:absolute;width:62px;height:62px;border-radius:50%;background:#fff;border:4px solid #d7a35b;box-shadow:0 4px 8px #0003;display:flex;align-items:center;justify-content:center;font-size:30px;z-index:4;transition:transform .2s}
 .customer.eating{transform:scale(1.12)}.seatLabel{position:absolute;font-size:12px;color:#5b4028;font-weight:700;z-index:1}
@@ -52,12 +52,38 @@ function spawnSushi(angle=null){
  const s={el:plate,angle:angle===null?Math.random()*Math.PI*2:angle,value:income};sushis.push(s);
 }
 function moveSushi(dt){
- const lane=document.getElementById("lane"),cx=lane.clientWidth/2,cy=lane.clientHeight/2,r=135;
+ const lane=document.getElementById("lane"),cx=lane.clientWidth/2,cy=lane.clientHeight/2;
+ const w=430,h=270,r=100;
+ const straightX=w/2-r, straightY=h/2-r;
+ const perimeter=2*straightX+2*straightY+2*Math.PI*r;
  sushis=sushis.filter(s=>{
   if(!s.el.isConnected)return false;
-  s.angle+=(0.0024+speed*0.00025)*dt;
-  s.el.style.left=(cx+Math.cos(s.angle)*r-36)+"px";
-  s.el.style.top=(cy+Math.sin(s.angle)*r-36)+"px";
+  s.distance=(s.distance||0)+0.075*dt;
+  const d=((s.distance%perimeter)+perimeter)%perimeter;
+  let x,y;
+  if(d<straightX){
+   x=-straightX/2+d; y=-h/2+r;
+  }else if(d<straightX+Math.PI*r/2){
+   const a=-Math.PI/2+(d-straightX)/r;
+   x=straightX/2+r*Math.cos(a); y=-straightY+r*Math.sin(a);
+  }else if(d<straightX+Math.PI*r/2+straightY){
+   const q=d-(straightX+Math.PI*r/2);
+   x=straightX/2; y=-straightY+q;
+  }else if(d<straightX+Math.PI*r/2+straightY+Math.PI*r/2){
+   const a=0+(d-(straightX+Math.PI*r/2+straightY))/r;
+   x=straightX/2+r*Math.cos(a); y=straightY+r*Math.sin(a);
+  }else if(d<straightX+Math.PI*r+straightY+Math.PI*r/2){
+   const q=d-(straightX+Math.PI*r/2+straightY+Math.PI*r/2);
+   x=straightX/2-q; y=straightY+r;
+  }else if(d<straightX+Math.PI*r+straightY+Math.PI*r){
+   const a=Math.PI/2+(d-(straightX+Math.PI*r+straightY+Math.PI*r/2))/r;
+   x=-straightX/2+r*Math.cos(a); y=straightY+r*Math.sin(a);
+  }else{
+   const q=d-(straightX+Math.PI*r+straightY+Math.PI*r);
+   x=-straightX/2; y=straightY-q;
+  }
+  s.el.style.left=(cx+x-36)+"px";
+  s.el.style.top=(cy+y-36)+"px";
   s.el.style.zIndex=5;
   return true;
  });
@@ -77,11 +103,13 @@ function customersEat(){
  });
 }
 function startLane(){
- if(sushiTimer)clearInterval(sushiTimer);
  if(customerTimer)cancelAnimationFrame(customerTimer);
  sushis.forEach(s=>s.el.remove());sushis=[];lastFrame=performance.now();
  const count=10;
- for(let i=0;i<count;i++)spawnSushi((Math.PI*2*i)/count);
+ for(let i=0;i<count;i++){
+  spawnSushi();
+  sushis[i].distance=(i/count)*(2*(430/2-100)+2*(270/2-100)+2*Math.PI*100);
+ }
  makeCustomers();
  const loop=(now)=>{
   const dt=Math.min(40,now-lastFrame);lastFrame=now;
