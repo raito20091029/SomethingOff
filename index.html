@@ -94,7 +94,7 @@ function customersEat(){
   c.cooldown-=16;if(c.cooldown>0)return;
   let best=null,dist=999;
   sushis.forEach(s=>{let d=Math.abs(Math.atan2(Math.sin(s.angle-c.angle),Math.cos(s.angle-c.angle)));if(d<dist){dist=d;best=s}});
-  if(best&&dist<0.12){
+  if(best&&dist<0.12&&Math.random()<0.25){
    money+=best.value;popularity=Math.min(5,popularity+0.05);best.el.remove();sushis=sushis.filter(x=>x!==best);
    c.el.classList.add("eating");setTimeout(()=>c.el.classList.remove("eating"),300);
    document.getElementById("order").textContent="お客さんが"+yen(best.value)+"のお寿司を食べました！";
