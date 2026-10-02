@@ -132,6 +132,7 @@ const home=document.getElementById("homeScreen"),game=document.getElementById("g
 function startGame(){document.getElementById("homeScreen").style.display="none";document.getElementById("gameScreen").style.display="block";}
 document.getElementById("startText").onclick=startGame;
 home.onclick=e=>{if(e.target!==document.getElementById("startText"))startGame();};
+</script>
 <script>
 const panLane=document.getElementById("lane");
 let dragging=false,startX=0,startY=0,panX=0,panY=0;
