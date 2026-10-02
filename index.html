@@ -133,20 +133,4 @@ function startGame(){document.getElementById("homeScreen").style.display="none";
 document.getElementById("startText").onclick=startGame;
 home.onclick=e=>{if(e.target!==document.getElementById("startText"))startGame();};
 </script>
-<script>
-const panLane=document.getElementById("lane");
-let dragging=false,startX=0,startY=0,panX=0,panY=0;
-const panSvg=panLane.querySelector(".serpentineLane");
-function applyPan(){panSvg.style.transform="translate("+panX+"px,"+panY+"px)";}
-panLane.addEventListener("pointerdown",e=>{
- if(e.button!==0 && e.pointerType==="mouse")return;
- dragging=true;startX=e.clientX-panX;startY=e.clientY-panY;
- panLane.classList.add("dragging");panSvg.classList.add("dragging");panLane.setPointerCapture(e.pointerId);
-});
-panLane.addEventListener("pointermove",e=>{
- if(!dragging)return;
- panX=e.clientX-startX;panY=e.clientY-startY;applyPan();
-});
-function stopPan(e){if(!dragging)return;dragging=false;panLane.classList.remove("dragging");panSvg.classList.remove("dragging");try{panLane.releasePointerCapture(e.pointerId)}catch(_){}}
-panLane.addEventListener("pointerup",stopPan);panLane.addEventListener("pointercancel",stopPan);
-</script></body></html>
+</body></html>
