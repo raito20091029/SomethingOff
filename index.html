@@ -9,8 +9,8 @@
 .fullLane{position:absolute;inset:0;width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(ellipse at center,#b47b43,#7a461f 70%);border:0}
 .fullLane:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 48px,#ffffff09 49px 50px);pointer-events:none}
 .serpentineLane{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.laneOuter{fill:none;stroke:#111;stroke-width:92;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 16px 18px #0008)}
-.laneInner{fill:none;stroke:#666;stroke-width:64;stroke-linecap:round;stroke-linejoin:round}
+.laneOuter{fill:none;stroke:#111;stroke-width:62;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 16px 18px #0008)}
+.laneInner{fill:none;stroke:#666;stroke-width:40;stroke-linecap:round;stroke-linejoin:round}
 .laneInner{stroke-dasharray:38 22}
 .gameHud{position:absolute;z-index:50;top:0;left:0;right:0;padding:25px 32px;display:flex;justify-content:space-between;color:#fff;text-shadow:0 3px 8px #000;pointer-events:none}
 .hudTitle{font:800 30px Georgia,serif;letter-spacing:4px}.hudMoney{font-size:28px;font-weight:800}
@@ -19,8 +19,8 @@
 <div id="gameScreen"><div class="fullGame">
 <div class="fullLane" id="lane">
 <svg class="serpentineLane" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
-<path class="laneOuter" d="M -80 75 H 900 C 980 75 980 175 900 175 H 100 C 20 175 20 275 100 275 H 900 C 980 275 980 375 900 375 H 100 C 20 375 20 475 100 475 H 1080"/>
-<path class="laneInner" d="M -80 75 H 900 C 980 75 980 175 900 175 H 100 C 20 175 20 275 100 275 H 900 C 980 275 980 375 900 375 H 100 C 20 375 20 475 100 475 H 1080"/>
+<path class="laneOuter" d="M -80 70 H 900 C 980 70 980 165 900 165 H 100 C 20 165 20 260 100 260 H 900 C 980 260 980 355 900 355 H 100 C 20 355 20 450 100 450 H 1080"/>
+<path class="laneInner" d="M -80 70 H 900 C 980 70 980 165 900 165 H 100 C 20 165 20 260 100 260 H 900 C 980 260 980 355 900 355 H 100 C 20 355 20 450 100 450 H 1080"/>
 </svg>
 </div>
 <div class="gameHud"><div class="hudTitle">Sushi</div><div class="hudMoney" id="money">¥0</div></div>
