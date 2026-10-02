@@ -55,7 +55,7 @@
    const dt=Math.min(.05,(now-last)/1000);last=now;
    sushi.forEach(s=>{
      const len=s.path.getTotalLength();
-     s.pos=(s.pos+s.speed*dt)%len;
+     s.pos=(s.pos-s.speed*dt+len)%len;
      const p=s.path.getPointAtLength(s.pos);
      s.g.setAttribute("transform","translate("+p.x+" "+p.y+")");
    });
