@@ -1,90 +1,92 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SomethingOff</title><style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050505;color:#ddd;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif}button{background:#151515;color:#ddd;border:1px solid #555;padding:11px 24px;margin:5px;font-size:15px;cursor:pointer}button:hover{background:#242424}.hidden{display:none!important}
-#game{position:relative;width:100vw;height:100vh;background:radial-gradient(circle at 50% 43%,#292929 0,#111 38%,#030303 100%);transition:filter .3s}.room{position:absolute;inset:0;perspective:800px}.back{position:absolute;width:62%;height:58%;left:19%;top:18%;background:#171717;border:1px solid #303030}.floor{position:absolute;width:82%;height:56%;left:9%;top:46%;transform:rotateX(62deg);transform-origin:center top;background:repeating-linear-gradient(90deg,#181818 0 65px,#121212 65px 130px);border-top:1px solid #333}.door{position:absolute;width:110px;height:215px;left:calc(50% - 55px);top:25%;background:#0a0a0a;border:3px solid #444;box-shadow:0 0 18px #000}.door:after{content:'●';position:absolute;right:12px;top:92px;color:#666;font-size:11px}.lamp{position:absolute;left:calc(50% - 9px);top:8%;width:18px;height:18px;border-radius:50%;background:#aaa;box-shadow:0 0 45px 18px rgba(200,200,200,.13)}
-#hud{position:absolute;inset:0;pointer-events:none}.cross{position:absolute;left:50%;top:50%;width:8px;height:8px;border:1px solid #bbb;border-radius:50%;transform:translate(-50%,-50%)}#text{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);width:min(760px,84%);padding:17px 22px;background:rgba(0,0,0,.82);border:1px solid #333;text-align:center;font-size:17px;line-height:1.7;opacity:0;transition:.2s}#hint{position:absolute;left:18px;bottom:18px;font-size:12px;color:#888}#status{position:absolute;right:18px;top:17px;text-align:right;color:#aaa;font-size:12px;line-height:1.8}#inventory{position:absolute;right:18px;bottom:18px;color:#777;font-size:12px;text-align:right}.glitch{animation:glitch .09s 7}@keyframes glitch{50%{transform:translate(4px,-2px)}}.low{filter:brightness(.45)}
-#menu{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.91);z-index:5}.panel{width:min(680px,90%);text-align:center}.title{font-weight:400;letter-spacing:.22em;margin-bottom:8px}.sub{color:#777;font-size:13px}.log{margin:20px auto;padding:12px;border:1px solid #222;background:#090909;text-align:left;max-height:170px;overflow:auto;font-size:13px;line-height:1.7;color:#999}.ending{font-size:18px;line-height:2}
-</style><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#050505"><link rel="icon" href="icon-192.png"></head><body><div id="game"><div class="room"><div class="back"></div><div class="floor"></div><div class="door" id="door"></div><div class="lamp"></div></div><div id="hud"><div class="cross"></div><div id="text"></div><div id="hint">WASD：移動　E：調べる　F5：セーブ　ESC：メニュー <button id="pauseQuick" style="pointer-events:auto;margin:0 0 0 8px;padding:3px 9px;font-size:11px;">MENU</button></div><div id="status">正気度　100%<br>違和感　0</div><div id="inventory">所持品：なし</div></div><div id="menu"><div class="panel"><h1 class="title">SomethingOff</h1><div class="sub">VER. 0.2 — RPG PROTOTYPE</div><p>この部屋には、見落としているものがある。</p><div id="mainButtons"><button id="start" type="button" onclick="startGame()">ゲーム開始</button></div><div id="pauseButtons" class="hidden"><button id="resume">ゲームに戻る</button><button id="pauseSave">セーブする</button><button id="titleBack">タイトルに戻る</button></div><div class="log" id="log">記録はありません。</div></div></div></div>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>寿司屋経営ゲーム</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Yu Gothic",sans-serif;background:#f5efe5;color:#292522}
+button{font:inherit;cursor:pointer;border:0}
+#app{min-height:100vh;padding:24px}
+header{display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:auto;background:#fff;border-radius:18px;padding:18px 24px;box-shadow:0 5px 20px #0001}
+.money{font-size:26px;font-weight:700}
+main{max-width:1100px;margin:24px auto;display:grid;grid-template-columns:1.4fr .8fr;gap:20px}
+.card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 5px 20px #0001}
+.shop{min-height:420px;text-align:center}
+.sushi{font-size:110px;margin:30px 0 12px}
+.order{font-size:20px;margin-bottom:20px}
+.work{background:#222;color:#fff;padding:16px 50px;border-radius:12px;font-size:20px}
+.work:hover{transform:translateY(-2px)}
+.upgrade{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eee}
+.upgrade:last-child{border:0}
+.upgrade small{display:block;color:#777;margin-top:4px}
+.buy{background:#e85d3f;color:#fff;padding:9px 14px;border-radius:9px}
+.buy:disabled{background:#bbb;cursor:not-allowed}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.stat{background:#f7f3ed;padding:12px 16px;border-radius:12px;flex:1;min-width:130px}
+@media(max-width:800px){main{grid-template-columns:1fr}#app{padding:12px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div><strong>🍣 すし屋「いちばん」</strong><div style="color:#777">今日もお客さんを満足させよう！</div></div><div class="money" id="money">¥0</div></header>
+<main>
+<section class="card shop">
+<h2>今日の注文</h2>
+<div class="sushi" id="sushi">🍣</div>
+<div class="order" id="order">まぐろを1皿お願いします！</div>
+<button class="work" id="serve">🍣 寿司を握る</button>
+<div class="stats">
+<div class="stat">1皿の売上<br><b id="income">¥10</b></div>
+<div class="stat">提供速度<br><b id="speed">普通</b></div>
+<div class="stat">人気<br><b id="popularity">★☆☆☆☆</b></div>
+</div>
+</section>
+<section class="card">
+<h2>🛠️ お店をアップグレード</h2>
+<div id="upgrades"></div>
+</section>
+</main>
+</div>
 <script>
-const $=s=>document.querySelector(s);const game=$('#game'),menu=$('#menu'),text=$('#text'),status=$('#status'),inv=$('#inventory'),logBox=$('#log'),door=$('#door');
-let S={started:false,room:0,sanity:100,anomaly:0,items:[],searched:[],keypad:false,ending:false,player:{x:0,y:0}};
-const keys={w:false,a:false,s:false,d:false};
-let lastMove=0;
-const saved=localStorage.getItem('kik_save');
-function msg(s,t=3600){text.textContent=s;text.style.opacity=1;clearTimeout(msg.t);msg.t=setTimeout(()=>text.style.opacity=0,t)}
-function note(s){S.searched.push(s);if(S.searched.length>8)S.searched.shift();logBox.innerHTML=S.searched.map(x=>'・'+x).join('<br>')||'記録はありません。'}
-function has(x){return S.items.includes(x)}function add(x){if(!has(x)){S.items.push(x);msg('入手した：'+x);note('入手：'+x)}}
-function updatePlayer(){
- if(!S.started||S.ending||menu.style.display!=='none')return;
- const dx=(keys.d?1:0)-(keys.a?1:0), dy=(keys.s?1:0)-(keys.w?1:0);
- if(!dx&&!dy)return;
- const now=performance.now(); const dt=Math.min(32,now-lastMove||16)/16; lastMove=now;
- const len=Math.hypot(dx,dy)||1, speed=7;
- S.player.x=Math.max(-220,Math.min(220,S.player.x+dx/len*speed*dt));
- S.player.y=Math.max(-120,Math.min(120,S.player.y+dy/len*speed*dt));
- $('.room').style.transform='translate('+(-S.player.x)+'px,'+(-S.player.y)+'px)';
- requestAnimationFrame(updatePlayer);
+let money=0, income=10, speed=1, popularity=1;
+const upgrades=[
+{id:"knife",name:"🔪 包丁",desc:"1皿の売上 +¥10",cost:50},
+{id:"chef",name:"👨‍🍳 職人の腕",desc:"1皿の売上 +¥25",cost:150},
+{id:"seat",name:"🪑 席を増やす",desc:"お客さんの注文単価UP",cost:400},
+{id:"shop",name:"🏮 店舗改装",desc:"1皿の売上 +¥100",cost:1000}
+];
+const levels={knife:0,chef:0,seat:0,shop:0};
+const moneyEl=document.getElementById("money"),incomeEl=document.getElementById("income"),popEl=document.getElementById("popularity"),speedEl=document.getElementById("speed");
+function yen(n){return "¥"+Math.floor(n).toLocaleString("ja-JP")}
+function render(){
+ moneyEl.textContent=yen(money);incomeEl.textContent=yen(income);
+ popEl.textContent="★".repeat(Math.min(5,popularity))+"☆".repeat(5-Math.min(5,popularity));
+ speedEl.textContent=speed>=3?"高速":speed>=2?"速い":"普通";
+ document.getElementById("upgrades").innerHTML=upgrades.map(u=>{
+   const lv=levels[u.id]; const cost=Math.floor(u.cost*Math.pow(1.65,lv));
+   return '<div class="upgrade"><div><b>'+u.name+' Lv.'+lv+'</b><small>'+u.desc+'<br>次の価格 '+yen(cost)+'</small></div><button class="buy" '+(money<cost?"disabled":"")+' data-id="'+u.id+'">購入</button></div>';
+ }).join("");
+ document.querySelectorAll(".buy").forEach(b=>b.onclick=()=>buy(b.dataset.id));
 }
-function render(){status.innerHTML='正気度　'+S.sanity+'%<br>違和感　'+S.anomaly;inv.textContent='所持品：'+(S.items.join(' / ')||'なし');if(S.sanity<40)game.classList.add('low');else game.classList.remove('low')}
-function anomaly(n=1){S.anomaly+=n;S.sanity=Math.max(0,S.sanity-(n*5));render();game.classList.add('glitch');setTimeout(()=>game.classList.remove('glitch'),800)}
-function save(){localStorage.setItem('kik_save',JSON.stringify({...S,started:false}));msg('セーブしました。')}
-function inspect(){
- if(S.ending)return;
- if(S.room===0){
-  if(!has('古い鍵')&&!S.searched.includes('ドアを調べた')){note('ドアを調べた');msg('鍵がかかっている。ドアの下から紙が半分だけ見えている。');return}
-  if(!has('古い鍵')&&!S.items.includes('紙')){add('紙');msg('紙には「時計が3時を指したら、二回ノック」と書いてある。');return}
-  if(!has('古い鍵')){if(S.anomaly<1){anomaly();msg('時計は3時ではない。なのに、どこかで二回ノックが聞こえた。')}else{add('古い鍵');msg('ドアの横の壁紙が少し浮いている。中から古い鍵が出てきた。');}return}
-  if(!S.searched.includes('ドアを開けた')){note('ドアを開けた');S.room=1;anomaly();msg('ドアが開いた。その先にも、同じ部屋がある。');door.style.background='#222';return}
- }
- if(S.room===1){
-  if(!has('鏡の欠片')){add('鏡の欠片');msg('床に鏡の欠片がある。映っている部屋だけ、家具の位置が違う。');anomaly();return}
-  if(!has('赤いメモ')){add('赤いメモ');msg('鏡の裏にメモがある。「数字は見えている順番を信じるな」。');return}
-  if(!S.keypad){msg('壁に小さな数字入力盤がある。入力するには手がかりが必要だ。');if(has('鏡の欠片')&&has('赤いメモ')){S.keypad=true;setTimeout(()=>{let code=prompt('4桁の数字を入力してください');if(code==='3142'){S.keypad=false;S.room=2;anomaly(2);msg('入力音。壁がゆっくり開いた。');note('数字入力盤を解除した');}else if(code!==null){anomaly();msg('違う。……数字が一つ消えた。');}},200)}return}
- }
- if(S.room===2){
-  if(!S.searched.includes('出口')){note('出口');msg('出口がある。外から風が入っている。');return}
-  end();
- }
+function serve(){
+ money+=income;
+ if(Math.random()<.15) popularity=Math.min(5,popularity+1);
+ document.getElementById("order").textContent=["まぐろ","サーモン","えび","たまご","いくら"][Math.floor(Math.random()*5)]+"を1皿お願いします！";
+ render();
 }
-function end(){S.ending=true;menu.style.display='flex';$('.title').textContent='SomethingOff';$('.sub').textContent='VER. 0.2 — END';logBox.innerHTML='<div class="ending">外に出た。<br><br>……でも、外の時計も3時だった。</div><button onclick="location.reload()">最初から</button>';localStorage.removeItem('kik_save')}
-function showMainMenu(){menu.style.display='flex';$('.title').textContent='SomethingOff';$('.sub').textContent='VER. 0.2 — RPG PROTOTYPE';$('#mainButtons').classList.remove('hidden');$('#pauseButtons').classList.add('hidden');logBox.innerHTML=S.searched.map(x=>'・'+x).join('<br>')||'記録はありません。'}
-function showPause(){if(!S.started||S.ending)return;menu.style.display='flex';$('.title').textContent='PAUSE';$('.sub').textContent='ゲームを一時停止しています';$('#mainButtons').classList.add('hidden');$('#pauseButtons').classList.remove('hidden');logBox.innerHTML='現在の状態を保存したり、ゲームに戻ったりできます。'}
-function resumeGame(){menu.style.display='none';$('#mainButtons').classList.remove('hidden');$('#pauseButtons').classList.add('hidden');msg('ゲームに戻ります。')}\nfunction togglePause(e){if(e)e.preventDefault();if(!S.started||S.ending)return;if(menu.style.display==='none')showPause();else resumeGame()}
-addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();togglePause(e)}},{capture:true});
-$('#pauseQuick').onclick=togglePause;$('#resume').onclick=()=>resumeGame();$('#pauseSave').onclick=()=>save();$('#titleBack').onclick=()=>{S.started=false;showMainMenu();render();msg('タイトル画面に戻りました。')};
-addEventListener('keydown',e=>{const k=(e.key||'').toLowerCase();if(e.code==='Escape'||k==='escape'){togglePause(e);return}if(!S.started||S.ending)return;if(k==='e')inspect();if(e.key==='F5'){e.preventDefault();save()}if(['w','a','s','d'].includes(k)){e.preventDefault();if(!keys[k]){keys[k]=true;lastMove=performance.now();requestAnimationFrame(updatePlayer)}if(Math.random()<.025&&S.anomaly>0){anomaly();msg('歩くたびに、足音が一つ多い。')}}},{capture:true});
-addEventListener('keyup',e=>{const k=(e.key||'').toLowerCase();if(['w','a','s','d'].includes(k)){keys[k]=false;e.preventDefault()}},{capture:true});
-function startGame(){
-  S.started=true;
-  S.ending=false;
-  S.room=0;
-  S.sanity=100;
-  S.anomaly=0;
-  S.items=[];
-  S.searched=[];
-  S.keypad=false;
-  S.player={x:0,y:0};
-  $('.room').style.transform='translate(0,0)';
-  menu.style.display='none';
-  $('#mainButtons').classList.add('hidden');
-  $('#pauseButtons').classList.add('hidden');
-  msg('目が覚めた。知らない部屋だ。出口は一つしかない。');
-  render();
+function buy(id){
+ const u=upgrades.find(x=>x.id===id),lv=levels[id],cost=Math.floor(u.cost*Math.pow(1.65,lv));
+ if(money<cost)return;
+ money-=cost;levels[id]++;
+ if(id==="knife")income+=10;
+ if(id==="chef")income+=25;
+ if(id==="seat"){income+=40;popularity=Math.min(5,popularity+1)}
+ if(id==="shop")income+=100;
+ render();
 }
-
+document.getElementById("serve").onclick=serve;
 render();
-</script><script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
-  if("caches" in window) caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});
-}
-</script><script>
-function removeLegacyLoadButton(){
-  document.querySelectorAll('button').forEach(b=>{
-    const t=(b.textContent||'').trim();
-    if(t==='セーブを読む'||t==='セーブを読み込む') b.remove();
-  });
-}
-document.addEventListener('DOMContentLoaded',removeLegacyLoadButton);
-removeLegacyLoadButton();
 </script>
-</body></html>
+</body>
+</html>
