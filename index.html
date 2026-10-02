@@ -112,7 +112,7 @@ function buy(id){
 </script>
 <script>
 const home=document.getElementById("homeScreen"),game=document.getElementById("gameScreen");
-function startGame(){home.style.display="none";game.style.display="block";}
+function startGame(){window.location.href="./?game=16";}
 document.getElementById("startText").onclick=startGame;
 home.onclick=e=>{if(e.target!==document.getElementById("startText"))startGame();};
 </script></body></html>
