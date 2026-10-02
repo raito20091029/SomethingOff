@@ -3,7 +3,7 @@
 #game{position:relative;width:100vw;height:100vh;background:radial-gradient(circle at 50% 43%,#292929 0,#111 38%,#030303 100%);transition:filter .3s}.room{position:absolute;inset:0;perspective:800px}.back{position:absolute;width:62%;height:58%;left:19%;top:18%;background:#171717;border:1px solid #303030}.floor{position:absolute;width:82%;height:56%;left:9%;top:46%;transform:rotateX(62deg);transform-origin:center top;background:repeating-linear-gradient(90deg,#181818 0 65px,#121212 65px 130px);border-top:1px solid #333}.door{position:absolute;width:110px;height:215px;left:calc(50% - 55px);top:25%;background:#0a0a0a;border:3px solid #444;box-shadow:0 0 18px #000}.door:after{content:'●';position:absolute;right:12px;top:92px;color:#666;font-size:11px}.lamp{position:absolute;left:calc(50% - 9px);top:8%;width:18px;height:18px;border-radius:50%;background:#aaa;box-shadow:0 0 45px 18px rgba(200,200,200,.13)}
 #hud{position:absolute;inset:0;pointer-events:none}.cross{position:absolute;left:50%;top:50%;width:8px;height:8px;border:1px solid #bbb;border-radius:50%;transform:translate(-50%,-50%)}#text{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);width:min(760px,84%);padding:17px 22px;background:rgba(0,0,0,.82);border:1px solid #333;text-align:center;font-size:17px;line-height:1.7;opacity:0;transition:.2s}#hint{position:absolute;left:18px;bottom:18px;font-size:12px;color:#888}#status{position:absolute;right:18px;top:17px;text-align:right;color:#aaa;font-size:12px;line-height:1.8}#inventory{position:absolute;right:18px;bottom:18px;color:#777;font-size:12px;text-align:right}.glitch{animation:glitch .09s 7}@keyframes glitch{50%{transform:translate(4px,-2px)}}.low{filter:brightness(.45)}
 #menu{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.91);z-index:5}.panel{width:min(680px,90%);text-align:center}.title{font-weight:400;letter-spacing:.22em;margin-bottom:8px}.sub{color:#777;font-size:13px}.log{margin:20px auto;padding:12px;border:1px solid #222;background:#090909;text-align:left;max-height:170px;overflow:auto;font-size:13px;line-height:1.7;color:#999}.ending{font-size:18px;line-height:2}
-</style><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#050505"><link rel="icon" href="icon-192.png"></head><body><div id="game"><div class="room"><div class="back"></div><div class="floor"></div><div class="door" id="door"></div><div class="lamp"></div></div><div id="hud"><div class="cross"></div><div id="text"></div><div id="hint">WASD：移動　E：調べる　F5：セーブ　ESC：メニュー <button id="pauseQuick" style="pointer-events:auto;margin:0 0 0 8px;padding:3px 9px;font-size:11px;">MENU</button></div><div id="status">正気度　100%<br>違和感　0</div><div id="inventory">所持品：なし</div></div><div id="menu"><div class="panel"><h1 class="title">SomethingOff</h1><div class="sub">VER. 0.2 — RPG PROTOTYPE</div><p>この部屋には、見落としているものがある。</p><div id="mainButtons"><button id="start" type="button" onclick="window.startGame()">ゲーム開始</button></div><div id="pauseButtons" class="hidden"><button id="resume">ゲームに戻る</button><button id="pauseSave">セーブする</button><button id="titleBack">タイトルに戻る</button></div><div class="log" id="log">記録はありません。</div></div></div></div>
+</style><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#050505"><link rel="icon" href="icon-192.png"></head><body><div id="game"><div class="room"><div class="back"></div><div class="floor"></div><div class="door" id="door"></div><div class="lamp"></div></div><div id="hud"><div class="cross"></div><div id="text"></div><div id="hint">WASD：移動　E：調べる　F5：セーブ　ESC：メニュー <button id="pauseQuick" style="pointer-events:auto;margin:0 0 0 8px;padding:3px 9px;font-size:11px;">MENU</button></div><div id="status">正気度　100%<br>違和感　0</div><div id="inventory">所持品：なし</div></div><div id="menu"><div class="panel"><h1 class="title">SomethingOff</h1><div class="sub">VER. 0.2 — RPG PROTOTYPE</div><p>この部屋には、見落としているものがある。</p><div id="mainButtons"><div id="start" role="button" tabindex="0" style="display:inline-block;padding:16px 42px;margin:8px;background:#151515;border:1px solid #777;color:#ddd;font-size:18px;cursor:pointer;user-select:none">ゲーム開始</div></div><div id="pauseButtons" class="hidden"><button id="resume">ゲームに戻る</button><button id="pauseSave">セーブする</button><button id="titleBack">タイトルに戻る</button></div><div class="log" id="log">記録はありません。</div></div></div></div>
 <script>
 const $=s=>document.querySelector(s);const game=$('#game'),menu=$('#menu'),text=$('#text'),status=$('#status'),inv=$('#inventory'),logBox=$('#log'),door=$('#door');
 let S={started:false,room:0,sanity:100,anomaly:0,items:[],searched:[],keypad:false,ending:false,player:{x:0,y:0}};
@@ -56,6 +56,12 @@ addEventListener('keyup',e=>{const k=(e.key||'').toLowerCase();if(['w','a','s','
 window.startGame=function(){
   S.started=true;
   S.ending=false;
+  S.room=0;
+  S.sanity=100;
+  S.anomaly=0;
+  S.items=[];
+  S.searched=[];
+  S.keypad=false;
   S.player={x:0,y:0};
   $('.room').style.transform='translate(0,0)';
   menu.style.display='none';
@@ -64,6 +70,14 @@ window.startGame=function(){
   msg('目が覚めた。知らない部屋だ。出口は一つしかない。');
   render();
 };
+(function(){
+  const b=document.getElementById('start');
+  if(!b)return;
+  const launch=e=>{e.preventDefault();window.startGame();};
+  b.addEventListener('click',launch);
+  b.addEventListener('pointerup',launch);
+  b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){launch(e);}});
+})();
 render();
 </script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register('./sw.js?v=6').catch(()=>{});}</script><script>
 function removeLegacyLoadButton(){
