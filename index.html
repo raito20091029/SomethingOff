@@ -8,10 +8,13 @@
 .fullGame{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:linear-gradient(135deg,#6f401e,#a86d37 50%,#593117)}
 .fullLane{position:absolute;inset:0;width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(ellipse at center,#b47b43,#7a461f 70%);border:0}
 .fullLane:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 48px,#ffffff09 49px 50px);pointer-events:none}
-.serpentineLane{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.serpentineLane{position:absolute;left:-20%;top:-20%;width:140%;height:140%;overflow:visible;cursor:grab;touch-action:none}
+.serpentineLane.dragging{cursor:grabbing}
 .laneOuter{fill:none;stroke:#111;stroke-width:68;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 16px 18px #0008)}
 .laneInner{fill:none;stroke:#666;stroke-width:44;stroke-linecap:round;stroke-linejoin:round}
 .laneInner{stroke-dasharray:38 22}
+.fullLane{cursor:grab;touch-action:none}
+.fullLane.dragging{cursor:grabbing}
 .gameHud{position:absolute;z-index:50;top:0;left:0;right:0;padding:25px 32px;display:flex;justify-content:space-between;color:#fff;text-shadow:0 3px 8px #000;pointer-events:none}
 .hudTitle{font:800 30px Georgia,serif;letter-spacing:4px}.hudMoney{font-size:28px;font-weight:800}
 </style></head><body>
@@ -129,4 +132,20 @@ const home=document.getElementById("homeScreen"),game=document.getElementById("g
 function startGame(){document.getElementById("homeScreen").style.display="none";document.getElementById("gameScreen").style.display="block";}
 document.getElementById("startText").onclick=startGame;
 home.onclick=e=>{if(e.target!==document.getElementById("startText"))startGame();};
+<script>
+const panLane=document.getElementById("lane");
+let dragging=false,startX=0,startY=0,panX=0,panY=0;
+const panSvg=panLane.querySelector(".serpentineLane");
+function applyPan(){panSvg.style.transform="translate("+panX+"px,"+panY+"px)";}
+panLane.addEventListener("pointerdown",e=>{
+ if(e.button!==0 && e.pointerType==="mouse")return;
+ dragging=true;startX=e.clientX-panX;startY=e.clientY-panY;
+ panLane.classList.add("dragging");panSvg.classList.add("dragging");panLane.setPointerCapture(e.pointerId);
+});
+panLane.addEventListener("pointermove",e=>{
+ if(!dragging)return;
+ panX=e.clientX-startX;panY=e.clientY-startY;applyPan();
+});
+function stopPan(e){if(!dragging)return;dragging=false;panLane.classList.remove("dragging");panSvg.classList.remove("dragging");try{panLane.releasePointerCapture(e.pointerId)}catch(_){}}
+panLane.addEventListener("pointerup",stopPan);panLane.addEventListener("pointercancel",stopPan);
 </script></body></html>
