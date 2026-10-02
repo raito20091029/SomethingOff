@@ -53,35 +53,34 @@ function spawnSushi(angle=null){
 }
 function moveSushi(dt){
  const lane=document.getElementById("lane"),cx=lane.clientWidth/2,cy=lane.clientHeight/2;
- const halfW=215,halfH=135,r=100;
- const straightX=halfW-r, straightY=halfH-r;
- const L=2*straightX+2*straightY+2*Math.PI*r;
+ // Match the visible conveyor's center line exactly.
+ const r=73, hx=198, hy=118;
+ const top= hx-r, side=hy-r;
+ const q=2*top+2*side+2*Math.PI*r;
  sushis=sushis.filter(s=>{
   if(!s.el.isConnected)return false;
-  s.distance=((s.distance||0)+0.075*dt)%L;
-  const d=s.distance;
-  let x,y;
-  const topLen=straightX, arcLen=Math.PI*r/2, sideLen=straightY;
-  if(d<topLen){
-   x=-straightX/2+d; y=-straightY;
-  }else if(d<topLen+arcLen){
-   const a=-Math.PI/2+(d-topLen)/r;
-   x=straightX/2+r*Math.cos(a); y=-straightY+r*Math.sin(a);
-  }else if(d<topLen+arcLen+sideLen){
-   x=straightX/2+r; y=-straightY+(d-topLen-arcLen);
-  }else if(d<topLen+2*arcLen+sideLen){
-   const a=0+(d-topLen-arcLen-sideLen)/r;
-   x=straightX/2+r*Math.cos(a); y=straightY+r*Math.sin(a);
-  }else if(d<topLen+2*arcLen+sideLen+straightX){
-   x=straightX/2-(d-topLen-2*arcLen-sideLen); y=straightY;
-  }else if(d<topLen+3*arcLen+sideLen+straightX){
-   const a=Math.PI/2+(d-topLen-2*arcLen-sideLen-straightX)/r;
-   x=-straightX/2+r*Math.cos(a); y=straightY+r*Math.sin(a);
-  }else if(d<topLen+4*arcLen+sideLen+straightX){
-   x=-straightX/2-r; y=straightY-(d-topLen-3*arcLen-sideLen-straightX);
+  s.distance=((s.distance||0)+0.075*dt)%q;
+  let d=s.distance,x,y;
+  if(d<top){
+   x=-top/2+d; y=-hy;
+  }else if(d<top+Math.PI*r/2){
+   const t=(d-top)/r-Math.PI/2;
+   x=top/2+r*Math.cos(t); y=-side+r*Math.sin(t);
+  }else if(d<top+Math.PI*r/2+side){
+   x=hx; y=-side+(d-top-Math.PI*r/2);
+  }else if(d<top+Math.PI*r+side){
+   const t=(d-top-Math.PI*r/2-side)/r;
+   x=top/2+r*Math.cos(t); y=side+r*Math.sin(t);
+  }else if(d<2*top+Math.PI*r+side){
+   x=top/2-(d-top-Math.PI*r-side); y=hy;
+  }else if(d<2*top+3*Math.PI*r/2+side){
+   const t=(d-top-Math.PI*r-side-top)/r+Math.PI/2;
+   x=-top/2+r*Math.cos(t); y=side+r*Math.sin(t);
+  }else if(d<2*top+3*Math.PI*r/2+2*side){
+   x=-hx; y=side-(d-2*top-3*Math.PI*r/2-side);
   }else{
-   const a=Math.PI+(d-topLen-3*arcLen-sideLen-straightX)/r;
-   x=-straightX/2+r*Math.cos(a); y=-straightY+r*Math.sin(a);
+   const t=(d-2*top-3*Math.PI*r/2-2*side)/r+Math.PI;
+   x=-top/2+r*Math.cos(t); y=-side+r*Math.sin(t);
   }
   s.el.style.left=(cx+x-36)+"px";
   s.el.style.top=(cy+y-36)+"px";
