@@ -53,8 +53,9 @@ function hit(){
  if(best.hp<=0){
   const lv=best.lv;p.xp+=lv;permanent.totalCoins+=lv;p.coins+=lv;
   permanent.kills[best.name]=(permanent.kills[best.name]||0)+1;
-  gainXP(0);drops.push({x:best.x,y:best.y,text:best.base.drop[Math.floor(Math.random()*best.base.drop.length)]});
-  if(Math.random()<0.08)drops.push({x:best.x+12,y:best.y+12,text:best.base.rare[Math.floor(Math.random()*best.base.rare.length)]});
+  gainXP(0);
+  for(const item of best.base.drop){if(Math.random()<0.8)drops.push({x:best.x+(Math.random()-0.5)*18,y:best.y+(Math.random()-0.5)*18,text:item})}
+  for(const item of best.base.rare){if(Math.random()<(Math.random()*0.079+0.001))drops.push({x:best.x+(Math.random()-0.5)*24,y:best.y+(Math.random()-0.5)*24,text:item})}
   enemies=enemies.filter(x=>x!==best);save();
  }
 }
@@ -68,7 +69,7 @@ function update(dt){
  if(dx||dy){const l=Math.hypot(dx,dy);p.x+=dx/l*p.speed*dt*60;p.y+=dy/l*p.speed*dt*60}
  attackClock=Math.max(0,attackClock-dt);spawnClock-=dt;saveClock+=dt;
  if(spawnClock<=0&&enemies.length<8){spawn();spawnClock=.8}
- for(const e of enemies){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;e.x+=dx/d*(e===enemies.find(x=>x===e)&&e.name==="スケルトン"?0:e.speed||.8)*dt*60;if(d<28){e.cool=(e.cool||0)-dt;if(e.cool<=0){damage(e.atk);e.cool=1}}}
+ for(const e of enemies){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(e.name!=="スケルトン")e.x+=dx/d*(e.speed||.8)*dt*60;if(d<28){e.cool=(e.cool||0)-dt;if(e.cool<=0){damage(e.atk);e.cool=1}}}
  collectDrops();if(saveClock>=300){saveClock=0;save()}
 }
 function draw(){
