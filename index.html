@@ -106,8 +106,6 @@ function buy(id){
  const u=upgrades.find(x=>x.id===id),lv=levels[id],cost=Math.floor(u.cost*Math.pow(1.65,lv));if(money<cost)return;
  money-=cost;levels[id]++;if(id==="knife")income+=10;if(id==="chef")income+=25;if(id==="seat"){popularity=Math.min(5,popularity+1);makeCustomers()}if(id==="shop")income+=100;render();
 }
-
-}
 </script>
 <script>
 const home=document.getElementById("homeScreen"),game=document.getElementById("gameScreen");
