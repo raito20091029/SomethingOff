@@ -6,14 +6,27 @@
 </style><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#050505"><link rel="icon" href="icon-192.png"></head><body><div id="game"><div class="room"><div class="back"></div><div class="floor"></div><div class="door" id="door"></div><div class="lamp"></div></div><div id="hud"><div class="cross"></div><div id="text"></div><div id="hint">WASD：移動　E：調べる　F5：セーブ　ESC：メニュー <button id="pauseQuick" style="pointer-events:auto;margin:0 0 0 8px;padding:3px 9px;font-size:11px;">MENU</button></div><div id="status">正気度　100%<br>違和感　0</div><div id="inventory">所持品：なし</div></div><div id="menu"><div class="panel"><h1 class="title">SomethingOff</h1><div class="sub">VER. 0.2 — RPG PROTOTYPE</div><p>この部屋には、見落としているものがある。</p><div id="mainButtons"><button id="start">ゲーム開始</button></div><div id="pauseButtons" class="hidden"><button id="resume">ゲームに戻る</button><button id="pauseSave">セーブする</button><button id="titleBack">タイトルに戻る</button></div><div class="log" id="log">記録はありません。</div></div></div></div>
 <script>
 const $=s=>document.querySelector(s);const game=$('#game'),menu=$('#menu'),text=$('#text'),status=$('#status'),inv=$('#inventory'),logBox=$('#log'),door=$('#door');
-let S={started:false,room:0,sanity:100,anomaly:0,items:[],searched:[],keypad:false,ending:false};
+let S={started:false,room:0,sanity:100,anomaly:0,items:[],searched:[],keypad:false,ending:false,player:{x:0,y:0}};
+const keys={w:false,a:false,s:false,d:false};
+let lastMove=0;
 const saved=localStorage.getItem('kik_save');
 function msg(s,t=3600){text.textContent=s;text.style.opacity=1;clearTimeout(msg.t);msg.t=setTimeout(()=>text.style.opacity=0,t)}
 function note(s){S.searched.push(s);if(S.searched.length>8)S.searched.shift();logBox.innerHTML=S.searched.map(x=>'・'+x).join('<br>')||'記録はありません。'}
 function has(x){return S.items.includes(x)}function add(x){if(!has(x)){S.items.push(x);msg('入手した：'+x);note('入手：'+x)}}
+function updatePlayer(){
+ if(!S.started||S.ending||menu.style.display!=='none')return;
+ const dx=(keys.d?1:0)-(keys.a?1:0), dy=(keys.s?1:0)-(keys.w?1:0);
+ if(!dx&&!dy)return;
+ const now=performance.now(); const dt=Math.min(32,now-lastMove||16)/16; lastMove=now;
+ const len=Math.hypot(dx,dy)||1, speed=7;
+ S.player.x=Math.max(-220,Math.min(220,S.player.x+dx/len*speed*dt));
+ S.player.y=Math.max(-120,Math.min(120,S.player.y+dy/len*speed*dt));
+ $('.room').style.transform='translate('+(-S.player.x)+'px,'+(-S.player.y)+'px)';
+ requestAnimationFrame(updatePlayer);
+}
 function render(){status.innerHTML='正気度　'+S.sanity+'%<br>違和感　'+S.anomaly;inv.textContent='所持品：'+(S.items.join(' / ')||'なし');if(S.sanity<40)game.classList.add('low');else game.classList.remove('low')}
 function anomaly(n=1){S.anomaly+=n;S.sanity=Math.max(0,S.sanity-(n*5));render();game.classList.add('glitch');setTimeout(()=>game.classList.remove('glitch'),800)}
-function start(load=false){if(load&&saved){try{S={...S,...JSON.parse(saved),started:true};menu.style.display='none';render();msg('……セーブした時より、部屋が少し広い。');return}catch{}}S.started=true;menu.style.display='none';msg('目が覚めた。知らない部屋だ。出口は一つしかない。');render()}
+function start(load=false){if(load&&saved){try{S={...S,...JSON.parse(saved),started:true};menu.style.display='none';render();msg('……セーブした時より、部屋が少し広い。');return}catch{}}S.started=true;S.player={x:0,y:0};$('.room').style.transform='translate(0,0)';menu.style.display='none';msg('目が覚めた。知らない部屋だ。出口は一つしかない。');render()}
 function save(){localStorage.setItem('kik_save',JSON.stringify({...S,started:false}));msg('セーブしました。')}
 function inspect(){
  if(S.ending)return;
@@ -38,7 +51,8 @@ function showMainMenu(){menu.style.display='flex';$('.title').textContent='Somet
 function showPause(){if(!S.started||S.ending)return;menu.style.display='flex';$('.title').textContent='PAUSE';$('.sub').textContent='ゲームを一時停止しています';$('#mainButtons').classList.add('hidden');$('#pauseButtons').classList.remove('hidden');logBox.innerHTML='現在の状態を保存したり、ゲームに戻ったりできます。'}
 function resumeGame(){menu.style.display='none';$('#mainButtons').classList.remove('hidden');$('#pauseButtons').classList.add('hidden');msg('ゲームに戻ります。')}\nfunction togglePause(e){if(e)e.preventDefault();if(!S.started||S.ending)return;if(menu.style.display==='none')showPause();else resumeGame()}
 $('#start').onclick=()=>start();$('#load').onclick=()=>start(true);$('#pauseQuick').onclick=togglePause;$('#resume').onclick=()=>resumeGame();$('#pauseSave').onclick=()=>save();$('#titleBack').onclick=()=>{S.started=false;showMainMenu();render();msg('タイトル画面に戻りました。')};
-addEventListener('keydown',e=>{const k=(e.key||'').toLowerCase();if(e.code==='Escape'||k==='escape'){togglePause(e);return}if(!S.started||S.ending)return;if(k==='e')inspect();if(e.key==='F5'){e.preventDefault();save()}if(['w','a','s','d'].includes(k)){if(Math.random()<.025&&S.anomaly>0){anomaly();msg('歩くたびに、足音が一つ多い。')}}},{capture:true});
+addEventListener('keydown',e=>{const k=(e.key||'').toLowerCase();if(e.code==='Escape'||k==='escape'){togglePause(e);return}if(!S.started||S.ending)return;if(k==='e')inspect();if(e.key==='F5'){e.preventDefault();save()}if(['w','a','s','d'].includes(k)){e.preventDefault();if(!keys[k]){keys[k]=true;lastMove=performance.now();requestAnimationFrame(updatePlayer)}if(Math.random()<.025&&S.anomaly>0){anomaly();msg('歩くたびに、足音が一つ多い。')}}},{capture:true});
+addEventListener('keyup',e=>{const k=(e.key||'').toLowerCase();if(['w','a','s','d'].includes(k)){keys[k]=false;e.preventDefault()}},{capture:true});
 render();
 </script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register('./sw.js?v=6').catch(()=>{});}</script><script>
 function removeLegacyLoadButton(){
