@@ -109,7 +109,10 @@ const types=[
 {name:"スケルトン",atk:3,hp:1,color:"#ddd",drop:["骨"],rare:["鉄"]},
 {name:"オーク",atk:4,hp:4,color:"#4f8d45",drop:["皮","骨","牙"],rare:["角","石","鉄"]},
 {name:"クモ",atk:1,hp:2,color:"#9b4c9b",drop:["目","歯","硬い石"],rare:["毒の花"]},
-{name:"ゴーレム",atk:6,hp:6,color:"#777",drop:["砂","石","硬い石"],rare:["ガラス","砂利","花"]}
+{name:"ゴーレム",atk:6,hp:6,color:"#777",drop:["砂","石","硬い石"],rare:["ガラス","砂利","花"]},
+{name:"リバーフィン",atk:3,hp:2,color:"#4aa8d8",drop:["魚の鱗","水草"],rare:["真珠","貝殻"],water:true},
+{name:"リバークラブ",atk:4,hp:3,color:"#d86b55",drop:["貝殻","水草"],rare:["真珠","魚の鱗"],water:true},
+{name:"ウォーターエレメント",atk:7,hp:5,color:"#5ed6e8",drop:["水晶","水草"],rare:["真珠","ガラス"],water:true}
 ];
 function resize(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener("resize",resize);resize();
 function normalizePlayer(){
@@ -138,8 +141,16 @@ function xpNeed(){return p.level*10}
 function gainXP(n){p.xp+=n;let gained=0;while(p.xp>=xpNeed()){p.xp-=xpNeed();p.level++;gained++;}if(gained){levelUpChoices+=gained;showLevelUp();save();}hud()}
 function enemyLevel(e){let s=e.atk+e.maxHp;return Math.floor((s-1)/10)+1}
 function spawn(){
- const t=types[Math.floor(Math.random()*types.length)],a=Math.random()*Math.PI*2,d=280+Math.random()*220,lv=enemyLevel(t);
- enemies.push({x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d,hp:t.hp,maxHp:t.hp,atk:t.atk,base:t,name:t.name,lv});
+ let pool=types;
+ const nearWater=waterAt(p.x,p.y)!=="";
+ if(nearWater){const aquatic=types.filter(t=>t.water);if(Math.random()<0.72)pool=aquatic}
+ else pool=types.filter(t=>!t.water);
+ if(!pool.length)pool=types;
+ const t=pool[Math.floor(Math.random()*pool.length)],a=Math.random()*Math.PI*2,d=280+Math.random()*220;
+ let ex=p.x+Math.cos(a)*d,ey=p.y+Math.sin(a)*d;
+ if(t.water){for(let n=0;n<8&&waterAt(ex,ey)==="";n++){const aa=Math.random()*Math.PI*2,dd=280+Math.random()*220;ex=p.x+Math.cos(aa)*dd;ey=p.y+Math.sin(aa)*dd}}
+ const lv=enemyLevel(t);
+ enemies.push({x:ex,y:ey,hp:t.hp,maxHp:t.hp,atk:t.atk,base:t,name:t.name,lv});
 }
 function hit(){
  if(attackClock>0||dead)return;attackClock=.35;
@@ -187,7 +198,7 @@ function draw(){
  ctx.fillStyle="#55aaff";ctx.beginPath();ctx.arc(W/2,H/2,18,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(W/2-6,H/2-3,3,0,7);ctx.arc(W/2+6,H/2-3,3,0,7);ctx.fill();
 }
 function drawPause(){}
-const INVENTORY_ITEMS=["ゼリー","毛皮","角","目","爪","骨","しっぽ","牙","歯","舌","皮","木材","石","硬い石","砂","葉","砂利","花","毒の花","鉄","金","プラチナ","ガラス"];
+const INVENTORY_ITEMS=["ゼリー","毛皮","角","目","爪","骨","しっぽ","牙","歯","舌","皮","木材","石","硬い石","砂","葉","砂利","花","毒の花","鉄","金","プラチナ","ガラス","水草","魚の鱗","貝殻","真珠","水晶"];
 function renderInventory(){const list=document.getElementById("inventoryList");list.innerHTML=INVENTORY_ITEMS.map(item=>{const n=Math.max(0,Math.floor(safeNum(p.materials?.[item],0)));return '<div class="inventoryItem'+(n===0?' empty':'')+'"><span>'+item+'</span><b>'+n+'</b></div>'}).join("")}
 function toggleInventory(force){const el=document.getElementById("inventory");const show=typeof force==="boolean"?force:!el.classList.contains("show");el.classList.toggle("show",show);if(show){keys.clear();touch.clear();renderInventory();}}
 function updateAttackUI(){const b=document.getElementById("atkBtn");const panel=document.getElementById("attackCooldown");if(panel){panel.classList.toggle("cooling",attackClock>0);panel.classList.toggle("ready",attackClock<=0);panel.textContent=attackClock>0?"⚔ 攻撃まで "+Math.max(0,attackClock).toFixed(2)+"秒":"⚔ 攻撃準備OK"}if(!b)return;const max=.35;const ratio=Math.max(0,Math.min(1,attackClock/max));const fill=b.querySelector(".cooldownFill");if(fill)fill.style.height=(ratio*100)+"%";b.classList.toggle("cooling",attackClock>0);b.classList.toggle("ready",attackClock<=0);const label=b.querySelector(".attackLabel");if(label)label.textContent=attackClock>0?Math.max(0,attackClock).toFixed(1)+"s":"攻撃"}
