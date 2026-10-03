@@ -107,14 +107,15 @@ function hit(){
  if(best.hp<=0){
   const lv=best.lv;p.xp+=lv;p.coins=Math.max(0,safeNum(p.coins,0))+lv;permanent.totalCoins=Math.max(0,safeNum(permanent.totalCoins,0))+lv;hud();
   permanent.kills[best.name]=(permanent.kills[best.name]||0)+1;
-  gainXP(0);
+  drops.push({x:best.x,y:best.y,text:"XP",kind:"xp",value:lv});
+  drops.push({x:best.x+(Math.random()-0.5)*20,y:best.y+(Math.random()-0.5)*20,text:"🪙",kind:"coin",value:lv});
   for(const item of best.base.drop){if(Math.random()<0.8)drops.push({x:best.x+(Math.random()-0.5)*18,y:best.y+(Math.random()-0.5)*18,text:item})}
   for(const item of best.base.rare){if(Math.random()<(Math.random()*0.079+0.001))drops.push({x:best.x+(Math.random()-0.5)*24,y:best.y+(Math.random()-0.5)*24,text:item})}
   enemies=enemies.filter(x=>x!==best);save();
  }
 }
 function damage(n){p.hp-=n;if(p.hp<=0){p.hp=0;die()}}
-function collectDrops(){for(let i=drops.length-1;i>=0;i--){const d=drops[i];if(Math.hypot(d.x-p.x,d.y-p.y)<34){p.materials[d.text]=(p.materials[d.text]||0)+1;drops.splice(i,1);save()}}}
+function collectDrops(){for(let i=drops.length-1;i>=0;i--){const d=drops[i];if(Math.hypot(d.x-p.x,d.y-p.y)<34){if(d.kind==="xp"){gainXP(d.value)}else if(d.kind==="coin"){p.coins+=d.value;permanent.totalCoins+=d.value}else{p.materials[d.text]=(p.materials[d.text]||0)+1}drops.splice(i,1);save()}}}
 function die(){dead=true;save();document.getElementById("deathText").textContent="Lv."+p.level+"　XP "+p.xp+"　累計コイン "+permanent.totalCoins+"　討伐数 "+Object.values(permanent.kills).reduce((a,b)=>a+b,0);document.getElementById("dead").style.display="flex"}
 function resetRun(){p={x:0,y:0,hp:10,maxHp:10,atk:1,speed:3,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};enemies=[];spawnClock=0;drops=[];worldSeed=Math.floor(Math.random()*99999);dead=false;document.getElementById("dead").style.display="none";save()}
 function update(dt){
@@ -136,7 +137,7 @@ function draw(){
  for(let wx=Math.floor((p.x-W/2)/240)*240;wx<p.x+W/2+240;wx+=240)for(let wy=Math.floor((p.y-H/2)/240)*240;wy<p.y+H/2+240;wy+=240){const h=terrainHeight(wx,wy);if(h>7){ctx.strokeStyle="#ffffff18";ctx.beginPath();ctx.ellipse(wx+ox,wy+oy,85,60,0,0,Math.PI*2);ctx.stroke()}}
  // 木と岩は実際の障害物。
  for(const o of worldObjectsNear(p.x,p.y)){const x=o.x+ox,y=o.y+oy;if(x<-50||x>W+50||y<-50||y>H+50)continue;if(o.type==="tree"){ctx.fillStyle="#5b3b25";ctx.fillRect(x-5,y+6,10,24);ctx.fillStyle="#285b2b";ctx.beginPath();ctx.arc(x,y,22,0,7);ctx.fill();ctx.fillStyle="#3d7837";ctx.beginPath();ctx.arc(x-8,y-10,15,0,7);ctx.fill()}else{ctx.fillStyle="#777";ctx.beginPath();ctx.ellipse(x,y,24,17,-.2,0,7);ctx.fill();ctx.fillStyle="#929292";ctx.beginPath();ctx.ellipse(x-5,y-5,12,8,-.2,0,7);ctx.fill()}}
- for(const d of drops){const x=d.x+ox,y=d.y+oy;ctx.fillStyle="#e8c85a";ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.font="11px sans-serif";ctx.fillText(d.text,x+9,y+4)}
+ for(const d of drops){const x=d.x+ox,y=d.y+oy;if(d.kind==="xp"){ctx.fillStyle="#69e6ff";ctx.beginPath();ctx.arc(x,y,8,0,7);ctx.fill();ctx.fillStyle="#083";ctx.font="bold 11px sans-serif";ctx.textAlign="center";ctx.fillText("XP",x,y+4)}else if(d.kind==="coin"){ctx.fillStyle="#f2c94c";ctx.beginPath();ctx.arc(x,y,9,0,7);ctx.fill();ctx.fillStyle="#7a5600";ctx.font="bold 12px sans-serif";ctx.textAlign="center";ctx.fillText("★",x,y+4)}else{ctx.fillStyle="#e8c85a";ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.font="11px sans-serif";ctx.textAlign="left";ctx.fillText(d.text,x+9,y+4)}}
  for(const e of enemies){const x=e.x+ox,y=e.y+oy;ctx.fillStyle=e.base.color;ctx.beginPath();ctx.arc(x,y,16,0,7);ctx.fill();ctx.fillStyle="#111";ctx.fillRect(x-18,y-25,36,4);ctx.fillStyle="#e55";ctx.fillRect(x-18,y-25,36*(e.hp/e.maxHp),4);ctx.fillStyle="#fff";ctx.font="11px sans-serif";ctx.textAlign="center";ctx.fillText(e.name+" Lv."+e.lv,x,y+30)}
  ctx.save();ctx.strokeStyle="#ffffff66";ctx.lineWidth=2;ctx.setLineDash([7,6]);ctx.beginPath();ctx.arc(W/2,H/2,72,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle="#ffffff22";ctx.lineWidth=1;ctx.beginPath();ctx.arc(W/2,H/2,72,0,Math.PI*2);ctx.stroke();ctx.restore();
  ctx.fillStyle="#55aaff";ctx.beginPath();ctx.arc(W/2,H/2,18,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(W/2-6,H/2-3,3,0,7);ctx.arc(W/2+6,H/2-3,3,0,7);ctx.fill();
