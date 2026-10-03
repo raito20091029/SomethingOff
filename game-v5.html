@@ -262,7 +262,7 @@ function enemyLimits(){const max=6+3*Math.floor((Math.max(1,p.level)-1)/5);retur
 function habitatOk(e,x,y){
  const base=e?.base||e;
  const target=base?.river?"river":base?.lake?"lake":"land";
- const margin=52;
+ const margin=target==="land"?52:18;
  const samples=[[0,0]];
  for(let i=0;i<16;i++){const a=i*Math.PI*2/16;samples.push([Math.cos(a)*margin,Math.sin(a)*margin])}
  for(const [sx,sy] of samples){
