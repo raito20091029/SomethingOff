@@ -31,7 +31,7 @@
 <script>
 "use strict";
 const c=document.getElementById("c"),ctx=c.getContext("2d"),keys=new Set(),touch=new Set();
-document.getElementById("start").onclick=()=>{document.getElementById("title").style.display="none";if(dead){document.getElementById("dead").style.display="flex"}else{document.getElementById("dead").style.display="none";if(enemies.length===0){const lim=enemyLimits();refillHabitat("land",Math.min(lim.max,Math.max(lim.min,3)));refillCurrentHabitat(lim);spawnClock=.3}};paused=false;hud();last=performance.now();requestAnimationFrame(loop);};
+document.getElementById("start").onclick=()=>{document.getElementById("title").style.display="none";if(dead){document.getElementById("dead").style.display="flex"}else{document.getElementById("dead").style.display="none";enemies=[];spawnClock=3};paused=false;hud();last=performance.now();requestAnimationFrame(loop);};
 let W=innerWidth,H=innerHeight,dpr=devicePixelRatio||1,last=performance.now(),spawnClock=3,attackClock=0,saveClock=0,spawnTry=0,spawnOk=0,spawnFail=0,fixRemoved=0,despawned=0;
 const SAVE_KEY="somethingOffSave_v2";const RUN_KEY="somethingOffRun_v2";const BACKUP_KEY="somethingOffRunBackup_v2";const LEGACY_SAVE_KEY="somethingOffSave";const LEGACY_RUN_KEY="somethingOffRun";const LEGACY_BACKUP_KEY="somethingOffRunBackup";const safeNum=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
 let permanent;
@@ -54,7 +54,7 @@ if(runSave&&!runSave.p&&runSave.level){runSave.p={...defaultPlayer,level:runSave
 let p=runSave?.p||defaultPlayer;
 if(runSave&&!runSave.speedBaseVersion){p.speed=safeNum(p.speed,1)+3;runSave.speedBaseVersion=3;}else if(runSave.speedBaseVersion<3){p.speed+=2;runSave.speedBaseVersion=3;}
 normalizePlayer();p.level=Math.max(1,parseInt(p.level,10)||1);p.xp=Math.max(0,safeNum(p.xp,permanent.xp));
-let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;const BUILD_VERSION="20261003-60",INITIAL_ENEMY_COUNT=enemies.length;
+let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;const BUILD_VERSION="20261003-61",INITIAL_ENEMY_COUNT=enemies.length;
 if(dead)enemies=[];
 const WORLD_CELL=260;
 function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
@@ -85,14 +85,14 @@ function ensureBaseOnLand(){
   if(waterAt(0,0)===""){
    enemies=[];
    drops=[];
-   spawnClock=0;
+   spawnClock=3;
    return true;
   }
  }
  worldSeed=12345;
  enemies=[];
  drops=[];
- spawnClock=0;
+ spawnClock=3;
  return waterAt(0,0)!=="";
 }
 ensureBaseOnLand();
@@ -183,9 +183,10 @@ function findHabitatPosition(t,ox,oy){const target=habitatType(t);
   if(waterAt(0,0)==="")return {x:0,y:0};
  }
  return null}
+function canSpawnEnemy(t){return p.level>=3||(t.name!=="スケルトン"&&enemyLevel(t)<2)}
 function spawnForHabitat(h){
  spawnTry++;
- const pool=h==="river"?types.filter(t=>t.river):h==="lake"?types.filter(t=>t.lake):types.filter(t=>!t.river&&!t.lake);
+ const pool=(h==="river"?types.filter(t=>t.river):h==="lake"?types.filter(t=>t.lake):types.filter(t=>!t.river&&!t.lake)).filter(canSpawnEnemy);
  if(!pool.length){spawnFail++;return false}
  const t=pool[Math.floor(Math.random()*pool.length)],pos=findHabitatPosition(t,p.x,p.y);
  if(!pos){spawnFail++;return false}
@@ -331,4 +332,4 @@ addEventListener("keydown",e=>{if(e.code==="Escape"&&document.getElementById("be
 c.addEventListener("pointerdown",e=>{if(levelUpChoices>0)return;hit()});document.getElementById("atkBtn").onpointerdown=hit;document.getElementById("restart").onclick=resetRun;document.getElementById("inventoryBtn").onclick=()=>toggleInventory();document.getElementById("bestiaryBtn").onclick=()=>toggleBestiary();document.getElementById("bestiaryClose").onclick=()=>toggleBestiary(false);document.getElementById("bestiary").addEventListener("click",e=>{if(e.target.id==="bestiary")toggleBestiary(false)});document.getElementById("baseWarpBtn").onclick=warpBase;document.getElementById("shopClose").onclick=()=>toggleShop(false);document.getElementById("shop").addEventListener("click",e=>{if(e.target.id==="shop")toggleShop(false)});document.getElementById("inventoryClose").onclick=()=>toggleInventory(false);document.getElementById("inventory").addEventListener("click",e=>{if(e.target.id==="inventory")toggleInventory(false);});
 document.querySelectorAll(".touch button").forEach(b=>{b.onpointerdown=e=>{e.preventDefault();touch.add(b.dataset.k)};b.onpointerup=b.onpointercancel=()=>touch.delete(b.dataset.k)});
 save();
-</script><div id="enemyDebug" style="position:fixed;left:10px;bottom:10px;z-index:99999;background:#000b;color:#fff;padding:6px 9px;border:1px solid #fff4;border-radius:6px;font:12px monospace;pointer-events:none">BUILD 20261003-58 / 初期敵 0 / 敵 0 / 生成 0 / 失敗 0 / 修正削除 0</div></body></html>
+</script><div id="enemyDebug" style="position:fixed;left:10px;bottom:10px;z-index:99999;background:#000b;color:#fff;padding:6px 9px;border:1px solid #fff4;border-radius:6px;font:12px monospace;pointer-events:none">BUILD 20261003-61 / 初期敵 0 / 敵 0 / 生成 0 / 失敗 0 / 修正削除 0</div></body></html>
