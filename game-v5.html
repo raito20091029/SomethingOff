@@ -298,7 +298,7 @@ function sameHabitat(a,b){
  const bh=habitatType(b?.base||b);
  return ah===bh
 }
-function weaponMultiplier(){return p.weapon==="木の棒"?1.1:p.weapon==="投石"?1.1:1}
+function weaponMultiplier(){const lv=Math.max(1,Math.floor(safeNum(p.weaponLevels?.[p.weapon],1)));return p.weapon==="木の棒"||p.weapon==="投石"?1+lv*.1:1}
 function effectiveAttack(){return Math.round(p.atk*weaponMultiplier()*100)/100}
 const enemyHitMask=document.createElement("canvas");
 enemyHitMask.width=100;enemyHitMask.height=100;
