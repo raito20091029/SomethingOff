@@ -196,7 +196,7 @@ addEventListener("pagehide",forceSave);
 addEventListener("beforeunload",forceSave);
 function xpNeed(){return p.level*10}
 function gainXP(n){p.xp+=n;let gained=0;while(p.xp>=xpNeed()){p.xp-=xpNeed();p.level++;gained++;}if(gained){levelUpChoices+=gained;showLevelUp();save();}hud()}
-function enemyLevel(e){const total=Math.max(0,safeNum(e.maxHp,0))+Math.max(0,safeNum(e.atk,0));return Math.max(1,Math.ceil(total/5))}
+function enemyLevel(e){const hp=Math.max(0,safeNum(e.maxHp,e.hp??0));const total=hp+Math.max(0,safeNum(e.atk,0));return Math.max(1,Math.ceil(total/5))}
 enemies=enemies.map(e=>({...e,lv:enemyLevel(e)}));
 function habitatType(t){return t?.river?"river":t?.lake?"lake":"land"}function habitatAt(x,y){return waterAt(x,y)||"land"}
 function findHabitatPosition(t,ox,oy,minDistance=120){
