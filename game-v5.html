@@ -256,7 +256,7 @@ function findHabitatPosition(t,ox,oy,minDistance=120){
  }
  return null;
 }
-function canSpawnEnemy(t){return p.level>=3||(t.name!=="スケルトン"&&enemyLevel(t)<2)}
+function canSpawnEnemy(t){return p.level>=3||enemyLevel(t)<3}
 function spawnForHabitat(h,far=false){
  spawnTry++;
  const pool=(h==="river"?types.filter(t=>t.river):h==="lake"?types.filter(t=>t.lake):types.filter(t=>!t.river&&!t.lake)).filter(canSpawnEnemy);
