@@ -121,10 +121,16 @@ function drawWater(ox,oy){
   const sx=lx+ox,sy=ly+oy;
   if(sx<-rx||sx>W+rx||sy<-ry||sy>H+ry)continue;
   if(lakeIntersectsRiver(lx,ly,rx,ry))continue;
+  ctx.fillStyle="#214d3d";ctx.beginPath();ctx.ellipse(sx,sy,rx+10,ry+10,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#3f9fc2";ctx.beginPath();ctx.ellipse(sx,sy,rx,ry,0,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle="#78cde5";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(sx-20,sy-8,rx*.72,ry*.62,0,0,Math.PI*2);ctx.stroke();
  }
  const startX=Math.floor((p.x-W/2)/120)*120-120,endX=p.x+W/2+120;
+ ctx.fillStyle="#214d3d";
+ ctx.beginPath();
+ for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420-90;ctx.lineTo(x+ox,y+oy)}
+ for(let x=endX;x>=startX;x-=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420+90;ctx.lineTo(x+ox,y+oy)}
+ ctx.closePath();ctx.fill();
  ctx.fillStyle="#3f9fc2";
  ctx.beginPath();
  for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420-80;ctx.lineTo(x+ox,y+oy)}
