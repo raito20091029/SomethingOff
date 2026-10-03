@@ -54,7 +54,7 @@ if(runSave&&!runSave.p&&runSave.level){runSave.p={...defaultPlayer,level:runSave
 let p=runSave?.p||defaultPlayer;
 if(runSave&&!runSave.speedBaseVersion){p.speed=safeNum(p.speed,1)+3;runSave.speedBaseVersion=3;}else if(runSave.speedBaseVersion<3){p.speed+=2;runSave.speedBaseVersion=3;}
 normalizePlayer();p.level=Math.max(1,parseInt(p.level,10)||1);p.xp=Math.max(0,safeNum(p.xp,permanent.xp));
-let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;let rareShop=runSave?.rareShop&&typeof runSave.rareShop==="object"?runSave.rareShop:{active:false,x:0,y:0,elapsed:0};rareShop.active=!!rareShop.active;rareShop.elapsed=Math.max(0,safeNum(rareShop.elapsed,0));const BUILD_VERSION="20261003-102",INITIAL_ENEMY_COUNT=enemies.length;
+let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;let rareShop=runSave?.rareShop&&typeof runSave.rareShop==="object"?runSave.rareShop:{active:false,x:0,y:0,elapsed:0};rareShop.active=!!rareShop.active;rareShop.elapsed=Math.max(0,safeNum(rareShop.elapsed,0));const BUILD_VERSION="20261003-103",INITIAL_ENEMY_COUNT=enemies.length;
 if(dead)enemies=[];
 const WORLD_CELL=260;
 function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
@@ -287,10 +287,25 @@ function sameHabitat(a,b){
 }
 function weaponMultiplier(){return p.weapon==="木の棒"?1.1:1}
 function effectiveAttack(){return Math.round(p.atk*weaponMultiplier()*100)/100}
+function enemyHitRadius(e){
+ const n=e?.name;
+ if(n==="ゴーレム"||n==="湖の守護者")return 30;
+ if(n==="オオーク")return 26;
+ if(n==="スライム"||n==="オーク")return 24;
+ if(n==="ゴブリン"||n==="カワウソ"||n==="巨大カエル"||n==="レイクサーペント")return 22;
+ if(n==="リバーパイク"||n==="川の精霊"||n==="コウモリ"||n==="スケルトン"||n==="クモ")return 20;
+ return 22;
+}
 function hit(){
  if(attackClock>0||dead)return;attackClock=.35;
- let best=null,bd=72;
- for(const e of enemies){const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<bd&&sameHabitat(p,e)){bd=d;best=e}}
+ let best=null,bestScore=Infinity;
+ const playerHitRadius=23;
+ for(const e of enemies){
+  if(!sameHabitat(p,e))continue;
+  const d=Math.hypot(e.x-p.x,e.y-p.y);
+  const hitDistance=playerHitRadius+enemyHitRadius(e);
+  if(d<=hitDistance&&d<bestScore){bestScore=d;best=e}
+ }
  if(!best)return;
  best.hp-=effectiveAttack();
  if(best.hp<=0){
