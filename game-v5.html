@@ -75,6 +75,26 @@ function terrainHeight(x,y){return Math.sin((x+worldSeed)*.0027)*10+Math.sin((y-
  if(Math.abs(y-riverCenter)<riverWidth)return "river";
  return "";
 }
+function ensureBaseOnLand(){
+ if(waterAt(0,0)===""){
+  return false;
+ }
+ for(let i=0;i<100;i++){
+  worldSeed=Math.floor(Math.random()*99999);
+  if(waterAt(0,0)===""){
+   enemies=[];
+   drops=[];
+   spawnClock=0;
+   return true;
+  }
+ }
+ worldSeed=12345;
+ enemies=[];
+ drops=[];
+ spawnClock=0;
+ return waterAt(0,0)!=="";
+}
+ensureBaseOnLand();
 function drawWater(ox,oy){
  const cell=900;
  const minX=Math.floor((p.x-W/2)/cell)*cell-cell,maxX=p.x+W/2+cell;
@@ -185,7 +205,7 @@ function updatePoison(dt){if(poison.time<=0)return;poison.time=Math.max(0,poison
 function damage(n){p.hp-=n;if(p.hp<=0){p.hp=0;die()}}
 function collectDrops(){for(let i=drops.length-1;i>=0;i--){const d=drops[i];if(Math.hypot(d.x-p.x,d.y-p.y)<52){if(d.kind==="xp"){const amount=Math.max(1,Math.floor(safeNum(d.value,1)));gainXP(amount)}else if(d.kind==="coin"){const amount=Math.max(1,Math.floor(safeNum(d.value,1)));p.coins=Math.max(0,safeNum(p.coins,0))+amount;permanent.totalCoins=Math.max(0,safeNum(permanent.totalCoins,0))+amount}else{p.materials[d.text]=(p.materials[d.text]||0)+1}drops.splice(i,1);save();hud()}}}
 function showLevelUp(){const el=document.getElementById("levelUp");const text=document.getElementById("levelUpText");if(!el)return;paused=true;text.textContent="Lv."+p.level+"　残り "+levelUpChoices+"回";el.classList.add("show");keys.clear();touch.clear()}function chooseLevelStat(stat){if(levelUpChoices<=0)return;if(stat==="hp"){p.maxHp+=5;p.hp=p.maxHp}else if(stat==="atk"){p.atk+=1}else if(stat==="speed"){p.speed+=0.5}levelUpChoices--;save();hud();if(levelUpChoices>0)showLevelUp();else {document.getElementById("levelUp").classList.remove("show");paused=false;last=performance.now();requestAnimationFrame(loop)}}function die(){dead=true;permanent.level=1;permanent.xp=0;p.level=1;p.xp=0;save();document.getElementById("deathText").textContent="Lv.1　XP 0　累計コイン "+permanent.totalCoins+"　討伐数 "+Object.values(permanent.kills).reduce((a,b)=>a+b,0);document.getElementById("dead").style.display="flex"}
-function resetRun(){p={x:0,y:0,hp:10,maxHp:10,atk:1,speed:1,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};poison={time:0,tick:0,sourceAtk:0};projectiles=[];enemies=[];spawnClock=0;drops=[];worldSeed=Math.floor(Math.random()*99999);dead=false;document.getElementById("dead").style.display="none";save()}
+function resetRun(){p={x:0,y:0,hp:10,maxHp:10,atk:1,speed:1,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};poison={time:0,tick:0,sourceAtk:0};projectiles=[];enemies=[];spawnClock=0;drops=[];worldSeed=Math.floor(Math.random()*99999);ensureBaseOnLand();dead=false;document.getElementById("dead").style.display="none";save()}
 function enemyLimits(){const max=6+3*Math.floor((Math.max(1,p.level)-1)/5);return {min:Math.max(3,max-3),max}}
 function habitatOk(e,x,y){const h=waterAt(x,y);if(e.base?.river)return h==="river";if(e.base?.lake)return h==="lake";return h===""}
 function moveEnemySafe(e,dx,dy){const step=Math.hypot(dx,dy)||0;if(!step)return;const nx=e.x+dx,ny=e.y+dy;if(habitatOk(e,nx,ny)){e.x=nx;e.y=ny;return}for(const [ax,ay] of [[-dy,dx],[dy,-dx],[-dx,-dy]]){const l=Math.hypot(ax,ay)||1;const tx=e.x+ax/l*step,ty=e.y+ay/l*step;if(habitatOk(e,tx,ty)){e.x=tx;e.y=ty;return}}}
