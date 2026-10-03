@@ -171,7 +171,7 @@ const types=[
 {name:"湖の守護者",atk:10,hp:10,color:"#4c9fb0",drop:["水晶","硬い石"],rare:["真珠","プラチナ"],lake:true}
 ];
 function resize(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener("resize",resize);resize();
-function normalizePlayer(){
+function normalizePlayer(){if(!p.weaponLevels||typeof p.weaponLevels!=="object")p.weaponLevels={};if(!Number.isFinite(Number(p.weaponLevels["木の棒"])))p.weaponLevels["木の棒"]=1;if(!Number.isFinite(Number(p.weaponLevels["投石"])))p.weaponLevels["投石"]=1;
  if(p.weapon==="なし"||typeof p.weapon!=="string"||!p.weapon)p.weapon="おてて";if(!Array.isArray(p.ownedWeapons))p.ownedWeapons=[];if(p.weapon==="木の棒"&&!p.ownedWeapons.includes("木の棒"))p.ownedWeapons.push("木の棒");
  p.x=safeNum(p.x,0);p.y=safeNum(p.y,0);p.hp=Math.max(0,safeNum(p.hp,10));p.maxHp=Math.max(1,safeNum(p.maxHp,10));p.atk=Math.max(1,safeNum(p.atk,1));p.speed=Math.max(0.1,safeNum(p.speed,4));
  let lv=parseInt(p.level,10);if(!Number.isFinite(lv)||lv<1)lv=1;p.level=lv;
