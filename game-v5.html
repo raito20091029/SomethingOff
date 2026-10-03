@@ -56,7 +56,50 @@ if(dead)enemies=[];
 const WORLD_CELL=260;
 function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
 function worldObjectsNear(px,py){const out=[];const cx=Math.floor(px/WORLD_CELL),cy=Math.floor(py/WORLD_CELL);for(let yy=cy-2;yy<=cy+2;yy++)for(let xx=cx-2;xx<=cx+2;xx++){const r=hash2(xx,yy);if(r<.62)continue;const count=r>.92?2:1;for(let i=0;i<count;i++){const a=hash2(xx*3+i,yy*5+i),b=hash2(xx*7+i+11,yy*2+i+19);out.push({x:(xx+a)*WORLD_CELL,y:(yy+b)*WORLD_CELL,type:hash2(xx*13+i,yy*17+i)>0.48?"tree":"rock",r:hash2(xx*19+i,yy*23+i)*7+17})}}return out}
-function terrainHeight(x,y){return Math.sin((x+worldSeed)*.0027)*10+Math.sin((y-worldSeed)*.0021)*8+Math.sin((x+y)*.0011)*6}
+function terrainHeight(x,y){return Math.sin((x+worldSeed)*.0027)*10+Math.sin((y-worldSeed)*.0021)*8+Math.sin((x+y)*.0011)*6}function waterAt(x,y){
+ const cell=900,cx=Math.floor(x/cell),cy=Math.floor(y/cell);
+ for(let yy=cy-1;yy<=cy+1;yy++)for(let xx=cx-1;xx<=cx+1;xx++){
+  const r=hash2(xx*31+7,yy*47+13);
+  if(r>.16){
+   const lx=(xx+0.5+hash2(xx*11,yy*17)*0.35)*cell;
+   const ly=(yy+0.5+hash2(xx*19,yy*23)*0.35)*cell;
+   const rx=250+hash2(xx*29,yy*31)*220,ry=170+hash2(xx*37,yy*41)*150;
+   const dx=(x-lx)/rx,dy=(y-ly)/ry;
+   if(dx*dx+dy*dy<1)return "lake";
+  }
+ }
+ const riverCenter=Math.sin((x+worldSeed*300)*0.0012)*420;
+ const riverWidth=70+Math.sin((x+worldSeed)*0.0021)*25;
+ if(Math.abs(y-riverCenter)<riverWidth)return "river";
+ return "";
+}
+function drawWater(ox,oy){
+ const cell=900;
+ const minX=Math.floor((p.x-W/2)/cell)*cell-cell,maxX=p.x+W/2+cell;
+ const minY=Math.floor((p.y-H/2)/cell)*cell-cell,maxY=p.y+H/2+cell;
+ ctx.save();
+ for(let yy=minY;yy<=maxY;yy+=cell)for(let xx=minX;xx<=maxX;xx+=cell){
+  const r=hash2(xx/cell*31+7,yy/cell*47+13);
+  if(r<=.16)continue;
+  const lx=xx+cell*(0.5+hash2(xx/cell*11,yy/cell*17)*0.35);
+  const ly=yy+cell*(0.5+hash2(xx/cell*19,yy/cell*23)*0.35);
+  const rx=250+hash2(xx/cell*29,yy/cell*31)*220,ry=170+hash2(xx/cell*37,yy/cell*41)*150;
+  const sx=lx+ox,sy=ly+oy;
+  if(sx<-rx||sx>W+rx||sy<-ry||sy>H+ry)continue;
+  ctx.fillStyle="#3f9fc2";ctx.beginPath();ctx.ellipse(sx,sy,rx,ry,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#78cde5";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(sx-20,sy-8,rx*.72,ry*.62,0,0,Math.PI*2);ctx.stroke();
+ }
+ const startX=Math.floor((p.x-W/2)/120)*120-120,endX=p.x+W/2+120;
+ ctx.fillStyle="#3f9fc2";
+ ctx.beginPath();
+ for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420-80;ctx.lineTo(x+ox,y+oy)}
+ for(let x=endX;x>=startX;x-=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420+80;ctx.lineTo(x+ox,y+oy)}
+ ctx.closePath();ctx.fill();
+ ctx.strokeStyle="#78cde5";ctx.lineWidth=3;ctx.beginPath();
+ for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420;ctx.lineTo(x+ox,y+oy)}
+ ctx.stroke();
+ ctx.restore();
+}
 function movePlayer(dx,dy){p.x=p.x+dx;p.y=p.y+dy}
 const types=[
 {name:"スライム",atk:1,hp:1,color:"#56c45b",drop:["ゼリー"],rare:["花"]},
@@ -137,7 +180,7 @@ function draw(){
  // 小さな丘の輪郭を入れて、少し登り降りする地形を表現。
  for(let wx=Math.floor((p.x-W/2)/240)*240;wx<p.x+W/2+240;wx+=240)for(let wy=Math.floor((p.y-H/2)/240)*240;wy<p.y+H/2+240;wy+=240){const h=terrainHeight(wx,wy);if(h>7){ctx.strokeStyle="#ffffff18";ctx.beginPath();ctx.ellipse(wx+ox,wy+oy,85,60,0,0,Math.PI*2);ctx.stroke()}}
  // 木と岩は実際の障害物。
- for(const o of worldObjectsNear(p.x,p.y)){const x=o.x+ox,y=o.y+oy;if(x<-50||x>W+50||y<-50||y>H+50)continue;if(o.type==="tree"){ctx.fillStyle="#5b3b25";ctx.fillRect(x-5,y+6,10,24);ctx.fillStyle="#285b2b";ctx.beginPath();ctx.arc(x,y,22,0,7);ctx.fill();ctx.fillStyle="#3d7837";ctx.beginPath();ctx.arc(x-8,y-10,15,0,7);ctx.fill()}else{ctx.fillStyle="#777";ctx.beginPath();ctx.ellipse(x,y,24,17,-.2,0,7);ctx.fill();ctx.fillStyle="#929292";ctx.beginPath();ctx.ellipse(x-5,y-5,12,8,-.2,0,7);ctx.fill()}}
+ drawWater(ox,oy);\n for(const o of worldObjectsNear(p.x,p.y)){const x=o.x+ox,y=o.y+oy;if(x<-50||x>W+50||y<-50||y>H+50)continue;if(o.type==="tree"){ctx.fillStyle="#5b3b25";ctx.fillRect(x-5,y+6,10,24);ctx.fillStyle="#285b2b";ctx.beginPath();ctx.arc(x,y,22,0,7);ctx.fill();ctx.fillStyle="#3d7837";ctx.beginPath();ctx.arc(x-8,y-10,15,0,7);ctx.fill()}else{ctx.fillStyle="#777";ctx.beginPath();ctx.ellipse(x,y,24,17,-.2,0,7);ctx.fill();ctx.fillStyle="#929292";ctx.beginPath();ctx.ellipse(x-5,y-5,12,8,-.2,0,7);ctx.fill()}}
  for(const d of drops){const x=d.x+ox,y=d.y+oy;if(d.kind==="xp"){ctx.fillStyle="#69e6ff";ctx.beginPath();ctx.arc(x,y,8,0,7);ctx.fill();ctx.fillStyle="#083";ctx.font="bold 11px sans-serif";ctx.textAlign="center";ctx.fillText("XP",x,y+4)}else if(d.kind==="coin"){ctx.fillStyle="#f2c94c";ctx.beginPath();ctx.arc(x,y,9,0,7);ctx.fill();ctx.fillStyle="#7a5600";ctx.font="bold 12px sans-serif";ctx.textAlign="center";ctx.fillText("★",x,y+4)}else{ctx.fillStyle="#e8c85a";ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.font="11px sans-serif";ctx.textAlign="left";ctx.fillText(d.text,x+9,y+4)}}
  for(const e of enemies){const x=e.x+ox,y=e.y+oy;ctx.fillStyle=e.base.color;ctx.beginPath();ctx.arc(x,y,16,0,7);ctx.fill();ctx.fillStyle="#111";ctx.fillRect(x-18,y-25,36,4);ctx.fillStyle="#e55";ctx.fillRect(x-18,y-25,36*(e.hp/e.maxHp),4);ctx.fillStyle="#fff";ctx.font="11px sans-serif";ctx.textAlign="center";ctx.fillText(e.name+" Lv."+e.lv,x,y+30)}
  ctx.save();ctx.strokeStyle="#ffffff66";ctx.lineWidth=2;ctx.setLineDash([7,6]);ctx.beginPath();ctx.arc(W/2,H/2,72,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle="#ffffff22";ctx.lineWidth=1;ctx.beginPath();ctx.arc(W/2,H/2,72,0,Math.PI*2);ctx.stroke();ctx.restore();
