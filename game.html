@@ -23,17 +23,18 @@
 const c=document.getElementById("c"),ctx=c.getContext("2d"),keys=new Set(),touch=new Set();
 document.getElementById("start").onclick=()=>{document.getElementById("title").style.display="none";if(dead)document.getElementById("dead").style.display="flex";hud();};
 let W=innerWidth,H=innerHeight,dpr=devicePixelRatio||1,last=performance.now(),spawnClock=0,attackClock=0,saveClock=0;
-const safeNum=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+const SAVE_KEY="somethingOffSave";const RUN_KEY="somethingOffRun";const BACKUP_KEY="somethingOffRunBackup";const safeNum=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
 let permanent;
-try{permanent=JSON.parse(localStorage.getItem("somethingOffSave")||'{"level":1,"xp":0,"totalCoins":0,"kills":{}}')}catch{permanent={level:1,xp:0,totalCoins:0,kills:{}}}
+try{permanent=JSON.parse(localStorage.getItem(SAVE_KEY)||'{"level":1,"xp":0,"totalCoins":0,"kills":{}}')}catch{permanent={level:1,xp:0,totalCoins:0,kills:{}}}
 permanent.level=Math.max(1,Math.floor(safeNum(permanent.level,1)));permanent.xp=Math.max(0,safeNum(permanent.xp,0));permanent.totalCoins=Math.max(0,safeNum(permanent.totalCoins,0));if(!permanent.kills||typeof permanent.kills!=="object")permanent.kills={};
 let runSave=null;
 try{
- const a=JSON.parse(localStorage.getItem("somethingOffRun")||"null");
- const b=JSON.parse(localStorage.getItem("somethingOffRunBackup")||"null");
+ const a=JSON.parse(localStorage.getItem(RUN_KEY)||"null");
+ const b=JSON.parse(localStorage.getItem(BACKUP_KEY)||"null");
  runSave=(a?.savedAt||0)>=(b?.savedAt||0)?a:b;
 }catch{runSave=null}
 const defaultPlayer={x:0,y:0,hp:10,maxHp:10,atk:1,speed:3,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};
+if(runSave&&!runSave.p&&runSave.level){runSave.p={...defaultPlayer,level:runSave.level,xp:runSave.xp||0};}
 let p=runSave?.p||defaultPlayer;
 p.x=safeNum(p.x,0);p.y=safeNum(p.y,0);p.hp=Math.max(0,safeNum(p.hp,10));p.maxHp=Math.max(1,safeNum(p.maxHp,10));p.atk=Math.max(1,safeNum(p.atk,1));p.speed=Math.max(0.1,safeNum(p.speed,3));p.level=Math.max(1,Math.floor(safeNum(p.level,permanent.level)));p.xp=Math.max(0,safeNum(p.xp,permanent.xp));p.coins=Math.max(0,safeNum(p.coins,0));if(!p.materials||typeof p.materials!=="object")p.materials={};
 let paused=false,enemies=Array.isArray(runSave?.enemies)?runSave.enemies:[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;
@@ -55,10 +56,10 @@ const types=[
 ];
 function resize(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener("resize",resize);resize();
 function save(){
- localStorage.setItem("somethingOffSave",JSON.stringify({level:p.level,xp:p.xp,totalCoins:permanent.totalCoins,kills:permanent.kills}));
+ localStorage.setItem(SAVE_KEY,JSON.stringify({level:p.level,xp:p.xp,totalCoins:permanent.totalCoins,kills:permanent.kills}));
  const runData={p,enemies,drops,worldSeed,dead,savedAt:Date.now()};
- localStorage.setItem("somethingOffRun",JSON.stringify(runData));
- localStorage.setItem("somethingOffRunBackup",JSON.stringify(runData));
+ localStorage.setItem(RUN_KEY,JSON.stringify(runData));
+ localStorage.setItem(BACKUP_KEY,JSON.stringify(runData));
 }
 addEventListener("pagehide",save);
 addEventListener("beforeunload",save);
@@ -119,5 +120,5 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);dr
 addEventListener("keydown",e=>{if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();document.getElementById("game").style.display=paused?"none":"block";document.getElementById("hud").style.display=paused?"none":"block";document.getElementById("msg").style.display=paused?"none":"block";document.getElementById("pauseOverlay").classList.toggle("show",paused);if(!paused){resize();last=performance.now();draw();hud();requestAnimationFrame(loop)}e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
 c.addEventListener("pointerdown",hit);document.getElementById("atkBtn").onpointerdown=hit;document.getElementById("restart").onclick=resetRun;
 document.querySelectorAll(".touch button").forEach(b=>{b.onpointerdown=e=>{e.preventDefault();touch.add(b.dataset.k)};b.onpointerup=b.onpointercancel=()=>touch.delete(b.dataset.k)});
-if(!runSave)save();
+if(!runSave&&localStorage.getItem(SAVE_KEY)===null&&localStorage.getItem(RUN_KEY)===null)save();
 </script></body></html>
