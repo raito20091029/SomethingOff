@@ -125,7 +125,7 @@ function update(dt){
  attackClock=Math.max(0,attackClock-dt);spawnClock-=dt;saveClock+=dt;
  if(!Number.isFinite(spawnClock))spawnClock=0;
  if(enemies.length===0){for(let i=0;i<5;i++)spawn();spawnClock=.35}else if(enemies.length<24&&spawnClock<=0){const batch=enemies.length<8?3:2;for(let i=0;i<batch&&enemies.length<24;i++)spawn();spawnClock=.3}
- for(const e of enemies){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(e.name!=="スケルトン")e.x+=dx/d*(e.speed||.8)*dt*60;if(d<28){e.cool=(e.cool||0)-dt;if(e.cool<=0){damage(e.atk);e.cool=1}}}
+ for(const e of enemies){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(e.name!=="スケルトン"){const step=(e.speed||.8)*dt*60;e.x+=dx/d*step;e.y+=dy/d*step}if(d<28){e.cool=(e.cool||0)-dt;if(e.cool<=0){damage(e.atk);e.cool=1}}}
  collectDrops();if(saveClock>=2){saveClock=0;save()}
 }
 function draw(){
