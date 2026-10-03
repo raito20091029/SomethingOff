@@ -110,9 +110,12 @@ const types=[
 {name:"オーク",atk:4,hp:4,color:"#4f8d45",drop:["皮","骨","牙"],rare:["角","石","鉄"]},
 {name:"クモ",atk:1,hp:2,color:"#9b4c9b",drop:["目","歯","硬い石"],rare:["毒の花"]},
 {name:"ゴーレム",atk:6,hp:6,color:"#777",drop:["砂","石","硬い石"],rare:["ガラス","砂利","花"]},
-{name:"リバーフィン",atk:3,hp:2,color:"#4aa8d8",drop:["魚の鱗","水草"],rare:["真珠","貝殻"],water:true},
-{name:"リバークラブ",atk:4,hp:3,color:"#d86b55",drop:["貝殻","水草"],rare:["真珠","魚の鱗"],water:true},
-{name:"ウォーターエレメント",atk:7,hp:5,color:"#5ed6e8",drop:["水晶","水草"],rare:["真珠","ガラス"],water:true}
+{name:"カワウソ",atk:3,hp:2,color:"#7b5a43",drop:["毛皮","魚の鱗"],rare:["貝殻","水草"],river:true},
+{name:"リバーパイク",atk:5,hp:3,color:"#3f86a8",drop:["魚の鱗","歯"],rare:["真珠","水草"],river:true},
+{name:"川の精霊",atk:6,hp:4,color:"#65cfe0",drop:["水晶","水草"],rare:["真珠","魚の鱗"],river:true},
+{name:"巨大カエル",atk:4,hp:5,color:"#5e9d4f",drop:["皮","水草"],rare:["毒の花","真珠"],lake:true},
+{name:"レイクサーペント",atk:8,hp:7,color:"#356b78",drop:["魚の鱗","牙"],rare:["水晶","真珠"],lake:true},
+{name:"湖の守護者",atk:10,hp:10,color:"#4c9fb0",drop:["水晶","硬い石"],rare:["真珠","プラチナ"],lake:true}
 ];
 function resize(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener("resize",resize);resize();
 function normalizePlayer(){
@@ -141,14 +144,20 @@ function xpNeed(){return p.level*10}
 function gainXP(n){p.xp+=n;let gained=0;while(p.xp>=xpNeed()){p.xp-=xpNeed();p.level++;gained++;}if(gained){levelUpChoices+=gained;showLevelUp();save();}hud()}
 function enemyLevel(e){let s=e.atk+e.maxHp;return Math.floor((s-1)/10)+1}
 function spawn(){
- let pool=types;
- const nearWater=waterAt(p.x,p.y)!=="";
- if(nearWater){const aquatic=types.filter(t=>t.water);if(Math.random()<0.72)pool=aquatic}
- else pool=types.filter(t=>!t.water);
+ const water=waterAt(p.x,p.y);
+ let pool;
+ if(water==="river"){
+  pool=types.filter(t=>t.river);
+ }else if(water==="lake"){
+  pool=types.filter(t=>t.lake);
+ }else{
+  pool=types.filter(t=>!t.river&&!t.lake);
+ }
  if(!pool.length)pool=types;
  const t=pool[Math.floor(Math.random()*pool.length)],a=Math.random()*Math.PI*2,d=280+Math.random()*220;
  let ex=p.x+Math.cos(a)*d,ey=p.y+Math.sin(a)*d;
- if(t.water){for(let n=0;n<8&&waterAt(ex,ey)==="";n++){const aa=Math.random()*Math.PI*2,dd=280+Math.random()*220;ex=p.x+Math.cos(aa)*dd;ey=p.y+Math.sin(aa)*dd}}
+ const targetType=t.river?"river":t.lake?"lake":"land";
+ if(targetType!=="land"){for(let n=0;n<12&&waterAt(ex,ey)!==targetType;n++){const aa=Math.random()*Math.PI*2,dd=280+Math.random()*220;ex=p.x+Math.cos(aa)*dd;ey=p.y+Math.sin(aa)*dd}}
  const lv=enemyLevel(t);
  enemies.push({x:ex,y:ey,hp:t.hp,maxHp:t.hp,atk:t.atk,base:t,name:t.name,lv});
 }
