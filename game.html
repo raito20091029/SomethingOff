@@ -77,7 +77,7 @@ function hit(){
  if(!best)return;
  best.hp-=p.atk;
  if(best.hp<=0){
-  const lv=best.lv;p.xp+=lv;permanent.totalCoins+=lv;p.coins+=lv;
+  const lv=best.lv;p.xp+=lv;p.coins=Math.max(0,safeNum(p.coins,0))+lv;permanent.totalCoins=Math.max(0,safeNum(permanent.totalCoins,0))+lv;hud();
   permanent.kills[best.name]=(permanent.kills[best.name]||0)+1;
   gainXP(0);
   for(const item of best.base.drop){if(Math.random()<0.8)drops.push({x:best.x+(Math.random()-0.5)*18,y:best.y+(Math.random()-0.5)*18,text:item})}
