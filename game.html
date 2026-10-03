@@ -36,7 +36,7 @@ try{
 const defaultPlayer={x:0,y:0,hp:10,maxHp:10,atk:1,speed:3,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};
 if(runSave&&!runSave.p&&runSave.level){runSave.p={...defaultPlayer,level:runSave.level,xp:runSave.xp||0};}
 let p=runSave?.p||defaultPlayer;
-p.x=safeNum(p.x,0);p.y=safeNum(p.y,0);p.hp=Math.max(0,safeNum(p.hp,10));p.maxHp=Math.max(1,safeNum(p.maxHp,10));p.atk=Math.max(1,safeNum(p.atk,1));p.speed=Math.max(0.1,safeNum(p.speed,3));p.level=Math.max(1,Math.floor(safeNum(p.level,permanent.level)));if(!Number.isFinite(p.level))p.level=permanent.level;if(!Number.isFinite(p.level)||p.level<1)p.level=1;p.xp=Math.max(0,safeNum(p.xp,permanent.xp));p.coins=Math.max(0,safeNum(p.coins,0));if(!p.materials||typeof p.materials!=="object")p.materials={};
+normalizePlayer();p.level=Math.max(1,Math.floor(safeNum(p.level,permanent.level)));p.xp=Math.max(0,safeNum(p.xp,permanent.xp));
 let paused=false,enemies=Array.isArray(runSave?.enemies)?runSave.enemies:[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;
 const WORLD_CELL=260, OBSTACLE_R=20;
 function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
@@ -55,7 +55,13 @@ const types=[
 {name:"ゴーレム",atk:6,hp:6,color:"#777",drop:["砂","石","硬い石"],rare:["ガラス","砂利","花"]}
 ];
 function resize(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener("resize",resize);resize();
+function normalizePlayer(){
+ p.x=safeNum(p.x,0);p.y=safeNum(p.y,0);p.hp=Math.max(0,safeNum(p.hp,10));p.maxHp=Math.max(1,safeNum(p.maxHp,10));p.atk=Math.max(1,safeNum(p.atk,1));p.speed=Math.max(0.1,safeNum(p.speed,3));
+ const lv=safeNum(p.level,1);p.level=Number.isFinite(lv)&&lv>=1?Math.floor(lv):1;
+ p.xp=Math.max(0,safeNum(p.xp,0));p.coins=Math.max(0,safeNum(p.coins,0));if(!p.materials||typeof p.materials!=="object")p.materials={};
+}
 function save(){
+ normalizePlayer();
  localStorage.setItem(SAVE_KEY,JSON.stringify({level:p.level,xp:p.xp,totalCoins:permanent.totalCoins,kills:permanent.kills}));
  const runData={p,enemies,drops,worldSeed,dead,savedAt:Date.now()};
  localStorage.setItem(RUN_KEY,JSON.stringify(runData));
@@ -115,7 +121,7 @@ function draw(){
  ctx.fillStyle="#55aaff";ctx.beginPath();ctx.arc(W/2,H/2,18,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(W/2-6,H/2-3,3,0,7);ctx.arc(W/2+6,H/2-3,3,0,7);ctx.fill();
 }
 function drawPause(){}
-function hud(){p.level=Math.max(1,Math.floor(safeNum(p.level,1)));if(!Number.isFinite(p.level)||p.level<1)p.level=1;document.getElementById("lv").textContent="Lv."+String(p.level);document.getElementById("levelValue").textContent=p.level;document.getElementById("hp").style.width=(p.hp/p.maxHp*100)+"%";document.getElementById("xp").textContent="XP "+p.xp+"/"+xpNeed();document.getElementById("coins").textContent="🪙 "+p.coins;document.getElementById("atk").textContent=p.atk}
+function hud(){normalizePlayer();const levelText=String(p.level);document.getElementById("lv").textContent="Lv."+levelText;document.getElementById("levelValue").textContent=levelText;document.getElementById("hp").style.width=(p.hp/p.maxHp*100)+"%";document.getElementById("xp").textContent="XP "+p.xp+"/"+xpNeed();document.getElementById("coins").textContent="🪙 "+p.coins;document.getElementById("atk").textContent=p.atk}
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);draw();drawPause();hud();if(!paused)requestAnimationFrame(loop)}requestAnimationFrame(loop);
 addEventListener("keydown",e=>{if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();document.getElementById("game").style.display=paused?"none":"block";document.getElementById("hud").style.display=paused?"none":"block";document.getElementById("msg").style.display=paused?"none":"block";document.getElementById("pauseOverlay").classList.toggle("show",paused);if(!paused){resize();last=performance.now();draw();hud();requestAnimationFrame(loop)}e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
 c.addEventListener("pointerdown",hit);document.getElementById("atkBtn").onpointerdown=hit;document.getElementById("restart").onclick=resetRun;
