@@ -172,6 +172,9 @@ function findHabitatPosition(t,ox,oy){const target=habitatType(t);
  const nearMin=target==="land"?120:280,nearMax=target==="land"?420:1000;
  for(let n=0;n<320;n++){const a=Math.random()*Math.PI*2,d=nearMin+Math.random()*(nearMax-nearMin);const x=ox+Math.cos(a)*d,y=oy+Math.sin(a)*d;if(waterAt(x,y)===target)return {x,y}}
  for(let d=300;d<=1400;d+=100){for(let i=0;i<24;i++){const a=i*Math.PI*2/24+(d/100)*0.17;const x=ox+Math.cos(a)*d,y=oy+Math.sin(a)*d;if(waterAt(x,y)===target)return {x,y}}}
+ if(target==="land"){
+  for(let d=120;d<=1800;d+=40)for(let i=0;i<48;i++){const a=i*Math.PI*2/48;const x=ox+Math.cos(a)*d,y=oy+Math.sin(a)*d;if(waterAt(x,y)==="")return {x,y}}
+ }
  return null}
 function spawnForHabitat(h){
  const pool=h==="river"?types.filter(t=>t.river):h==="lake"?types.filter(t=>t.lake):types.filter(t=>!t.river&&!t.lake);
