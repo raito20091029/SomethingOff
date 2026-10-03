@@ -43,7 +43,7 @@ function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return 
 function worldObjectsNear(px,py){const out=[];const cx=Math.floor(px/WORLD_CELL),cy=Math.floor(py/WORLD_CELL);for(let yy=cy-2;yy<=cy+2;yy++)for(let xx=cx-2;xx<=cx+2;xx++){const r=hash2(xx,yy);if(r<.62)continue;const count=r>.92?2:1;for(let i=0;i<count;i++){const a=hash2(xx*3+i,yy*5+i),b=hash2(xx*7+i+11,yy*2+i+19);out.push({x:(xx+a)*WORLD_CELL,y:(yy+b)*WORLD_CELL,type:hash2(xx*13+i,yy*17+i)>0.48?"tree":"rock",r:hash2(xx*19+i,yy*23+i)*7+17})}}return out}
 function terrainHeight(x,y){return Math.sin((x+worldSeed)*.0027)*10+Math.sin((y-worldSeed)*.0021)*8+Math.sin((x+y)*.0011)*6}
 function collides(x,y){for(const o of worldObjectsNear(x,y)){if(Math.hypot(x-o.x,y-o.y)<o.r+OBSTACLE_R)return true}return false}
-function movePlayer(dx,dy){if(!dx&&!dy)return;const nx=p.x+dx,ny=p.y+dy;if(!collides(nx,p.y))p.x=nx;if(!collides(p.x,ny))p.y=ny}
+function movePlayer(dx,dy){if(!dx&&!dy)return;p.x+=dx;p.y+=dy}
 const types=[
 {name:"スライム",atk:1,hp:1,color:"#56c45b",drop:["ゼリー"],rare:["花"]},
 {name:"ゴブリン",atk:2,hp:2,color:"#8b6b45",drop:["皮"],rare:["木材","石"]},
