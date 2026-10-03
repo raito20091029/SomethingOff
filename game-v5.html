@@ -320,7 +320,7 @@ function enemyVisibleMask(e){
 }
 function enemyVisibleHit(e,dx,dy){
  const points=enemyVisibleMask(e);
- const attackRadius=72;
+ const attackRadius=72*attackRangeMultiplier();
  const r2=attackRadius*attackRadius;
  for(const [x,y] of points){
   const ox=dx+x,oy=dy+y;
@@ -336,6 +336,7 @@ function throwStone(){
  const dx=best.x-p.x,dy=best.y-p.y,d=Math.hypot(dx,dy)||1;
  projectiles.push({x:p.x,y:p.y,vx:dx/d*9,vy:dy/d*9,damage:effectiveAttack(),life:1.4,owner:"player"});
 }
+function attackRangeMultiplier(){return p.weapon==="投石"?2:1}
 function hit(){
  if(p.weapon==="投石"){throwStone();return}if(attackClock>0||dead)return;initAudio();sfx("attack");attackClock=.35;
  let best=null,bestScore=Infinity;
