@@ -8,6 +8,14 @@
 #hud{position:fixed;top:12px;left:12px;z-index:5;background:#0009;border:1px solid #fff3;border-radius:12px;padding:10px 14px;min-width:220px;pointer-events:none}
 .row{display:flex;justify-content:space-between;gap:18px}.bar{height:10px;background:#321;border-radius:9px;overflow:hidden;margin:5px 0 7px}.fill{height:100%;width:100%;background:#e65}.small{font-size:13px;opacity:.85}
 #msg{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:6;background:#000b;border:1px solid #fff3;border-radius:12px;padding:9px 14px;text-align:center;pointer-events:none}
+#inventoryBtn{position:fixed;top:12px;right:12px;z-index:8;padding:9px 14px;background:#000b;color:#fff;border:1px solid #fff4;border-radius:10px}
+#inventory{display:none;position:fixed;inset:0;z-index:40;background:#000b;align-items:center;justify-content:center;padding:20px}
+#inventory.show{display:flex}
+#inventoryPanel{width:min(560px,94vw);max-height:82vh;overflow:auto;background:#172019;border:1px solid #fff4;border-radius:16px;padding:20px;box-shadow:0 12px 40px #000}
+#inventoryPanel h2{margin:0 0 14px;text-align:center}
+#inventoryList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.inventoryItem{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;background:#0005;border:1px solid #fff2;border-radius:9px}
+.inventoryItem.empty{opacity:.45}
 #dead{display:none;position:fixed;inset:0;z-index:10;background:#000c;align-items:center;justify-content:center;text-align:center}
 #dead h1{font-size:48px;margin:0 0 12px}button{font:inherit;padding:12px 22px;border:0;border-radius:10px;background:#fff;color:#111;cursor:pointer}
 .touch{position:fixed;bottom:18px;left:18px;z-index:7;display:none;gap:8px;user-select:none}.touch button{width:58px;height:58px;padding:0;background:#ffffff33;color:#fff;border:1px solid #fff5}.atk{position:fixed;right:22px;bottom:25px;z-index:7;width:90px;height:90px;border-radius:50%;display:none;background:#d44;color:#fff}
@@ -15,7 +23,7 @@
 </style></head><body><div id="title"><h1>SomethingOff</h1><p>AN INFINITE WORLD</p><button class="start" id="start">START</button></div>
 <div id="game"><canvas id="c"></canvas></div><div id="pauseOverlay"><div><h1>PAUSED</h1><p>ESCで再開</p></div></div>
 <div id="hud"><div class="row"><b>SomethingOff</b><span id="lv">Lv.1</span></div><div class="small" style="margin-top:4px">レベル <b id="levelValue">1</b></div><div class="bar"><div id="hp" class="fill"></div></div><div class="small" style="text-align:center;margin:-2px 0 6px"><span id="hpText">10 / 10</span></div><div class="row small"><span id="xp">XP 0/10</span><span id="coins">🪙 0</span></div><div class="small">攻撃力 <span id="atk">1</span>　速度 <span id="spd">3</span></div></div>
-<div id="msg">WASD / 矢印で移動　SPACE / クリックで攻撃</div>
+<button id="inventoryBtn">🎒 インベントリ (I)</button><div id="inventory"><div id="inventoryPanel"><h2>🎒 インベントリ</h2><div id="inventoryList"></div><button id="inventoryClose" style="display:block;margin:16px auto 0">閉じる</button></div></div><div id="msg">WASD / 矢印で移動　SPACE / クリックで攻撃</div>
 <div class="touch"><button data-k="up">▲</button><button data-k="left">◀</button><button data-k="down">▼</button><button data-k="right">▶</button></div><button class="atk" id="atkBtn">攻撃</button>
 <div id="dead"><div><h1>YOU DIED</h1><p id="deathText"></p><button id="restart">もう一度</button></div></div>
 <script>
@@ -105,7 +113,7 @@ function hit(){
  }
 }
 function damage(n){p.hp-=n;if(p.hp<=0){p.hp=0;die()}}
-function collectDrops(){for(let i=drops.length-1;i>=0;i--){const d=drops[i];if(Math.hypot(d.x-p.x,d.y-p.y)<34){p.materials[d.text]=(p.materials[d.text]||0)+1;drops.splice(i,1)}}}
+function collectDrops(){for(let i=drops.length-1;i>=0;i--){const d=drops[i];if(Math.hypot(d.x-p.x,d.y-p.y)<34){p.materials[d.text]=(p.materials[d.text]||0)+1;drops.splice(i,1);save()}}}
 function die(){dead=true;save();document.getElementById("deathText").textContent="Lv."+p.level+"　XP "+p.xp+"　累計コイン "+permanent.totalCoins+"　討伐数 "+Object.values(permanent.kills).reduce((a,b)=>a+b,0);document.getElementById("dead").style.display="flex"}
 function resetRun(){p={x:0,y:0,hp:10,maxHp:10,atk:1,speed:3,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};enemies=[];drops=[];worldSeed=Math.floor(Math.random()*99999);dead=false;document.getElementById("dead").style.display="none";save()}
 function update(dt){
@@ -134,10 +142,13 @@ function draw(){
  ctx.fillStyle="#55aaff";ctx.beginPath();ctx.arc(W/2,H/2,18,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(W/2-6,H/2-3,3,0,7);ctx.arc(W/2+6,H/2-3,3,0,7);ctx.fill();
 }
 function drawPause(){}
+const INVENTORY_ITEMS=["ゼリー","毛皮","角","目","爪","骨","しっぽ","牙","歯","舌","皮","木材","石","硬い石","砂","葉","砂利","花","毒の花","鉄","金","プラチナ","ガラス"];
+function renderInventory(){const list=document.getElementById("inventoryList");list.innerHTML=INVENTORY_ITEMS.map(item=>{const n=Math.max(0,Math.floor(safeNum(p.materials?.[item],0)));return '<div class="inventoryItem'+(n===0?' empty':'')+'"><span>'+item+'</span><b>'+n+'</b></div>'}).join("")}
+function toggleInventory(force){const el=document.getElementById("inventory");const show=typeof force==="boolean"?force:!el.classList.contains("show");el.classList.toggle("show",show);if(show){keys.clear();touch.clear();renderInventory();}}
 function hud(){normalizePlayer();const levelText=String(Math.max(1,Number.isFinite(p.level)?Math.floor(p.level):1));document.getElementById("lv").textContent="Lv."+levelText;document.getElementById("levelValue").textContent=levelText;document.getElementById("hp").style.width=(p.hp/p.maxHp*100)+"%";document.getElementById("hpText").textContent=Math.ceil(p.hp)+" / "+Math.ceil(p.maxHp);document.getElementById("xp").textContent="XP "+p.xp+"/"+xpNeed();document.getElementById("coins").textContent="🪙 "+p.coins;document.getElementById("atk").textContent=p.atk}
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);draw();drawPause();hud();if(!paused)requestAnimationFrame(loop)}requestAnimationFrame(loop);
-addEventListener("keydown",e=>{if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();document.getElementById("game").style.display=paused?"none":"block";document.getElementById("hud").style.display=paused?"none":"block";document.getElementById("msg").style.display=paused?"none":"block";document.getElementById("pauseOverlay").classList.toggle("show",paused);if(!paused){resize();last=performance.now();draw();hud();requestAnimationFrame(loop)}e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
-c.addEventListener("pointerdown",hit);document.getElementById("atkBtn").onpointerdown=hit;document.getElementById("restart").onclick=resetRun;
+addEventListener("keydown",e=>{if(e.code==="Escape"&&document.getElementById("inventory").classList.contains("show")){toggleInventory(false);e.preventDefault();return}if(e.code==="KeyI"){toggleInventory();e.preventDefault();return}if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();document.getElementById("game").style.display=paused?"none":"block";document.getElementById("hud").style.display=paused?"none":"block";document.getElementById("msg").style.display=paused?"none":"block";document.getElementById("pauseOverlay").classList.toggle("show",paused);if(!paused){resize();last=performance.now();draw();hud();requestAnimationFrame(loop)}e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
+c.addEventListener("pointerdown",hit);document.getElementById("atkBtn").onpointerdown=hit;document.getElementById("restart").onclick=resetRun;document.getElementById("inventoryBtn").onclick=()=>toggleInventory();document.getElementById("inventoryClose").onclick=()=>toggleInventory(false);document.getElementById("inventory").addEventListener("click",e=>{if(e.target.id==="inventory")toggleInventory(false);});
 document.querySelectorAll(".touch button").forEach(b=>{b.onpointerdown=e=>{e.preventDefault();touch.add(b.dataset.k)};b.onpointerup=b.onpointercancel=()=>touch.delete(b.dataset.k)});
 save();
 </script></body></html>
