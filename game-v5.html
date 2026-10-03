@@ -115,7 +115,7 @@ function hit(){
  }
 }
 function damage(n){p.hp-=n;if(p.hp<=0){p.hp=0;die()}}
-function collectDrops(){for(let i=drops.length-1;i>=0;i--){const d=drops[i];if(Math.hypot(d.x-p.x,d.y-p.y)<34){if(d.kind==="xp"){gainXP(d.value)}else if(d.kind==="coin"){const amount=Math.max(1,Math.floor(safeNum(d.value,1)));p.coins=Math.max(0,safeNum(p.coins,0))+amount;permanent.totalCoins=Math.max(0,safeNum(permanent.totalCoins,0))+amount;hud()}else{p.materials[d.text]=(p.materials[d.text]||0)+1}drops.splice(i,1);save()}}}
+function collectDrops(){for(let i=drops.length-1;i>=0;i--){const d=drops[i];if(Math.hypot(d.x-p.x,d.y-p.y)<34){if(d.kind==="xp"){const amount=Math.max(1,Math.floor(safeNum(d.value,1)));gainXP(amount);hud()}else if(d.kind==="coin"){const amount=Math.max(1,Math.floor(safeNum(d.value,1)));p.coins=Math.max(0,safeNum(p.coins,0))+amount;permanent.totalCoins=Math.max(0,safeNum(permanent.totalCoins,0))+amount;hud()}else{p.materials[d.text]=(p.materials[d.text]||0)+1}drops.splice(i,1);save()}}}
 function die(){dead=true;save();document.getElementById("deathText").textContent="Lv."+p.level+"　XP "+p.xp+"　累計コイン "+permanent.totalCoins+"　討伐数 "+Object.values(permanent.kills).reduce((a,b)=>a+b,0);document.getElementById("dead").style.display="flex"}
 function resetRun(){p={x:0,y:0,hp:10,maxHp:10,atk:1,speed:3,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};enemies=[];spawnClock=0;drops=[];worldSeed=Math.floor(Math.random()*99999);dead=false;document.getElementById("dead").style.display="none";save()}
 function update(dt){
