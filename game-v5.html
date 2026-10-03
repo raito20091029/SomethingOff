@@ -421,7 +421,7 @@ function updateChest(){
  save();
 }
 
-function resetRun(){survivalTime=0;p={x:0,y:0,hp:10,maxHp:10,atk:1,speed:4,level:permanent.level,xp:permanent.xp,coins:0,weapon:"おてて",ownedWeapons:[],materials:{}};poison={time:0,tick:0,sourceAtk:0};projectiles=[];enemies=[];spawnClock=0;initialSpawnPending=true;attackClock=0;drops=[];worldSeed=Math.floor(Math.random()*99999);ensureBaseOnLand();chest=spawnChestFrom(p.x,p.y);
+function resetRun(){survivalTime=0;p={x:0,y:0,hp:10,maxHp:10,atk:1,speed:4,level:permanent.level,xp:permanent.xp,coins:0,weapon:"おてて",ownedWeapons:[],materials:{}};poison={time:0,tick:0,sourceAtk:0};damageFlash=0;damageTexts=[];projectiles=[];enemies=[];spawnClock=0;initialSpawnPending=true;attackClock=0;drops=[];worldSeed=Math.floor(Math.random()*99999);ensureBaseOnLand();chest=spawnChestFrom(p.x,p.y);
 dead=false;paused=false;document.getElementById("dead").style.display="none";save()}
 function enemyLimits(){const max=6+3*Math.floor((Math.max(1,p.level)-1)/5);return {min:Math.max(3,max-3),max}}
 function habitatOk(e,x,y){
