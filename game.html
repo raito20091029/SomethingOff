@@ -96,8 +96,8 @@ function draw(){
 }
 function drawPause(){if(!paused)return;ctx.fillStyle="#0009";ctx.fillRect(0,0,W,H);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 52px system-ui";ctx.fillText("PAUSED",W/2,H/2-20);ctx.font="20px system-ui";ctx.fillText("ESCで再開",W/2,H/2+25)}
 function hud(){document.getElementById("lv").textContent="Lv."+p.level;document.getElementById("hp").style.width=(p.hp/p.maxHp*100)+"%";document.getElementById("xp").textContent="XP "+p.xp+"/"+xpNeed();document.getElementById("coins").textContent="🪙 "+p.coins;document.getElementById("atk").textContent=p.atk}
-function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);draw();drawPause();hud();requestAnimationFrame(loop)}requestAnimationFrame(loop);
-addEventListener("keydown",e=>{if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);draw();drawPause();hud();if(!paused)requestAnimationFrame(loop)}requestAnimationFrame(loop);
+addEventListener("keydown",e=>{if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();if(!paused){last=performance.now();requestAnimationFrame(loop)}e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
 c.addEventListener("pointerdown",hit);document.getElementById("atkBtn").onpointerdown=hit;document.getElementById("restart").onclick=resetRun;
 document.querySelectorAll(".touch button").forEach(b=>{b.onpointerdown=e=>{e.preventDefault();touch.add(b.dataset.k)};b.onpointerup=b.onpointercancel=()=>touch.delete(b.dataset.k)});
 save();
