@@ -14,7 +14,7 @@
 @media (pointer:coarse){.touch,.atk{display:flex}.touch{flex-wrap:wrap;width:190px}.touch button:nth-child(1){margin-left:66px}.touch button:nth-child(2){margin-left:0}.touch button:nth-child(3){margin-left:66px}.touch button:nth-child(4){margin-left:132px;margin-top:-66px}}
 </style></head><body><div id="title"><h1>SomethingOff</h1><p>AN INFINITE WORLD</p><button class="start" id="start">START</button></div>
 <div id="game"><canvas id="c"></canvas></div><div id="pauseOverlay"><div><h1>PAUSED</h1><p>ESCで再開</p></div></div>
-<div id="hud"><div class="row"><b>SomethingOff</b><span id="lv">Lv.1</span></div><div class="bar"><div id="hp" class="fill"></div></div><div class="row small"><span id="xp">XP 0/10</span><span id="coins">🪙 0</span></div><div class="small">攻撃力 <span id="atk">1</span>　速度 <span id="spd">3</span></div></div>
+<div id="hud"><div class="row"><b>SomethingOff</b><span id="lv">Lv.1</span></div><div class="small" style="margin-top:4px">レベル <b id="levelValue">1</b></div><div class="bar"><div id="hp" class="fill"></div></div><div class="row small"><span id="xp">XP 0/10</span><span id="coins">🪙 0</span></div><div class="small">攻撃力 <span id="atk">1</span>　速度 <span id="spd">3</span></div></div>
 <div id="msg">WASD / 矢印で移動　SPACE / クリックで攻撃</div>
 <div class="touch"><button data-k="up">▲</button><button data-k="left">◀</button><button data-k="down">▼</button><button data-k="right">▶</button></div><button class="atk" id="atkBtn">攻撃</button>
 <div id="dead"><div><h1>YOU DIED</h1><p id="deathText"></p><button id="restart">もう一度</button></div></div>
@@ -115,7 +115,7 @@ function draw(){
  ctx.fillStyle="#55aaff";ctx.beginPath();ctx.arc(W/2,H/2,18,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(W/2-6,H/2-3,3,0,7);ctx.arc(W/2+6,H/2-3,3,0,7);ctx.fill();
 }
 function drawPause(){}
-function hud(){document.getElementById("lv").textContent="Lv."+p.level;document.getElementById("hp").style.width=(p.hp/p.maxHp*100)+"%";document.getElementById("xp").textContent="XP "+p.xp+"/"+xpNeed();document.getElementById("coins").textContent="🪙 "+p.coins;document.getElementById("atk").textContent=p.atk}
+function hud(){p.level=Math.max(1,Math.floor(safeNum(p.level,1)));document.getElementById("lv").textContent="Lv."+p.level;document.getElementById("levelValue").textContent=p.level;document.getElementById("hp").style.width=(p.hp/p.maxHp*100)+"%";document.getElementById("xp").textContent="XP "+p.xp+"/"+xpNeed();document.getElementById("coins").textContent="🪙 "+p.coins;document.getElementById("atk").textContent=p.atk}
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);draw();drawPause();hud();if(!paused)requestAnimationFrame(loop)}requestAnimationFrame(loop);
 addEventListener("keydown",e=>{if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();document.getElementById("game").style.display=paused?"none":"block";document.getElementById("hud").style.display=paused?"none":"block";document.getElementById("msg").style.display=paused?"none":"block";document.getElementById("pauseOverlay").classList.toggle("show",paused);if(!paused){resize();last=performance.now();draw();hud();requestAnimationFrame(loop)}e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
 c.addEventListener("pointerdown",hit);document.getElementById("atkBtn").onpointerdown=hit;document.getElementById("restart").onclick=resetRun;
