@@ -57,8 +57,10 @@ const types=[
 function resize(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener("resize",resize);resize();
 function normalizePlayer(){
  p.x=safeNum(p.x,0);p.y=safeNum(p.y,0);p.hp=Math.max(0,safeNum(p.hp,10));p.maxHp=Math.max(1,safeNum(p.maxHp,10));p.atk=Math.max(1,safeNum(p.atk,1));p.speed=Math.max(0.1,safeNum(p.speed,3));
- const lv=safeNum(p.level,1);p.level=Number.isFinite(lv)&&lv>=1?Math.floor(lv):1;
- p.xp=Math.max(0,safeNum(p.xp,0));p.coins=Math.max(0,safeNum(p.coins,0));if(!p.materials||typeof p.materials!=="object")p.materials={};
+ let lv=parseInt(p.level,10);if(!Number.isFinite(lv)||lv<1)lv=1;p.level=lv;
+ let xp=safeNum(p.xp,0);if(!Number.isFinite(xp)||xp<0)xp=0;p.xp=xp;
+ let coins=safeNum(p.coins,0);if(!Number.isFinite(coins)||coins<0)coins=0;p.coins=coins;
+ if(!p.materials||typeof p.materials!=="object")p.materials={};
 }
 function save(){
  normalizePlayer();
@@ -121,7 +123,7 @@ function draw(){
  ctx.fillStyle="#55aaff";ctx.beginPath();ctx.arc(W/2,H/2,18,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(W/2-6,H/2-3,3,0,7);ctx.arc(W/2+6,H/2-3,3,0,7);ctx.fill();
 }
 function drawPause(){}
-function hud(){normalizePlayer();const levelText=String(p.level);document.getElementById("lv").textContent="Lv."+levelText;document.getElementById("levelValue").textContent=levelText;document.getElementById("hp").style.width=(p.hp/p.maxHp*100)+"%";document.getElementById("xp").textContent="XP "+p.xp+"/"+xpNeed();document.getElementById("coins").textContent="🪙 "+p.coins;document.getElementById("atk").textContent=p.atk}
+function hud(){normalizePlayer();const levelText=Number.isFinite(p.level)&&p.level>=1?String(Math.floor(p.level)):"1";document.getElementById("lv").textContent="Lv."+levelText;document.getElementById("levelValue").textContent=levelText;document.getElementById("hp").style.width=(p.hp/p.maxHp*100)+"%";document.getElementById("xp").textContent="XP "+p.xp+"/"+xpNeed();document.getElementById("coins").textContent="🪙 "+p.coins;document.getElementById("atk").textContent=p.atk}
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);draw();drawPause();hud();if(!paused)requestAnimationFrame(loop)}requestAnimationFrame(loop);
 addEventListener("keydown",e=>{if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();document.getElementById("game").style.display=paused?"none":"block";document.getElementById("hud").style.display=paused?"none":"block";document.getElementById("msg").style.display=paused?"none":"block";document.getElementById("pauseOverlay").classList.toggle("show",paused);if(!paused){resize();last=performance.now();draw();hud();requestAnimationFrame(loop)}e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
 c.addEventListener("pointerdown",hit);document.getElementById("atkBtn").onpointerdown=hit;document.getElementById("restart").onclick=resetRun;
