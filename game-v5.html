@@ -170,6 +170,11 @@ enemies=enemies.map(e=>({...e,lv:enemyLevel(e)}));
 function habitatType(t){return t?.river?"river":t?.lake?"lake":"land"}
 function findHabitatPosition(t,ox,oy){const target=habitatType(t);
  const nearMin=target==="land"?120:280,nearMax=target==="land"?420:1000;
+ if(target==="land"){
+  const viewMaxX=Math.max(nearMin+20,W/2-55),viewMaxY=Math.max(nearMin+20,H/2-75);
+  const viewMax=Math.min(nearMax,Math.hypot(viewMaxX,viewMaxY));
+  for(let n=0;n<420;n++){const d=nearMin+Math.random()*Math.max(1,viewMax-nearMin),a=Math.random()*Math.PI*2;const x=ox+Math.cos(a)*d,y=oy+Math.sin(a)*d;if(Math.abs(x-ox)<=viewMaxX&&Math.abs(y-oy)<=viewMaxY&&waterAt(x,y)===target)return {x,y}}
+ }
  for(let n=0;n<320;n++){const a=Math.random()*Math.PI*2,d=nearMin+Math.random()*(nearMax-nearMin);const x=ox+Math.cos(a)*d,y=oy+Math.sin(a)*d;if(waterAt(x,y)===target)return {x,y}}
  for(let d=300;d<=1400;d+=100){for(let i=0;i<24;i++){const a=i*Math.PI*2/24+(d/100)*0.17;const x=ox+Math.cos(a)*d,y=oy+Math.sin(a)*d;if(waterAt(x,y)===target)return {x,y}}}
  if(target==="land"){
