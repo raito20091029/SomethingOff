@@ -31,7 +31,7 @@
 <script>
 "use strict";
 const c=document.getElementById("c"),ctx=c.getContext("2d"),keys=new Set(),touch=new Set();
-document.getElementById("start").onclick=()=>{document.getElementById("title").style.display="none";if(dead){document.getElementById("dead").style.display="flex"}else{document.getElementById("dead").style.display="none"};paused=false;hud();last=performance.now();requestAnimationFrame(loop);};
+document.getElementById("start").onclick=()=>{document.getElementById("title").style.display="none";if(dead){document.getElementById("dead").style.display="flex"}else{document.getElementById("dead").style.display="none";if(enemies.length===0){const lim=enemyLimits();refillHabitat("land",Math.min(lim.max,Math.max(lim.min,3)));refillCurrentHabitat(lim);spawnClock=.3}};paused=false;hud();last=performance.now();requestAnimationFrame(loop);};
 let W=innerWidth,H=innerHeight,dpr=devicePixelRatio||1,last=performance.now(),spawnClock=0,attackClock=0,saveClock=0;
 const SAVE_KEY="somethingOffSave_v2";const RUN_KEY="somethingOffRun_v2";const BACKUP_KEY="somethingOffRunBackup_v2";const LEGACY_SAVE_KEY="somethingOffSave";const LEGACY_RUN_KEY="somethingOffRun";const LEGACY_BACKUP_KEY="somethingOffRunBackup";const safeNum=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
 let permanent;
