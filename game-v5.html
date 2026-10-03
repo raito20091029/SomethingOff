@@ -54,7 +54,7 @@ if(runSave&&!runSave.p&&runSave.level){runSave.p={...defaultPlayer,level:runSave
 let p=runSave?.p||defaultPlayer;
 if(runSave&&!runSave.speedBaseVersion){p.speed=safeNum(p.speed,1)+3;runSave.speedBaseVersion=3;}else if(runSave.speedBaseVersion<3){p.speed+=2;runSave.speedBaseVersion=3;}
 normalizePlayer();p.level=Math.max(1,parseInt(p.level,10)||1);p.xp=Math.max(0,safeNum(p.xp,permanent.xp));
-let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=Array.isArray(runSave?.enemies)?runSave.enemies:[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;
+let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;
 if(dead)enemies=[];
 const WORLD_CELL=260;
 function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
