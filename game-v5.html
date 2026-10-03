@@ -31,7 +31,7 @@
 <script>
 "use strict";
 const c=document.getElementById("c"),ctx=c.getContext("2d"),keys=new Set(),touch=new Set();
-document.getElementById("start").onclick=()=>{document.getElementById("title").style.display="none";if(dead){document.getElementById("dead").style.display="flex"}else{document.getElementById("dead").style.display="none";enemies=[];spawnClock=0;initialSpawnPending=true};paused=false;hud();last=performance.now();requestAnimationFrame(loop);};
+document.getElementById("start").onclick=()=>{document.getElementById("title").style.display="none";if(dead){document.getElementById("dead").style.display="flex"}else{document.getElementById("dead").style.display="none";enemies=[];spawnClock=0;initialSpawnPending=true;chest=spawnChestFrom(p.x,p.y)};paused=false;hud();last=performance.now();requestAnimationFrame(loop);};
 let W=innerWidth,H=innerHeight,dpr=devicePixelRatio||1,last=performance.now(),spawnClock=0,initialSpawnPending=true,attackClock=0,saveClock=0,spawnTry=0,spawnOk=0,spawnFail=0,fixRemoved=0,despawned=0;
 const SAVE_KEY="somethingOffSave_v2";const RUN_KEY="somethingOffRun_v2";const BACKUP_KEY="somethingOffRunBackup_v2";const LEGACY_SAVE_KEY="somethingOffSave";const LEGACY_RUN_KEY="somethingOffRun";const LEGACY_BACKUP_KEY="somethingOffRunBackup";const safeNum=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
 let permanent;
@@ -54,7 +54,7 @@ if(runSave&&!runSave.p&&runSave.level){runSave.p={...defaultPlayer,level:runSave
 let p=runSave?.p||defaultPlayer;
 if(runSave&&!runSave.speedBaseVersion){p.speed=safeNum(p.speed,1)+3;runSave.speedBaseVersion=3;}else if(runSave.speedBaseVersion<3){p.speed+=2;runSave.speedBaseVersion=3;}
 normalizePlayer();p.level=Math.max(1,parseInt(p.level,10)||1);p.xp=Math.max(0,safeNum(p.xp,permanent.xp));
-let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;const BUILD_VERSION="20261003-84",INITIAL_ENEMY_COUNT=enemies.length;
+let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;const BUILD_VERSION="20261003-85",INITIAL_ENEMY_COUNT=enemies.length;
 if(dead)enemies=[];
 const WORLD_CELL=260;
 function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
