@@ -54,12 +54,23 @@ if(runSave&&!runSave.p&&runSave.level){runSave.p={...defaultPlayer,level:runSave
 let p=runSave?.p||defaultPlayer;
 if(runSave&&!runSave.speedBaseVersion){p.speed=safeNum(p.speed,1)+3;runSave.speedBaseVersion=3;}else if(runSave.speedBaseVersion<3){p.speed+=2;runSave.speedBaseVersion=3;}
 normalizePlayer();p.level=Math.max(1,parseInt(p.level,10)||1);p.xp=Math.max(0,safeNum(p.xp,permanent.xp));
-let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;const BUILD_VERSION="20261003-68",INITIAL_ENEMY_COUNT=enemies.length;
+let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;const BUILD_VERSION="20261003-69",INITIAL_ENEMY_COUNT=enemies.length;
 if(dead)enemies=[];
 const WORLD_CELL=260;
 function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
 function worldObjectsNear(px,py){const out=[];const cx=Math.floor(px/WORLD_CELL),cy=Math.floor(py/WORLD_CELL);const range=Math.ceil(Math.max(W,H)/WORLD_CELL)+2;for(let yy=cy-range;yy<=cy+range;yy++)for(let xx=cx-range;xx<=cx+range;xx++){const r=hash2(xx,yy);if(r<.62)continue;const count=r>.92?2:1;for(let i=0;i<count;i++){const a=hash2(xx*3+i,yy*5+i),b=hash2(xx*7+i+11,yy*2+i+19);out.push({x:(xx+a)*WORLD_CELL,y:(yy+b)*WORLD_CELL,type:hash2(xx*13+i,yy*17+i)>0.48?"tree":"rock",r:hash2(xx*19+i,yy*23+i)*7+17})}}return out}
-function terrainHeight(x,y){return Math.sin((x+worldSeed)*.0027)*10+Math.sin((y-worldSeed)*.0021)*8+Math.sin((x+y)*.0011)*6}function waterAt(x,y){
+function terrainHeight(x,y){return Math.sin((x+worldSeed)*.0027)*10+Math.sin((y-worldSeed)*.0021)*8+Math.sin((x+y)*.0011)*6}function riverCenterAt(x){return Math.sin((x+worldSeed*300)*0.0012)*420}
+function riverWidthAt(x){return 70+Math.sin((x+worldSeed)*0.0021)*25}
+function lakeIntersectsRiver(lx,ly,rx,ry){
+ for(let i=0;i<=12;i++){
+  const x=lx-rx+(rx*2)*(i/12);
+  const dx=(x-lx)/rx;
+  const halfY=ry*Math.sqrt(Math.max(0,1-dx*dx));
+  if(Math.abs(ly-riverCenterAt(x))<halfY+riverWidthAt(x))return true;
+ }
+ return false;
+}
+function waterAt(x,y){
  const cell=900,cx=Math.floor(x/cell),cy=Math.floor(y/cell);
  for(let yy=cy-1;yy<=cy+1;yy++)for(let xx=cx-1;xx<=cx+1;xx++){
   const r=hash2(xx*31+7,yy*47+13);
@@ -68,11 +79,11 @@ function terrainHeight(x,y){return Math.sin((x+worldSeed)*.0027)*10+Math.sin((y-
    const ly=(yy+0.5+hash2(xx*19,yy*23)*0.35)*cell;
    const rx=250+hash2(xx*29,yy*31)*220,ry=170+hash2(xx*37,yy*41)*150;
    const dx=(x-lx)/rx,dy=(y-ly)/ry;
-   if(dx*dx+dy*dy<1)return "lake";
+   if(dx*dx+dy*dy<1&&!lakeIntersectsRiver(lx,ly,rx,ry))return "lake";
   }
  }
- const riverCenter=Math.sin((x+worldSeed*300)*0.0012)*420;
- const riverWidth=70+Math.sin((x+worldSeed)*0.0021)*25;
+ const riverCenter=riverCenterAt(x);
+ const riverWidth=riverWidthAt(x);
  if(Math.abs(y-riverCenter)<riverWidth)return "river";
  return "";
 }
@@ -109,6 +120,7 @@ function drawWater(ox,oy){
   const rx=250+hash2(xx/cell*29,yy/cell*31)*220,ry=170+hash2(xx/cell*37,yy/cell*41)*150;
   const sx=lx+ox,sy=ly+oy;
   if(sx<-rx||sx>W+rx||sy<-ry||sy>H+ry)continue;
+  if(lakeIntersectsRiver(lx,ly,rx,ry))continue;
   ctx.fillStyle="#3f9fc2";ctx.beginPath();ctx.ellipse(sx,sy,rx,ry,0,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle="#78cde5";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(sx-20,sy-8,rx*.72,ry*.62,0,0,Math.PI*2);ctx.stroke();
  }
