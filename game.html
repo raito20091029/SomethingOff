@@ -4,6 +4,7 @@
 #title{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at center,#243b28 0,#0b100d 75%);text-align:center}#title h1{font-size:clamp(54px,13vw,130px);letter-spacing:8px;margin:0;text-shadow:0 8px 30px #000;font-weight:900}#title p{opacity:.7;letter-spacing:3px;margin:8px 0 38px}.start{font-size:22px;padding:15px 55px;border-radius:999px;background:#fff;color:#111;border:0;box-shadow:0 8px 30px #0008}.start:active{transform:scale(.97)}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10131a;color:#fff;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif}
 #game{position:fixed;inset:0;background:#18251c}canvas{display:block;width:100%;height:100%;touch-action:none}
+#pauseOverlay{display:none;position:fixed;inset:0;z-index:30;background:#000d;align-items:center;justify-content:center;text-align:center;pointer-events:none}#pauseOverlay.show{display:flex}#pauseOverlay h1{font-size:52px;margin:0 0 10px}#pauseOverlay p{font-size:20px;margin:0;opacity:.85}
 #hud{position:fixed;top:12px;left:12px;z-index:5;background:#0009;border:1px solid #fff3;border-radius:12px;padding:10px 14px;min-width:220px;pointer-events:none}
 .row{display:flex;justify-content:space-between;gap:18px}.bar{height:10px;background:#321;border-radius:9px;overflow:hidden;margin:5px 0 7px}.fill{height:100%;width:100%;background:#e65}.small{font-size:13px;opacity:.85}
 #msg{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:6;background:#000b;border:1px solid #fff3;border-radius:12px;padding:9px 14px;text-align:center;pointer-events:none}
@@ -12,7 +13,7 @@
 .touch{position:fixed;bottom:18px;left:18px;z-index:7;display:none;gap:8px;user-select:none}.touch button{width:58px;height:58px;padding:0;background:#ffffff33;color:#fff;border:1px solid #fff5}.atk{position:fixed;right:22px;bottom:25px;z-index:7;width:90px;height:90px;border-radius:50%;display:none;background:#d44;color:#fff}
 @media (pointer:coarse){.touch,.atk{display:flex}.touch{flex-wrap:wrap;width:190px}.touch button:nth-child(1){margin-left:66px}.touch button:nth-child(2){margin-left:0}.touch button:nth-child(3){margin-left:66px}.touch button:nth-child(4){margin-left:132px;margin-top:-66px}}
 </style></head><body><div id="title"><h1>SomethingOff</h1><p>AN INFINITE WORLD</p><button class="start" id="start">START</button></div>
-<div id="game"><canvas id="c"></canvas></div>
+<div id="game"><canvas id="c"></canvas></div><div id="pauseOverlay"><div><h1>PAUSED</h1><p>ESCで再開</p></div></div>
 <div id="hud"><div class="row"><b>SomethingOff</b><span id="lv">Lv.1</span></div><div class="bar"><div id="hp" class="fill"></div></div><div class="row small"><span id="xp">XP 0/10</span><span id="coins">🪙 0</span></div><div class="small">攻撃力 <span id="atk">1</span>　速度 <span id="spd">3</span></div></div>
 <div id="msg">WASD / 矢印で移動　SPACE / クリックで攻撃</div>
 <div class="touch"><button data-k="up">▲</button><button data-k="left">◀</button><button data-k="down">▼</button><button data-k="right">▶</button></div><button class="atk" id="atkBtn">攻撃</button>
@@ -94,10 +95,10 @@ function draw(){
  for(const e of enemies){const x=e.x+ox,y=e.y+oy;ctx.fillStyle=e.base.color;ctx.beginPath();ctx.arc(x,y,16,0,7);ctx.fill();ctx.fillStyle="#111";ctx.fillRect(x-18,y-25,36,4);ctx.fillStyle="#e55";ctx.fillRect(x-18,y-25,36*(e.hp/e.maxHp),4);ctx.fillStyle="#fff";ctx.font="11px sans-serif";ctx.textAlign="center";ctx.fillText(e.name+" Lv."+e.lv,x,y+30)}
  ctx.fillStyle="#55aaff";ctx.beginPath();ctx.arc(W/2,H/2,18,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(W/2-6,H/2-3,3,0,7);ctx.arc(W/2+6,H/2-3,3,0,7);ctx.fill();
 }
-function drawPause(){if(!paused)return;ctx.fillStyle="#0009";ctx.fillRect(0,0,W,H);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 52px system-ui";ctx.fillText("PAUSED",W/2,H/2-20);ctx.font="20px system-ui";ctx.fillText("ESCで再開",W/2,H/2+25)}
+function drawPause(){}
 function hud(){document.getElementById("lv").textContent="Lv."+p.level;document.getElementById("hp").style.width=(p.hp/p.maxHp*100)+"%";document.getElementById("xp").textContent="XP "+p.xp+"/"+xpNeed();document.getElementById("coins").textContent="🪙 "+p.coins;document.getElementById("atk").textContent=p.atk}
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);draw();drawPause();hud();if(!paused)requestAnimationFrame(loop)}requestAnimationFrame(loop);
-addEventListener("keydown",e=>{if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();if(!paused){last=performance.now();requestAnimationFrame(loop)}e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
+addEventListener("keydown",e=>{if(e.code==="Escape"){paused=!paused;keys.clear();touch.clear();document.getElementById("game").style.display=paused?"none":"block";document.getElementById("hud").style.display=paused?"none":"block";document.getElementById("msg").style.display=paused?"none":"block";document.getElementById("pauseOverlay").classList.toggle("show",paused);if(!paused){resize();last=performance.now();draw();hud();requestAnimationFrame(loop)}e.preventDefault();return}keys.add(e.key.toLowerCase());if(e.code==="Space"){e.preventDefault();hit()}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
 c.addEventListener("pointerdown",hit);document.getElementById("atkBtn").onpointerdown=hit;document.getElementById("restart").onclick=resetRun;
 document.querySelectorAll(".touch button").forEach(b=>{b.onpointerdown=e=>{e.preventDefault();touch.add(b.dataset.k)};b.onpointerup=b.onpointercancel=()=>touch.delete(b.dataset.k)});
 save();
