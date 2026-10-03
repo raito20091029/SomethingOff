@@ -118,16 +118,8 @@ function drawWater(ox,oy){
  for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420-80;ctx.lineTo(x+ox,y+oy)}
  for(let x=endX;x>=startX;x-=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420+80;ctx.lineTo(x+ox,y+oy)}
  ctx.closePath();ctx.fill();
- // 川の両岸も太い外周線＋明るい水際線で陸との境界を明確化。
- ctx.strokeStyle="#173b46";ctx.lineWidth=10;ctx.beginPath();
- for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420-80;ctx.lineTo(x+ox,y+oy)}
- for(let x=endX;x>=startX;x-=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420+80;ctx.lineTo(x+ox,y+oy)}
- ctx.closePath();ctx.stroke();
- ctx.strokeStyle="#b9efff";ctx.lineWidth=4;ctx.beginPath();
- for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420-80;ctx.lineTo(x+ox,y+oy)}
- ctx.stroke();
- ctx.beginPath();
- for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420+80;ctx.lineTo(x+ox,y+oy)}
+ ctx.strokeStyle="#78cde5";ctx.lineWidth=3;ctx.beginPath();
+ for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420;ctx.lineTo(x+ox,y+oy)}
  ctx.stroke();
  ctx.strokeStyle="#78cde5";ctx.lineWidth=3;ctx.beginPath();
  for(let x=startX;x<=endX;x+=30){const y=Math.sin((x+worldSeed*300)*0.0012)*420;ctx.lineTo(x+ox,y+oy)}
