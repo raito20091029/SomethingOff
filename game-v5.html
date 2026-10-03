@@ -54,7 +54,7 @@ if(runSave&&!runSave.p&&runSave.level){runSave.p={...defaultPlayer,level:runSave
 let p=runSave?.p||defaultPlayer;
 if(runSave&&!runSave.speedBaseVersion){p.speed=safeNum(p.speed,1)+3;runSave.speedBaseVersion=3;}else if(runSave.speedBaseVersion<3){p.speed+=2;runSave.speedBaseVersion=3;}
 normalizePlayer();p.level=Math.max(1,parseInt(p.level,10)||1);p.xp=Math.max(0,safeNum(p.xp,permanent.xp));
-let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;let rareShop=runSave?.rareShop&&typeof runSave.rareShop==="object"?runSave.rareShop:{active:false,x:0,y:0,elapsed:0};rareShop.active=!!rareShop.active;rareShop.elapsed=Math.max(0,safeNum(rareShop.elapsed,0));const BUILD_VERSION="20261003-101",INITIAL_ENEMY_COUNT=enemies.length;
+let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;let rareShop=runSave?.rareShop&&typeof runSave.rareShop==="object"?runSave.rareShop:{active:false,x:0,y:0,elapsed:0};rareShop.active=!!rareShop.active;rareShop.elapsed=Math.max(0,safeNum(rareShop.elapsed,0));const BUILD_VERSION="20261003-102",INITIAL_ENEMY_COUNT=enemies.length;
 if(dead)enemies=[];
 const WORLD_CELL=260;
 function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
@@ -159,7 +159,7 @@ const types=[
 ];
 function resize(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener("resize",resize);resize();
 function normalizePlayer(){
- if(typeof p.weapon!=="string"||!p.weapon)p.weapon="おてて";if(!Array.isArray(p.ownedWeapons))p.ownedWeapons=[];if(p.weapon==="木の棒"&&!p.ownedWeapons.includes("木の棒"))p.ownedWeapons.push("木の棒");
+ if(p.weapon==="なし"||typeof p.weapon!=="string"||!p.weapon)p.weapon="おてて";if(!Array.isArray(p.ownedWeapons))p.ownedWeapons=[];if(p.weapon==="木の棒"&&!p.ownedWeapons.includes("木の棒"))p.ownedWeapons.push("木の棒");
  p.x=safeNum(p.x,0);p.y=safeNum(p.y,0);p.hp=Math.max(0,safeNum(p.hp,10));p.maxHp=Math.max(1,safeNum(p.maxHp,10));p.atk=Math.max(1,safeNum(p.atk,1));p.speed=Math.max(0.1,safeNum(p.speed,4));
  let lv=parseInt(p.level,10);if(!Number.isFinite(lv)||lv<1)lv=1;p.level=lv;
  let xp=safeNum(p.xp,0);if(!Number.isFinite(xp)||xp<0)xp=0;p.xp=xp;
