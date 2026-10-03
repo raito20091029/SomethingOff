@@ -49,9 +49,10 @@ try{
  const lb=JSON.parse(localStorage.getItem(LEGACY_BACKUP_KEY)||"null");
  runSave=[a,b,la,lb].filter(Boolean).sort((x,y)=>(y?.savedAt||0)-(x?.savedAt||0))[0]||null;
 }catch{runSave=null}
-const defaultPlayer={x:0,y:0,hp:10,maxHp:10,atk:1,speed:1,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};
+const defaultPlayer={x:0,y:0,hp:10,maxHp:10,atk:1,speed:2,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};
 if(runSave&&!runSave.p&&runSave.level){runSave.p={...defaultPlayer,level:runSave.level,xp:runSave.xp||0};}
 let p=runSave?.p||defaultPlayer;
+if(runSave&&!runSave.speedBaseVersion){p.speed=safeNum(p.speed,1)+1;runSave.speedBaseVersion=2;}
 normalizePlayer();p.level=Math.max(1,parseInt(p.level,10)||1);p.xp=Math.max(0,safeNum(p.xp,permanent.xp));
 let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},projectiles=[],enemies=Array.isArray(runSave?.enemies)?runSave.enemies:[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;
 if(dead)enemies=[];
@@ -141,7 +142,7 @@ const types=[
 ];
 function resize(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener("resize",resize);resize();
 function normalizePlayer(){
- p.x=safeNum(p.x,0);p.y=safeNum(p.y,0);p.hp=Math.max(0,safeNum(p.hp,10));p.maxHp=Math.max(1,safeNum(p.maxHp,10));p.atk=Math.max(1,safeNum(p.atk,1));p.speed=Math.max(0.1,safeNum(p.speed,1));
+ p.x=safeNum(p.x,0);p.y=safeNum(p.y,0);p.hp=Math.max(0,safeNum(p.hp,10));p.maxHp=Math.max(1,safeNum(p.maxHp,10));p.atk=Math.max(1,safeNum(p.atk,1));p.speed=Math.max(0.1,safeNum(p.speed,2));
  let lv=parseInt(p.level,10);if(!Number.isFinite(lv)||lv<1)lv=1;p.level=lv;
  let xp=safeNum(p.xp,0);if(!Number.isFinite(xp)||xp<0)xp=0;p.xp=xp;
  let coins=safeNum(p.coins,0);if(!Number.isFinite(coins)||coins<0)coins=0;p.coins=coins;
@@ -151,7 +152,7 @@ function save(){
  normalizePlayer();
  const now=Date.now();
  const permanentData={level:p.level,xp:p.xp,totalCoins:permanent.totalCoins,kills:permanent.kills,savedAt:now};
- const runData={p,enemies,drops,worldSeed,dead,savedAt:now};
+ const runData={p,enemies,drops,worldSeed,dead,speedBaseVersion:2,savedAt:now};
  try{
   localStorage.setItem(SAVE_KEY,JSON.stringify(permanentData));
   localStorage.setItem(RUN_KEY,JSON.stringify(runData));
