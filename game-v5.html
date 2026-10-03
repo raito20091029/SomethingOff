@@ -123,7 +123,7 @@ function update(dt){
  if(keys.has("w")||keys.has("arrowup")||touch.has("up"))dy--;if(keys.has("s")||keys.has("arrowdown")||touch.has("down"))dy++;if(keys.has("a")||keys.has("arrowleft")||touch.has("left"))dx--;if(keys.has("d")||keys.has("arrowright")||touch.has("right"))dx++;
  if(dx||dy){const l=Math.hypot(dx,dy);p.x=p.x+dx/l*p.speed*dt*60;p.y=p.y+dy/l*p.speed*dt*60}
  attackClock=Math.max(0,attackClock-dt);spawnClock-=dt;saveClock+=dt;
- if(!Number.isFinite(spawnClock))spawnClock=0;\n if(enemies.length===0){spawn();spawn();spawnClock=.6}else if(enemies.length<12&&spawnClock<=0){const batch=enemies.length<4?2:1;for(let i=0;i<batch&&enemies.length<12;i++)spawn();spawnClock=.45}
+ if(!Number.isFinite(spawnClock))spawnClock=0;\n if(enemies.length===0){for(let i=0;i<5;i++)spawn();spawnClock=.35}else if(enemies.length<24&&spawnClock<=0){const batch=enemies.length<8?3:2;for(let i=0;i<batch&&enemies.length<24;i++)spawn();spawnClock=.3}
  for(const e of enemies){const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1;if(e.name!=="スケルトン")e.x+=dx/d*(e.speed||.8)*dt*60;if(d<28){e.cool=(e.cool||0)-dt;if(e.cool<=0){damage(e.atk);e.cool=1}}}
  collectDrops();if(saveClock>=2){saveClock=0;save()}
 }
