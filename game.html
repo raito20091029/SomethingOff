@@ -23,10 +23,15 @@
 const c=document.getElementById("c"),ctx=c.getContext("2d"),keys=new Set(),touch=new Set();
 document.getElementById("start").onclick=()=>{document.getElementById("title").style.display="none";if(dead)document.getElementById("dead").style.display="flex";hud();};
 let W=innerWidth,H=innerHeight,dpr=devicePixelRatio||1,last=performance.now(),spawnClock=0,attackClock=0,saveClock=0;
-const permanent=JSON.parse(localStorage.getItem("somethingOffSave")||'{"level":1,"xp":0,"totalCoins":0,"kills":{}}');
-const runSave=JSON.parse(localStorage.getItem("somethingOffRun")||"null");
-let p=runSave?.p||{x:0,y:0,hp:10,maxHp:10,atk:1,speed:3,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};
-let paused=false,enemies=runSave?.enemies||[],drops=runSave?.drops||[],worldSeed=runSave?.worldSeed??Math.floor(Math.random()*99999),dead=runSave?.dead||false;
+const safeNum=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+let permanent;
+try{permanent=JSON.parse(localStorage.getItem("somethingOffSave")||'{"level":1,"xp":0,"totalCoins":0,"kills":{}}')}catch{permanent={level:1,xp:0,totalCoins:0,kills:{}}}
+permanent.level=Math.max(1,Math.floor(safeNum(permanent.level,1)));permanent.xp=Math.max(0,safeNum(permanent.xp,0));permanent.totalCoins=Math.max(0,safeNum(permanent.totalCoins,0));if(!permanent.kills||typeof permanent.kills!=="object")permanent.kills={};
+let runSave;try{runSave=JSON.parse(localStorage.getItem("somethingOffRun")||"null")}catch{runSave=null}
+const defaultPlayer={x:0,y:0,hp:10,maxHp:10,atk:1,speed:3,level:permanent.level,xp:permanent.xp,coins:0,materials:{}};
+let p=runSave?.p||defaultPlayer;
+p.x=safeNum(p.x,0);p.y=safeNum(p.y,0);p.hp=Math.max(0,safeNum(p.hp,10));p.maxHp=Math.max(1,safeNum(p.maxHp,10));p.atk=Math.max(1,safeNum(p.atk,1));p.speed=Math.max(0.1,safeNum(p.speed,3));p.level=Math.max(1,Math.floor(safeNum(p.level,permanent.level)));p.xp=Math.max(0,safeNum(p.xp,permanent.xp));p.coins=Math.max(0,safeNum(p.coins,0));if(!p.materials||typeof p.materials!=="object")p.materials={};
+let paused=false,enemies=Array.isArray(runSave?.enemies)?runSave.enemies:[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;
 const WORLD_CELL=260, OBSTACLE_R=20;
 function hash2(x,y){let n=Math.sin(x*127.1+y*311.7+worldSeed)*43758.5453;return n-Math.floor(n)}
 function worldObjectsNear(px,py){const out=[];const cx=Math.floor(px/WORLD_CELL),cy=Math.floor(py/WORLD_CELL);for(let yy=cy-2;yy<=cy+2;yy++)for(let xx=cx-2;xx<=cx+2;xx++){const r=hash2(xx,yy);if(r<.62)continue;const count=r>.92?2:1;for(let i=0;i<count;i++){const a=hash2(xx*3+i,yy*5+i),b=hash2(xx*7+i+11,yy*2+i+19);out.push({x:(xx+a)*WORLD_CELL,y:(yy+b)*WORLD_CELL,type:hash2(xx*13+i,yy*17+i)>0.48?"tree":"rock",r:hash2(xx*19+i,yy*23+i)*7+17})}}return out}
