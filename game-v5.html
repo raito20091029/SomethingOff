@@ -138,6 +138,7 @@ function draw(){
  for(const o of worldObjectsNear(p.x,p.y)){const x=o.x+ox,y=o.y+oy;if(x<-50||x>W+50||y<-50||y>H+50)continue;if(o.type==="tree"){ctx.fillStyle="#5b3b25";ctx.fillRect(x-5,y+6,10,24);ctx.fillStyle="#285b2b";ctx.beginPath();ctx.arc(x,y,22,0,7);ctx.fill();ctx.fillStyle="#3d7837";ctx.beginPath();ctx.arc(x-8,y-10,15,0,7);ctx.fill()}else{ctx.fillStyle="#777";ctx.beginPath();ctx.ellipse(x,y,24,17,-.2,0,7);ctx.fill();ctx.fillStyle="#929292";ctx.beginPath();ctx.ellipse(x-5,y-5,12,8,-.2,0,7);ctx.fill()}}
  for(const d of drops){const x=d.x+ox,y=d.y+oy;ctx.fillStyle="#e8c85a";ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.font="11px sans-serif";ctx.fillText(d.text,x+9,y+4)}
  for(const e of enemies){const x=e.x+ox,y=e.y+oy;ctx.fillStyle=e.base.color;ctx.beginPath();ctx.arc(x,y,16,0,7);ctx.fill();ctx.fillStyle="#111";ctx.fillRect(x-18,y-25,36,4);ctx.fillStyle="#e55";ctx.fillRect(x-18,y-25,36*(e.hp/e.maxHp),4);ctx.fillStyle="#fff";ctx.font="11px sans-serif";ctx.textAlign="center";ctx.fillText(e.name+" Lv."+e.lv,x,y+30)}
+ ctx.save();ctx.strokeStyle="#ffffff66";ctx.lineWidth=2;ctx.setLineDash([7,6]);ctx.beginPath();ctx.arc(W/2,H/2,72,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle="#ffffff22";ctx.lineWidth=1;ctx.beginPath();ctx.arc(W/2,H/2,72,0,Math.PI*2);ctx.stroke();ctx.restore();
  ctx.fillStyle="#55aaff";ctx.beginPath();ctx.arc(W/2,H/2,18,0,7);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(W/2-6,H/2-3,3,0,7);ctx.arc(W/2+6,H/2-3,3,0,7);ctx.fill();
 }
 function drawPause(){}
