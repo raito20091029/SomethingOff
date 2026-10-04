@@ -57,7 +57,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
   <div class="event" id="event">ラインを起動しました。</div>
 
   <h2 style="margin-top:22px">⬆️ 工場アップグレード</h2>
-  <button class="upgrade" id="speedUp"><strong>⚡ 生産設備 Lv.<span id="speedLv">1</span></strong><small>生産速度を上げる　・　<span id="speedCost">50</span> G</span></small></button>
+  <button class="upgrade" id="speedUp"><strong>⚡ 生産設備 Lv.<span id="speedLv">1</span></strong><small>生産速度を上げる　・　<span id="speedCost">50</span> G</small></button>
   <button class="upgrade" id="priceUp"><strong>💰 出荷設備 Lv.<span id="priceLv">1</span></strong><small>ロボット1体あたりの価格を上げる　・　<span id="priceCost">75</span> G</small></button>
   <div class="tip">加速はプレイヤー操作による短いブーストです。タイミングよく使うほど、次のロボット完成までを早められます。</div>
 </section>
@@ -110,12 +110,29 @@ $("priceUp").addEventListener("click",()=>{
  state.money-=c;state.priceLv++;message("💰 出荷設備を強化しました！",true);render();
 });
 let last=performance.now();
+let lastRender=0;
+let frameId=0;
 function loop(now){
- const dt=Math.min(100,now-last);last=now;
+ const dt=Math.min(250,now-last);last=now;
  if(state.progress<100){state.progress=Math.min(100,state.progress+dt*0.0048*speed());}
- render();requestAnimationFrame(loop);
+ if(now-lastRender>=100 || state.progress>=100){
+   render();
+   lastRender=now;
+ }
+ frameId=requestAnimationFrame(loop);
 }
-render();requestAnimationFrame(loop);
+document.addEventListener("visibilitychange",()=>{
+ if(document.hidden){
+   cancelAnimationFrame(frameId);
+   frameId=0;
+ }else{
+   last=performance.now();
+   lastRender=0;
+   if(!frameId) frameId=requestAnimationFrame(loop);
+ }
+});
+render();
+frameId=requestAnimationFrame(loop);
 </script>
 </body>
 </html>
