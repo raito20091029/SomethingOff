@@ -133,7 +133,7 @@ let last=performance.now();
 let lastRender=0;
 let frameId=0;
 function loop(now){
- const dt=Math.min(250,now-last);last=now;
+ const dt=Math.min(60000,now-last);last=now;
  if(state.progress<100){state.progress=Math.min(100,state.progress+dt*0.0048*speed());}
  if(now-lastRender>=100 || state.progress>=100){
    render();
@@ -142,29 +142,8 @@ function loop(now){
  }
  frameId=requestAnimationFrame(loop);
 }
-function pauseAll(){
- document.body.classList.add("rf-paused");
- cancelAnimationFrame(frameId);
- frameId=0;
-}
-function resumeAll(){
- document.body.classList.remove("rf-paused");
- last=performance.now();
- lastRender=0;
- if(!frameId) frameId=requestAnimationFrame(loop);
-}
-document.addEventListener("visibilitychange",()=>{
- if(document.hidden) pauseAll();
- else if(document.hasFocus()) resumeAll();
-});
-window.addEventListener("blur",pauseAll);
-window.addEventListener("focus",()=>{
- if(!document.hidden) resumeAll();
-});
-window.addEventListener("pagehide",pauseAll);
-window.addEventListener("pageshow",()=>{
- if(!document.hidden && document.hasFocus()) resumeAll();
-});
+// 裏画面でもゲーム時間は進行させる。
+// ブラウザは裏画面の描画頻度を自動で落とすため、次に処理されたフレームで経過時間をまとめて反映する。
 render();
 frameId=requestAnimationFrame(loop);
 </script>
