@@ -83,6 +83,15 @@ function choose(i){
  $("bank").disabled=false;$("continue").disabled=false;
  $("event").innerHTML='<div class="eventTitle">結果が出た！</div><div class="eventText">この報酬を確定する？ それともさらに挑戦する？</div>';
  update();save();
+ if(state.coins<=0){
+   state.started=false;state.chosen=true;state.banked=0;state.best=Math.max(state.best,state.round);
+   save();
+   $("continue").disabled=true;$("bank").disabled=true;
+   $("overReason").textContent="コインが0になった！ここで終了。";
+   $("overScore").textContent="🪙 0 コイン";
+   $("overBest").textContent="最高記録：ROUND "+state.best;
+   $("gameOver").style.display="flex";
+ }
 }
 function nextRound(){state.round++;state.chosen=false;showChoice();update();save()}
 function bank(){
