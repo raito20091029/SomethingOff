@@ -75,7 +75,7 @@ function prepareBoxResults(){if(state.round===1){boxResults=["coin","good","coin
 function startShuffle(){
  shuffleBusy=true;shuffleAnswer=Math.floor(Math.random()*3);
  $("event").innerHTML='<div class="eventTitle">🔀 シャッフルゲーム — ROUND '+state.round+'</div><div class="eventText">★の位置を覚えろ！</div>';
- shuffleCards.forEach(c=>{c.disabled=true;c.textContent="★";c.className="shuffleCard"});
+ shuffleCards.forEach((c,i)=>{c.disabled=true;c.textContent=i===shuffleAnswer?"★":"❓";c.className="shuffleCard"});
  setTimeout(()=>{shuffleCards.forEach(c=>c.textContent="❓");let order=[0,1,2];for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}shuffleAnswer=order.indexOf(shuffleAnswer);shuffleBusy=false;shuffleCards.forEach(c=>c.disabled=false);$("shuffleStatus").textContent="シャッフル完了！★があったカードを選べ！"},900);
 }
 function chooseShuffle(i){
