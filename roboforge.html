@@ -132,9 +132,18 @@ $("priceUp").addEventListener("click",()=>{
 let last=performance.now();
 let lastRender=0;
 let frameId=0;
+let backgroundAt=0;
+
+function advanceProduction(dt){
+ if(state.progress<100){
+   state.progress=Math.min(100,state.progress+dt*0.0048*speed());
+ }
+}
+
 function loop(now){
- const dt=Math.min(60000,now-last);last=now;
- if(state.progress<100){state.progress=Math.min(100,state.progress+dt*0.0048*speed());}
+ const dt=Math.min(1000,now-last);
+ last=now;
+ advanceProduction(dt);
  if(now-lastRender>=100 || state.progress>=100){
    render();
    save();
@@ -142,8 +151,36 @@ function loop(now){
  }
  frameId=requestAnimationFrame(loop);
 }
-// 裏画面でもゲーム時間は進行させる。
-// ブラウザは裏画面の描画頻度を自動で落とすため、次に処理されたフレームで経過時間をまとめて反映する。
+
+function enterBackground(){
+ if(backgroundAt)return;
+ backgroundAt=performance.now();
+ cancelAnimationFrame(frameId);
+ frameId=0;
+}
+
+function returnToForeground(){
+ if(!backgroundAt)return;
+ const now=performance.now();
+ const elapsed=Math.max(0,now-backgroundAt);
+ backgroundAt=0;
+ last=now;
+ advanceProduction(elapsed);
+ render();
+ save();
+ lastRender=now;
+ if(!frameId)frameId=requestAnimationFrame(loop);
+}
+
+document.addEventListener("visibilitychange",()=>{
+ if(document.hidden) enterBackground();
+ else returnToForeground();
+});
+window.addEventListener("blur",enterBackground);
+window.addEventListener("focus",()=>{
+ if(!document.hidden)returnToForeground();
+});
+
 render();
 frameId=requestAnimationFrame(loop);
 </script>
