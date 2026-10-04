@@ -44,7 +44,7 @@ body{display:flex;align-items:center;justify-content:center;padding:18px}
 "use strict";
 const $=id=>document.getElementById(id);
 const boxes=[...document.querySelectorAll(".box")];
-let state={round:1,coins:0,streak:0,best:Number(localStorage.getItem("so_best")||0),banked:0,double:false,started:false,chosen:false};
+let state={round:1,coins:0,streak:0,best:Number(localStorage.getItem("so_best")||0),banked:0,double:true,started:false,chosen:false};
 let boxResults=["bad","good","coin"];
 function save(){localStorage.setItem("so_save",JSON.stringify(state));localStorage.setItem("so_best",String(state.best))}
 function load(){try{const s=JSON.parse(localStorage.getItem("so_save"));if(s&&typeof s==="object")state={...state,...s}}catch{}}
@@ -52,11 +52,11 @@ function update(){
  $("round").textContent=state.round;$("coins").textContent=state.coins;$("streak").textContent=state.streak;$("best").textContent=state.best;
  
  
- $("doubleBtn").textContent=state.double?"✖️ 次回2倍　準備中":"✖️ 次回2倍　250";
+ $("doubleBtn").textContent="✖️ 次回2倍　ON";
 }
 function message(t){$("message").textContent=t;setTimeout(()=>{if($("message").textContent===t)$("message").textContent=""},1800)}
 function startGame(){
- state={...state,round:1,coins:0,streak:0,banked:0,double:false,started:true,chosen:false};
+ state={...state,round:1,coins:0,streak:0,banked:0,double:true,started:true,chosen:false};
  $("startScreen").style.display="none";$("gameOver").style.display="none";resetBoxes();showChoice();update();save();
 }
 function resetBoxes(){boxes.forEach(b=>{b.disabled=false;b.className="box";b.querySelector(".emoji").textContent="📦"});$("result").style.display="none";$("bank").disabled=true;$("continue").disabled=true}
@@ -76,7 +76,7 @@ function choose(i){
  if(result==="bad"){
    gain=-Math.max(25,35+state.round*8);state.streak=0;title="💥 ハズレ……";sub="コイン "+gain;cls="bad"
  }
- if(state.double){gain*=2;state.double=false;sub+="　✖️2倍！"}
+ if(state.double&&gain>0){gain*=2;sub+="　✖️2倍！"}
  state.coins=Math.max(0,state.coins+gain);
  const b=boxes[i];b.classList.add(cls);b.querySelector(".emoji").textContent=result==="bad"?"💣":result==="jackpot"?"🌟":"💰";
  $("resultMain").textContent=title;$("resultSub").textContent=sub;$("result").style.display="block";
@@ -95,6 +95,6 @@ boxes.forEach(b=>b.addEventListener("click",()=>choose(Number(b.dataset.i))));
 $("start").onclick=startGame;$("again").onclick=startGame;
 
 
-$("doubleBtn").onclick=()=>{state.double=!state.double;message(state.double?"✖️ 次回2倍 ON！":"✖️ 次回2倍 OFF！");update();save()};
+$("doubleBtn").onclick=()=>message("✖️ 次回2倍は常時ONです！");
 load();update();
 </script></body></html>
