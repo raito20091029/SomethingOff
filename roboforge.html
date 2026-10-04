@@ -20,7 +20,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 </head>
 <body>
 <div class="app">
-<div style="position:fixed;right:10px;bottom:10px;z-index:9999;padding:6px 9px;border:1px solid #31516e;border-radius:8px;background:#0c1c2d;color:#62e6a7;font:700 11px system-ui">BUILD CHECK: 20261004-05</div>
+
 <header>
   <div class="brand"><div class="logo">🤖</div><div><div class="title">RoboForge</div><div class="sub">Build the factory. Forge the future.</div></div></div>
   <div class="money">💰 <span id="money">100</span> G</div>
@@ -28,8 +28,8 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 
 <div class="stats">
   <div class="stat"><div class="label">完成ロボット</div><div class="value" id="robots">0</div></div>
-  <div class="stat"><div class="label">生産速度</div><div class="value"><span id="speed">1.0</span>x</div></div>
-  <div class="stat"><div class="label">出荷価格</div><div class="value"><span id="price">25</span> G</div></div>
+  <div class="stat"><div class="label">稼働レーン</div><div class="value"><span id="speed">1</span> 本</div></div>
+  <div class="stat"><div class="label">次のレーン</div><div class="value"><span id="price">250</span> G</div></div>
 </div>
 
 <div class="grid">
@@ -44,7 +44,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 
 <section class="panel">
   <h2>⚙️ 生産管理</h2>
-  <div class="row"><span>ロボット製造</span><strong id="pct">0%</strong></div>
+  <div class="row"><span>LINE 1 生産進捗</span><strong id="pct">0%</strong></div>
   <div class="progress"><div class="bar" id="bar"></div></div>
   <div class="actions" style="grid-template-columns:1fr">
     <button class="secondary" id="ship" disabled>📦 出荷する</button>
@@ -53,7 +53,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 
   <h2 style="margin-top:22px">⬆️ 工場アップグレード</h2>
   <button class="upgrade" id="laneUp"><strong>🏭 生産レーン <span id="laneCount">1</span>本</strong><small>生産ラインを1本追加する　・　<span id="laneCost">250</span> G</small></button>
-  <div id="laneStatus" class="tip" style="margin-top:10px"></div>
+  <div id="laneStatus" class="tip" style="margin-top:10px"></div><div id="lanePotential" class="tip" style="margin-top:6px"></div>
   <div class="tip">生産ラインは自動で稼働します。設備を強化して、生産効率を高めていきましょう。</div>
 </section>
 </div>
