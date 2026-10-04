@@ -95,6 +95,6 @@ boxes.forEach(b=>b.addEventListener("click",()=>choose(Number(b.dataset.i))));
 $("start").onclick=startGame;$("again").onclick=startGame;
 
 
-$("doubleBtn").onclick=()=>{if(state.double){message("すでに2倍を準備中！");return}if(state.coins>=250){state.coins-=250;state.double=true;message("✖️ 次の報酬が2倍！");update();save()}else message("コインが足りない！")};
+$("doubleBtn").onclick=()=>{state.double=!state.double;message(state.double?"✖️ 次回2倍 ON！":"✖️ 次回2倍 OFF！");update();save()};
 load();update();
 </script></body></html>
