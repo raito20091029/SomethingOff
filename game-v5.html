@@ -60,6 +60,7 @@ function startGame(){
  $("startScreen").style.display="none";$("gameOver").style.display="none";resetBoxes();showChoice();update();save();
 }
 function resetBoxes(){boxes.forEach(b=>{b.disabled=false;b.className="box";b.querySelector(".emoji").textContent="📦"});$("result").style.display="none";$("bank").disabled=true;$("continue").disabled=true}
+function prepareBoxResults(){boxResults=["bad","good","coin"];const jackpotChance=Math.min(.20,.08+state.luck*.03);if(Math.random()<jackpotChance)boxResults[2]="jackpot";for(let i=boxResults.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[boxResults[i],boxResults[j]]=[boxResults[j],boxResults[i]]}}
 function showChoice(){
  state.chosen=false;resetBoxes();prepareBoxResults();
  $("event").innerHTML='<div class="eventTitle">🎁 ROUND '+state.round+' — どれを選ぶ？</div><div class="eventText">3つの箱には、それぞれ違う運命が入っている。どれを選ぶ？</div>';
