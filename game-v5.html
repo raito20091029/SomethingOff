@@ -95,6 +95,13 @@ function lakeIntersectsRiver(lx,ly,rx,ry){
  }
  return false;
 }
+function lakeTouchesForest(lx,ly,rx,ry){
+ return forestFactorAt(lx,ly)>.15||
+   forestFactorAt(lx+rx*.72,ly)>.15||
+   forestFactorAt(lx-rx*.72,ly)>.15||
+   forestFactorAt(lx,ly+ry*.72)>.15||
+   forestFactorAt(lx,ly-ry*.72)>.15;
+}
 function waterAt(x,y){
  const cell=900,cx=Math.floor(x/cell),cy=Math.floor(y/cell);
  for(let yy=cy-1;yy<=cy+1;yy++)for(let xx=cx-1;xx<=cx+1;xx++){
@@ -104,7 +111,7 @@ function waterAt(x,y){
    const ly=(yy+0.5+hash2(xx*19,yy*23)*0.35)*cell;
    const rx=250+hash2(xx*29,yy*31)*220,ry=170+hash2(xx*37,yy*41)*150;
    const dx=(x-lx)/rx,dy=(y-ly)/ry;
-   if(dx*dx+dy*dy<1&&!lakeIntersectsRiver(lx,ly,rx,ry))return "lake";
+   if(dx*dx+dy*dy<1&&!lakeIntersectsRiver(lx,ly,rx,ry)&&!lakeTouchesForest(lx,ly,rx,ry))return "lake";
   }
  }
  const riverCenter=riverCenterAt(x);
@@ -145,7 +152,7 @@ function drawWater(ox,oy){
   const rx=250+hash2(xx/cell*29,yy/cell*31)*220,ry=170+hash2(xx/cell*37,yy/cell*41)*150;
   const sx=lx+ox,sy=ly+oy;
   if(sx<-rx||sx>W+rx||sy<-ry||sy>H+ry)continue;
-  if(lakeIntersectsRiver(lx,ly,rx,ry))continue;
+  if(lakeIntersectsRiver(lx,ly,rx,ry)||lakeTouchesForest(lx,ly,rx,ry))continue;
   ctx.fillStyle="#214d3d";ctx.beginPath();ctx.ellipse(sx,sy,rx+10,ry+10,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#3f9fc2";ctx.beginPath();ctx.ellipse(sx,sy,rx,ry,0,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle="#78cde5";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(sx-20,sy-8,rx*.72,ry*.62,0,0,Math.PI*2);ctx.stroke();
