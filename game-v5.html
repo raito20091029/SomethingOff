@@ -31,6 +31,14 @@ body{display:flex;align-items:center;justify-content:center;padding:18px}
       <button class="box" data-i="1"><span class="emoji">📦</span><span>箱 B</span></button>
       <button class="box" data-i="2"><span class="emoji">📦</span><span>箱 C</span></button>
     </div>
+    <div id="shuffleGame" class="shuffleGame">
+      <div class="eventText" id="shuffleStatus">カードをよく見て覚えろ！</div>
+      <div class="shuffleCards">
+        <button type="button" class="shuffleCard" data-si="0">★</button>
+        <button type="button" class="shuffleCard" data-si="1">★</button>
+        <button type="button" class="shuffleCard" data-si="2">★</button>
+      </div>
+    </div>
     <div id="result"><div class="resultMain" id="resultMain"></div><div class="resultSub" id="resultSub"></div></div>
     <div class="actions"><button type="button" id="bank" class="gold" disabled>💰 報酬を確定</button><button type="button" id="continue" disabled>🔥 もう1回</button></div>
     <div id="message"></div>
