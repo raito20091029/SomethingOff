@@ -34,7 +34,7 @@
 <script>
 "use strict";
 const c=document.getElementById("c"),ctx=c.getContext("2d"),keys=new Set(),touch=new Set();
-document.getElementById("start").onclick=()=>{try{initAudio();startBgm()}catch(err){console.warn("Audio initialization failed",err)}document.getElementById("title").style.display="none";if(dead){document.getElementById("dead").style.display="flex"}else{document.getElementById("dead").style.display="none";enemies=[];spawnClock=0;initialSpawnPending=true;if(!chest||typeof chest.x!=="number"||typeof chest.y!=="number")chest=spawnChestFrom(p.x,p.y)};paused=false;hud();updateCoords();last=performance.now();requestAnimationFrame(loop);};
+document.getElementById("start").onclick=()=>{try{initAudio();startBgm()}catch(err){console.warn("Audio initialization failed",err)}document.getElementById("title").style.display="none";if(dead){document.getElementById("dead").style.display="flex"}else{document.getElementById("dead").style.display="none";enemies=[];spawnClock=0;initialSpawnPending=true;if(!chest||typeof chest.x!=="number"||typeof chest.y!=="number")chest=spawnChestFrom(p.x,p.y)};paused=false;document.getElementById("pauseOverlay").classList.remove("show");document.getElementById("game").style.display="block";document.getElementById("hud").style.display="block";document.getElementById("msg").style.display="block";syncPauseMenuButtons();hud();updateCoords();last=performance.now();requestAnimationFrame(loop);};
 let W=innerWidth,H=innerHeight,dpr=devicePixelRatio||1,last=performance.now(),spawnClock=0,initialSpawnPending=true,attackClock=0,saveClock=0,habitatFixClock=0,spawnTry=0,spawnOk=0,spawnFail=0,fixRemoved=0,despawned=0,damageFlash=0,damageTexts=[];
 /*SALES_SYSTEM_V1*/
 let salesCustomer={state:"cooldown",x:-520,y:-120,targetX:-120,targetY:0,type:"normal",item:"",qty:0,pay:0,wait:0,cooldown:3};
@@ -560,7 +560,7 @@ function updateChest(){
 }
 
 function resetRun(){survivalTime=0;healSkillClock=0;p={x:0,y:0,hp:10,maxHp:10,atk:1,speed:4,level:permanent.level,xp:permanent.xp,coins:0,weapon:"おてて",ownedWeapons:[],materials:{}};poison={time:0,tick:0,sourceAtk:0};damageFlash=0;damageTexts=[];projectiles=[];enemies=[];spawnClock=0;initialSpawnPending=true;attackClock=0;drops=[];worldSeed=Math.floor(Math.random()*99999);noDamageKillStreak=0;ensureBaseOnLand();chest=spawnChestFrom(p.x,p.y);
-dead=false;paused=false;document.getElementById("dead").style.display="none";save()}
+dead=false;paused=false;document.getElementById("dead").style.display="none";document.getElementById("pauseOverlay").classList.remove("show");document.getElementById("game").style.display="block";document.getElementById("hud").style.display="block";document.getElementById("msg").style.display="block";syncPauseMenuButtons();last=performance.now();requestAnimationFrame(loop);save()}
 function enemyLimits(){const max=6+3*Math.floor((Math.max(1,p.level)-1)/5);return {min:Math.max(3,max-3),max}}
 function habitatOk(e,x,y){
  const base=e?.base||e;
