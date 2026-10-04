@@ -50,8 +50,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
   <h2>⚙️ 生産管理</h2>
   <div class="row"><span>ロボット製造</span><strong id="pct">0%</strong></div>
   <div class="progress"><div class="bar" id="bar"></div></div>
-  <div class="actions">
-    <button class="primary" id="boost">⚡ 生産を加速</button>
+  <div class="actions" style="grid-template-columns:1fr">
     <button class="secondary" id="ship" disabled>📦 出荷する</button>
   </div>
   <div class="event" id="event">ラインを起動しました。</div>
@@ -59,7 +58,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
   <h2 style="margin-top:22px">⬆️ 工場アップグレード</h2>
   <button class="upgrade" id="speedUp"><strong>⚡ 生産設備 Lv.<span id="speedLv">1</span></strong><small>生産速度を上げる　・　<span id="speedCost">50</span> G</small></button>
   <button class="upgrade" id="priceUp"><strong>💰 出荷設備 Lv.<span id="priceLv">1</span></strong><small>ロボット1体あたりの価格を上げる　・　<span id="priceCost">75</span> G</small></button>
-  <div class="tip">加速はプレイヤー操作による短いブーストです。タイミングよく使うほど、次のロボット完成までを早められます。</div>
+  <div class="tip">生産ラインは自動で稼働します。設備を強化して、生産効率を高めていきましょう。</div>
 </section>
 </div>
 </div>
@@ -106,13 +105,6 @@ function render(){
  $("priceUp").disabled=state.money<priceCost();
 }
 function message(t,good=false){$("event").innerHTML=good?'<span class="bonus">'+t+"</span>":t}
-$("boost").addEventListener("click",()=>{
- if(state.progress>=100)return;
- state.progress=Math.min(100,state.progress+7);
- message("⚡ 生産ラインを加速！ +7%",true);
- save();
- render();
-});
 $("ship").addEventListener("click",()=>{
  if(state.progress<100)return;
  const earned=price();
