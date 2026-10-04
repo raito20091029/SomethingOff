@@ -573,7 +573,7 @@ function drawEnemy(e,x,y,targetCtx=ctx,showUi=true){
   targetCtx.fillStyle="#222";targetCtx.beginPath();targetCtx.arc(23,-7,2,0,7);targetCtx.fill();
   targetCtx.fillStyle="#d9c2a0";targetCtx.beginPath();targetCtx.moveTo(28,-2);targetCtx.lineTo(38,1);targetCtx.lineTo(28,5);targetCtx.closePath();targetCtx.fill();targetCtx.stroke();
   targetCtx.strokeStyle=e.base.color;targetCtx.lineWidth=5;targetCtx.beginPath();targetCtx.moveTo(-15,15);targetCtx.lineTo(-19,25);targetCtx.moveTo(-2,16);targetCtx.lineTo(-4,27);targetCtx.stroke();
- lse if(body==="ゴーレム"||body==="湖の守護者"){
+ }else if(body==="ゴーレム"||body==="湖の守護者"){
   const big=body==="湖の守護者";targetCtx.fillStyle=e.base.color;targetCtx.beginPath();targetCtx.roundRect(-18,-19,36,43,6);targetCtx.fill();targetCtx.stroke();targetCtx.fillStyle=big?"#b7f5ff":"#aaa";targetCtx.fillRect(-11,-9,7,6);targetCtx.fillRect(4,-9,7,6);targetCtx.strokeStyle="#1118";targetCtx.beginPath();targetCtx.moveTo(-12,10);targetCtx.lineTo(12,10);targetCtx.stroke();if(big){targetCtx.strokeStyle="#b7f5ff";targetCtx.lineWidth=3;targetCtx.beginPath();targetCtx.arc(0,2,27,0,7);targetCtx.stroke()}
  }else if(body==="カワウソ"){
   targetCtx.fillStyle=e.base.color;targetCtx.beginPath();targetCtx.ellipse(0,4,22,11,0,0,7);targetCtx.fill();targetCtx.stroke();targetCtx.beginPath();targetCtx.arc(18,-5,9,0,7);targetCtx.fill();targetCtx.beginPath();targetCtx.arc(14,-13,3,0,7);targetCtx.arc(22,-13,3,0,7);targetCtx.fill();targetCtx.stroke();targetCtx.strokeStyle=e.base.color;targetCtx.lineWidth=7;targetCtx.beginPath();targetCtx.moveTo(-18,5);targetCtx.quadraticCurveTo(-30,8,-25,19);targetCtx.stroke();targetCtx.fillStyle="#fff";targetCtx.beginPath();targetCtx.arc(21,-7,2,0,7);targetCtx.fill();
