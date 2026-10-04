@@ -129,8 +129,6 @@ function render(){
  const ready=state.laneData.filter(lane=>lane.progress>=100).length;
  $("laneStatus").textContent="稼働中 "+state.lanes+"本　・　出荷待ち "+ready+"本";
  renderFactoryLanes();
- $("speedUp").disabled=state.money<Math.floor(50*Math.pow(1.65,state.laneData[0].speedLv-1));
- $("priceUp").disabled=state.money<Math.floor(75*Math.pow(1.7,state.laneData[0].priceLv-1));
 }
 function message(t,good=false){$("event").innerHTML=good?'<span class="bonus">'+t+"</span>":t}
 $("ship").addEventListener("click",()=>{
