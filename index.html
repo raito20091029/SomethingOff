@@ -123,19 +123,15 @@ function render(){
 }
 function message(t,good=false){$("event").innerHTML=good?'<span class="bonus">'+t+"</span>":t}
 $("ship").addEventListener("click",()=>{
-  const readyLanes=state.laneData.filter(lane=>lane.progress>=100);
-  if(!readyLanes.length)return;
-  const earned=readyLanes.reduce((sum,lane)=>sum+Math.floor(lanePrice(lane,state.laneData.indexOf(lane))),0);
-  state.money+=earned;
-  state.robots+=readyLanes.length;
-  readyLanes.forEach(lane=>lane.progress=0);
- const index=state.laneData.findIndex(lane=>lane.progress>=100);
- if(index<0)return;
- const earned=Math.floor(lanePrice(state.laneData[index],index));
- state.money+=earned;state.robots++;state.laneData[index].progress=0;
+ const readyLanes=state.laneData.map((lane,index)=>({lane,index})).filter(x=>x.lane.progress>=100);
+ if(!readyLanes.length)return;
+ const earned=readyLanes.reduce((sum,x)=>sum+Math.floor(lanePrice(x.lane,x.index)),0);
+ state.money+=earned;
+ state.robots+=readyLanes.length;
+ readyLanes.forEach(x=>x.lane.progress=0);
  state.laneProgress=state.laneData.map(lane=>lane.progress);
  state.progress=state.laneData[0]?.progress||0;
- message("📦 レーン"+(index+1)+"から出荷！ +"+earned+" G",true);
+ message("📦 "+readyLanes.length+"本を出荷！ +"+earned+" G",true);
  save();
  render();
 });
