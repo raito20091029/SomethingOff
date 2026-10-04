@@ -32,7 +32,7 @@ body{display:flex;align-items:center;justify-content:center;padding:18px}
       <button class="box" data-i="2"><span class="emoji">📦</span><span>箱 C</span></button>
     </div>
     <div id="result"><div class="resultMain" id="resultMain"></div><div class="resultSub" id="resultSub"></div></div>
-    <div class="actions"><button id="bank" class="gold" disabled>💰 報酬を確定</button><button id="continue" disabled>🔥 もう1回</button></div>
+    <div class="actions"><button type="button" id="bank" class="gold" disabled>💰 報酬を確定</button><button type="button" id="continue" disabled>🔥 もう1回</button></div>
     <div id="message"></div>
   </div>
 </div>
@@ -61,13 +61,13 @@ function choose(i){
  state.coins=Math.max(0,state.coins+gain);
  const b=boxes[i];b.classList.add(cls);b.querySelector(".emoji").textContent=result==="bad"?"💣":result==="jackpot"?"🌟":"💰";
  $("resultMain").textContent=title;$("resultSub").textContent=sub;$("result").style.display="block";
- $("bank").disabled=false;$("continue").disabled=false;
+ $("bank").disabled=false;$("continue").disabled=false;$("bank").removeAttribute("disabled");$("continue").removeAttribute("disabled");
  $("event").innerHTML='<div class="eventTitle">結果が出た！</div><div class="eventText">この報酬を確定する？ それともさらに挑戦する？</div>';
  update();save();
  if(state.coins<=0){state.started=false;state.chosen=true;state.banked=0;state.best=Math.max(state.best,state.round);save();$("continue").disabled=true;$("bank").disabled=true;$("overReason").textContent="コインが0になった！ここで終了。";$("overScore").textContent="🪙 0 コイン";$("overBest").textContent="最高記録：ROUND "+state.best;$("gameOver").style.display="flex"}
 }
 function nextRound(){if(!state.started||!state.chosen)return;state.round++;state.chosen=false;$("gameOver").style.display="none";showChoice();update();save()}
 function bank(){state.banked=Math.max(state.banked,state.coins);state.best=Math.max(state.best,state.round);save();$("overReason").textContent="今回はここで撤退した。";$("overScore").textContent="🪙 "+state.coins+" コイン";$("overBest").textContent="最高記録：ROUND "+state.best;$("gameOver").style.display="flex"}
-$("bank").onclick=bank;$("continue").onclick=nextRound;$("again").onclick=startGame;$("start").onclick=startGame;boxes.forEach(b=>b.addEventListener("click",()=>choose(Number(b.dataset.i))));
+$("bank").addEventListener("click",bank);$("continue").addEventListener("click",nextRound);$("again").addEventListener("click",startGame);$("start").addEventListener("click",startGame);boxes.forEach(b=>b.addEventListener("click",()=>choose(Number(b.dataset.i))));
 load();update();
 </script></body></html>
