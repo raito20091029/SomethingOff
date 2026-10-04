@@ -440,7 +440,10 @@ function fixEnemyHabitats(){
 function sameHabitat(a,b){
  const ah=habitatAt(a.x,a.y);
  const bh=habitatType(b?.base||b);
- return ah===bh
+ // 草原と森の両方に出現する陸上モンスターは、森に入っても攻撃対象にできる。
+ // 水棲・森専用モンスターは従来どおり、それぞれのエリアだけ。
+ if(bh==="land")return ah==="land"||ah==="forest";
+ return ah===bh;
 }
 function weaponMultiplier(){const lv=Math.max(1,Math.floor(safeNum(p.weaponLevels?.[p.weapon],1)));if(p.weapon==="木の棒"||p.weapon==="投石")return 1.1*Math.pow(1.5,lv-1);if(p.weapon==="石の剣")return 1.65*Math.pow(1.5,lv-1);return 1}
 function effectiveAttack(){return Math.round(p.atk*weaponMultiplier()*100)/100}
