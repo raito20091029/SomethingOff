@@ -83,7 +83,7 @@ function forestFactorAt(x,y){
  return t*t*(3-2*t);
 }
 function forestAt(x,y){return forestFactorAt(x,y)>.5}
-function worldObjectsNear(px,py){const out=[];const cx=Math.floor(px/WORLD_CELL),cy=Math.floor(py/WORLD_CELL);const range=Math.ceil(Math.max(W,H)/WORLD_CELL)+2;for(let yy=cy-range;yy<=cy+range;yy++)for(let xx=cx-range;xx<=cx+range;xx++){const f=forestFactorAt((xx+.5)*WORLD_CELL,(yy+.5)*WORLD_CELL),threshold=f>.15?.45-f*.4:.62-f*.34;const r=hash2(xx,yy);if(r<threshold)continue;const count=f>.35?(r>.58?3:2):(r>(.92-f*.18)?2:1);for(let i=0;i<count;i++){const aa=hash2(xx*3+i,yy*5+i),bb=hash2(xx*7+i+11,yy*2+i+19);const ox=(xx+aa)*WORLD_CELL,oy=(yy+bb)*WORLD_CELL;if(waterAt(ox,oy))continue;const treeChance=f>.15?.96:.48+f*.34;out.push({x:ox,y:oy,type:hash2(xx*13+i,yy*17+i)<treeChance?"tree":"rock",r:hash2(xx*19+i,yy*23+i)*7+17})}}return out}
+function worldObjectsNear(px,py){const out=[];const cx=Math.floor(px/WORLD_CELL),cy=Math.floor(py/WORLD_CELL);const range=Math.ceil(Math.max(W,H)/WORLD_CELL)+2;for(let yy=cy-range;yy<=cy+range;yy++)for(let xx=cx-range;xx<=cx+range;xx++){const f=forestFactorAt((xx+.5)*WORLD_CELL,(yy+.5)*WORLD_CELL),threshold=f>.15?.18-f*.14:.62-f*.34;const r=hash2(xx,yy);if(r<threshold)continue;const count=f>.35?(r>.42?5:4):(r>(.92-f*.18)?2:1);for(let i=0;i<count;i++){const aa=hash2(xx*3+i,yy*5+i),bb=hash2(xx*7+i+11,yy*2+i+19);const ox=(xx+aa)*WORLD_CELL,oy=(yy+bb)*WORLD_CELL;if(waterAt(ox,oy))continue;const treeChance=f>.15?.985:.48+f*.34;out.push({x:ox,y:oy,type:hash2(xx*13+i,yy*17+i)<treeChance?"tree":"rock",r:hash2(xx*19+i,yy*23+i)*7+17})}}return out}
 function terrainHeight(x,y){return Math.sin((x+worldSeed)*.0027)*10+Math.sin((y-worldSeed)*.0021)*8+Math.sin((x+y)*.0011)*6}function riverCenterAt(x){return Math.sin((x+worldSeed*300)*0.0012)*420}
 function riverWidthAt(x){return 70+Math.sin((x+worldSeed)*0.0021)*25}
 function lakeIntersectsRiver(lx,ly,rx,ry){
@@ -96,11 +96,12 @@ function lakeIntersectsRiver(lx,ly,rx,ry){
  return false;
 }
 function lakeTouchesForest(lx,ly,rx,ry){
- return forestFactorAt(lx,ly)>.15||
-   forestFactorAt(lx+rx*.72,ly)>.15||
-   forestFactorAt(lx-rx*.72,ly)>.15||
-   forestFactorAt(lx,ly+ry*.72)>.15||
-   forestFactorAt(lx,ly-ry*.72)>.15;
+ if(forestFactorAt(lx,ly)>.02)return true;
+ for(let i=0;i<16;i++){
+  const a=i*Math.PI*2/16;
+  if(forestFactorAt(lx+Math.cos(a)*rx,ly+Math.sin(a)*ry)>.02)return true;
+ }
+ return false;
 }
 function waterAt(x,y){
  const cell=900,cx=Math.floor(x/cell),cy=Math.floor(y/cell);
