@@ -66,8 +66,26 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 
 <script>
 "use strict";
-const state={money:100,robots:0,progress:0,speedLv:1,priceLv:1};
+const SAVE_KEY="roboforge-save-v1";
+const defaultState={money:100,robots:0,progress:0,speedLv:1,priceLv:1};
+let state={...defaultState};
+try{
+ const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");
+ if(saved && typeof saved==="object"){
+  for(const key of Object.keys(defaultState)){
+   if(Number.isFinite(Number(saved[key]))) state[key]=Number(saved[key]);
+  }
+  state.money=Math.max(0,state.money);
+  state.robots=Math.max(0,Math.floor(state.robots));
+  state.progress=Math.max(0,Math.min(100,state.progress));
+  state.speedLv=Math.max(1,Math.floor(state.speedLv));
+  state.priceLv=Math.max(1,Math.floor(state.priceLv));
+ }
+}catch(e){}
 const $=id=>document.getElementById(id);
+function save(){
+ try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
+}
 const speed=()=>1+(state.speedLv-1)*0.18;
 const price=()=>25+(state.priceLv-1)*12;
 const speedCost=()=>Math.floor(50*Math.pow(1.65,state.speedLv-1));
@@ -92,6 +110,7 @@ $("boost").addEventListener("click",()=>{
  if(state.progress>=100)return;
  state.progress=Math.min(100,state.progress+7);
  message("⚡ 生産ラインを加速！ +7%",true);
+ save();
  render();
 });
 $("ship").addEventListener("click",()=>{
@@ -99,15 +118,16 @@ $("ship").addEventListener("click",()=>{
  const earned=price();
  state.money+=earned;state.robots++;state.progress=0;
  message("📦 ロボットを出荷！ +"+earned+" G",true);
+ save();
  render();
 });
 $("speedUp").addEventListener("click",()=>{
  const c=speedCost();if(state.money<c)return;
- state.money-=c;state.speedLv++;message("⚡ 生産設備を強化しました！",true);render();
+ state.money-=c;state.speedLv++;message("⚡ 生産設備を強化しました！",true);save();render();
 });
 $("priceUp").addEventListener("click",()=>{
  const c=priceCost();if(state.money<c)return;
- state.money-=c;state.priceLv++;message("💰 出荷設備を強化しました！",true);render();
+ state.money-=c;state.priceLv++;message("💰 出荷設備を強化しました！",true);save();render();
 });
 let last=performance.now();
 let lastRender=0;
@@ -117,6 +137,7 @@ function loop(now){
  if(state.progress<100){state.progress=Math.min(100,state.progress+dt*0.0048*speed());}
  if(now-lastRender>=100 || state.progress>=100){
    render();
+   save();
    lastRender=now;
  }
  frameId=requestAnimationFrame(loop);
