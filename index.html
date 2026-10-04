@@ -96,7 +96,7 @@ const lanePrice=(lane,index=0)=>25*Math.pow(1.05,index+(lane.priceLv-1));
 const laneProductionTime=(lane,index=0)=>100/(0.0048*laneSpeed(lane,index));
 const formatProductionTime=ms=>{const seconds=ms/1000;if(seconds<60)return seconds.toFixed(1)+"秒";const minutes=Math.floor(seconds/60);const remain=Math.round(seconds%60);return remain?minutes+"分"+remain+"秒":minutes+"分";};
 const laneCost=()=>Math.floor(228*state.lanes);
-const laneUpgradeBase=(type,index)=>{const base=type==="speed"?25:type==="price"?37.5:250;return Math.floor(base*Math.pow(1.5,index));};
+const laneUpgradeBase=(type,index)=>{const base=type==="speed"?25:type==="price"?37.5:100;return Math.floor(base*Math.pow(1.5,index));};
 const laneEfficiency=(lane,index)=>lanePrice(lane,index)/(laneProductionTime(lane,index)/1000);
 function renderFactoryLanes(){
  const root=$("factoryLanes");
