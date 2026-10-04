@@ -113,8 +113,8 @@ function handleLaneUpgrade(e){
 function render(){
  $("money").textContent=Math.floor(state.money);
  $("robots").textContent=state.robots;
- $("speed").textContent=laneSpeed(state.laneData[0],0).toFixed(2);
- $("price").textContent=Math.floor(lanePrice(state.laneData[0],0));
+ $("speed").textContent=state.lanes;
+ $("price").textContent=laneCost();
  $("laneCount").textContent=state.lanes;
  $("laneCost").textContent=laneCost();
  $("laneUp").disabled=state.money<laneCost();
@@ -123,6 +123,7 @@ function render(){
  $("ship").disabled=!state.laneData.some(lane=>lane.progress>=100);
  const ready=state.laneData.filter(lane=>lane.progress>=100).length;
  $("laneStatus").textContent="稼働中 "+state.lanes+"本　・　出荷待ち "+ready+"本";
+ $("lanePotential").textContent="次のレーンほどLv.1の生産時間は5%短く、出荷価格は5%高くなります。";
  renderFactoryLanes();
 }
 function message(t,good=false){$("event").innerHTML=good?'<span class="bonus">'+t+"</span>":t}
