@@ -34,7 +34,7 @@ body{display:flex;align-items:center;justify-content:center;padding:18px}
     </div>
     <div id="result"><div class="resultMain" id="resultMain"></div><div class="resultSub" id="resultSub"></div></div>
     <div class="actions"><button id="bank" class="gold" disabled>💰 報酬を確定</button><button id="continue" disabled>🔥 もう1回</button></div>
-    <div id="shop"><div class="shopTitle">🛒 強化</div><div class="shopBtns"><button class="secondary" id="luckBtn">🍀 運UP　100</button><button class="secondary" id="shieldBtn">🛡️ 保険　150</button><button class="secondary" id="doubleBtn">✖️ 次回2倍　250</button></div></div>
+    <div id="shop"><div class="shopTitle">🛒 強化</div><div class="shopBtns"><button class="secondary" id="doubleBtn">✖️ 次回2倍　250</button></div></div>
     <div id="message"></div>
   </div>
 </div>
@@ -44,23 +44,23 @@ body{display:flex;align-items:center;justify-content:center;padding:18px}
 "use strict";
 const $=id=>document.getElementById(id);
 const boxes=[...document.querySelectorAll(".box")];
-let state={round:1,coins:0,streak:0,best:Number(localStorage.getItem("so_best")||0),banked:0,luck:0,shield:false,double:false,started:false,chosen:false};
+let state={round:1,coins:0,streak:0,best:Number(localStorage.getItem("so_best")||0),banked:0,double:false,started:false,chosen:false};
 let boxResults=["bad","good","coin"];
 function save(){localStorage.setItem("so_save",JSON.stringify(state));localStorage.setItem("so_best",String(state.best))}
 function load(){try{const s=JSON.parse(localStorage.getItem("so_save"));if(s&&typeof s==="object")state={...state,...s}}catch{}}
 function update(){
  $("round").textContent=state.round;$("coins").textContent=state.coins;$("streak").textContent=state.streak;$("best").textContent=state.best;
- $("luckBtn").textContent="🍀 運UP　"+(100+state.luck*50);
- $("shieldBtn").textContent=state.shield?"🛡️ 保険　所持":"🛡️ 保険　150";
+ 
+ 
  $("doubleBtn").textContent=state.double?"✖️ 次回2倍　準備中":"✖️ 次回2倍　250";
 }
 function message(t){$("message").textContent=t;setTimeout(()=>{if($("message").textContent===t)$("message").textContent=""},1800)}
 function startGame(){
- state={...state,round:1,coins:0,streak:0,banked:0,shield:false,double:false,started:true,chosen:false};
+ state={...state,round:1,coins:0,streak:0,banked:0,double:false,started:true,chosen:false};
  $("startScreen").style.display="none";$("gameOver").style.display="none";resetBoxes();showChoice();update();save();
 }
 function resetBoxes(){boxes.forEach(b=>{b.disabled=false;b.className="box";b.querySelector(".emoji").textContent="📦"});$("result").style.display="none";$("bank").disabled=true;$("continue").disabled=true}
-function prepareBoxResults(){boxResults=["bad","good","coin"];const jackpotChance=Math.min(.20,.08+state.luck*.03);if(Math.random()<jackpotChance)boxResults[2]="jackpot";for(let i=boxResults.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[boxResults[i],boxResults[j]]=[boxResults[j],boxResults[i]]}}
+function prepareBoxResults(){boxResults=["bad","good","coin"];const jackpotChance=.08;if(Math.random()<jackpotChance)boxResults[2]="jackpot";for(let i=boxResults.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[boxResults[i],boxResults[j]]=[boxResults[j],boxResults[i]]}}
 function showChoice(){
  state.chosen=false;resetBoxes();prepareBoxResults();
  $("event").innerHTML='<div class="eventTitle">🎁 ROUND '+state.round+' — どれを選ぶ？</div><div class="eventText">3つの箱には、それぞれ違う運命が入っている。どれを選ぶ？</div>';
@@ -79,7 +79,7 @@ function choose(i){
  }
  if(state.double){gain*=2;state.double=false;sub+="　✖️2倍！"}
  state.coins=Math.max(0,state.coins+gain);
- const b=boxes[i];b.classList.add(cls);b.querySelector(".emoji").textContent=result==="bad"&&!state.shield?"💣":result==="jackpot"?"🌟":gain>0?"💰":"🛡️";
+ const b=boxes[i];b.classList.add(cls);b.querySelector(".emoji").textContent=result==="bad"?"💣":result==="jackpot"?"🌟":"💰";
  $("resultMain").textContent=title;$("resultSub").textContent=sub;$("result").style.display="block";
  $("bank").disabled=false;$("continue").disabled=false;
  $("event").innerHTML='<div class="eventTitle">結果が出た！</div><div class="eventText">この報酬を確定する？ それともさらに挑戦する？</div>';
@@ -94,8 +94,8 @@ $("bank").onclick=bank;
 $("continue").onclick=nextRound;
 boxes.forEach(b=>b.addEventListener("click",()=>choose(Number(b.dataset.i))));
 $("start").onclick=startGame;$("again").onclick=startGame;
-$("luckBtn").onclick=()=>{const cost=100+state.luck*50;if(state.coins>=cost){state.coins-=cost;state.luck++;message("🍀 運が少し上がった！");update();save()}else message("コインが足りない！")};
-$("shieldBtn").onclick=()=>{if(state.shield){message("🛡️ 保険はすでに持っている！");return}if(state.coins>=150){state.coins-=150;state.shield=true;message("🛡️ 次のハズレを1回防ぐ！");update();save()}else message("コインが足りない！")};
+
+
 $("doubleBtn").onclick=()=>{if(state.double){message("すでに2倍を準備中！");return}if(state.coins>=250){state.coins-=250;state.double=true;message("✖️ 次の報酬が2倍！");update();save()}else message("コインが足りない！")};
 load();update();
 </script></body></html>
