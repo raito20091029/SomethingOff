@@ -75,7 +75,7 @@ const FOREST_ANGLE=hash2(913,271)*Math.PI*2;
 const FOREST_CX=Math.cos(FOREST_ANGLE)*8200,FOREST_CY=Math.sin(FOREST_ANGLE)*8200;
 const FOREST_RX=7000,FOREST_RY=6200;
 function forestFactorAt(x,y){
- if(waterAt(x,y))return 0;
+ if(Math.hypot(x,y)<900||waterAt(x,y))return 0;
  const dx=(x-FOREST_CX)/FOREST_RX,dy=(y-FOREST_CY)/FOREST_RY;
  const radial=Math.sqrt(dx*dx+dy*dy)||0;
  const edgeNoise=1+(.055*Math.sin((x+worldSeed)*.0017)+.045*Math.sin((y-worldSeed)*.0013));
