@@ -91,8 +91,6 @@ function save(){
 }
 const laneSpeed=lane=>1+(lane.speedLv-1)*0.18;
 const lanePrice=lane=>25+(lane.priceLv-1)*12;
-const speedCost=()=>Math.floor(50*Math.pow(1.65,state.speedLv-1));
-const priceCost=()=>Math.floor(75*Math.pow(1.7,state.priceLv-1));
 const laneCost=()=>Math.floor(250*Math.pow(1.8,state.lanes-1));
 function renderFactoryLanes(){
  const root=$("factoryLanes");
@@ -145,14 +143,6 @@ $("ship").addEventListener("click",()=>{
  message("📦 レーン"+(index+1)+"から出荷！ +"+earned+" G",true);
  save();
  render();
-});
-$("speedUp").addEventListener("click",()=>{
- const c=speedCost();if(state.money<c)return;
- state.money-=c;state.laneData[0].speedLv++;state.speedLv=state.laneData[0].speedLv;message("⚡ LINE 1 の生産設備を強化しました！",true);save();render();
-});
-$("priceUp").addEventListener("click",()=>{
- const c=priceCost();if(state.money<c)return;
- state.money-=c;state.laneData[0].priceLv++;state.priceLv=state.laneData[0].priceLv;message("💰 LINE 1 の出荷設備を強化しました！",true);save();render();
 });
 $("laneUp").addEventListener("click",()=>{
  const c=laneCost();if(state.money<c)return;
