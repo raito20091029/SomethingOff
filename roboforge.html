@@ -63,7 +63,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 <script>
 "use strict";
 const SAVE_KEY="roboforge-save-v1";
-const defaultState={money:100,robots:0,progress:0,speedLv:1,priceLv:1,lanes:1,laneProgress:[0]};
+const defaultState={money:100,robots:0,progress:0,speedLv:1,priceLv:1,lanes:1,laneProgress:[0],laneData:[{progress:0}]};
 let state={...defaultState};
 try{
  const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");
@@ -77,11 +77,14 @@ try{
   state.speedLv=Math.max(1,Math.floor(state.speedLv));
   state.priceLv=Math.max(1,Math.floor(state.priceLv));
   state.lanes=Math.max(1,Math.floor(state.lanes));
-  if(!Array.isArray(saved.laneProgress)) state.laneProgress=[state.progress];
-  else state.laneProgress=saved.laneProgress.map(v=>Math.max(0,Math.min(100,Number(v)||0)));
-  while(state.laneProgress.length<state.lanes) state.laneProgress.push(0);
-  state.laneProgress=state.laneProgress.slice(0,state.lanes);
-  state.progress=state.laneProgress[0]||0;
+  const oldProgress=Array.isArray(saved.laneProgress)?saved.laneProgress.map(v=>Math.max(0,Math.min(100,Number(v)||0))):[Math.max(0,Math.min(100,Number(saved.progress)||0))];
+  if(Array.isArray(saved.laneData)) state.laneData=saved.laneData.map(v=>({progress:Math.max(0,Math.min(100,Number(v?.progress)||0))}));
+  else state.laneData=oldProgress.map(progress=>({progress}));
+  while(state.laneData.length<state.lanes) state.laneData.push({progress:0});
+  state.laneData=state.laneData.slice(0,state.lanes);
+  state.lanes=state.laneData.length;
+  state.laneProgress=state.laneData.map(lane=>lane.progress);
+  state.progress=state.laneData[0]?.progress||0;
  }
 }catch(e){}
 const $=id=>document.getElementById(id);
@@ -95,7 +98,7 @@ const priceCost=()=>Math.floor(75*Math.pow(1.7,state.priceLv-1));
 const laneCost=()=>Math.floor(250*Math.pow(1.8,state.lanes-1));
 function renderFactoryLanes(){
  const root=$("factoryLanes");
- root.innerHTML=state.laneProgress.map((progress,i)=>'<div class="factory-lane'+(progress>=100?' ready':'')+'"><div class="lane-label">LINE '+(i+1)+' ・ '+Math.floor(progress)+'%</div><div class="lane-machine"></div><div class="lane-robot"></div><div class="lane-conveyor"></div></div>').join("");
+ root.innerHTML=state.laneData.map((lane,i)=>'<div class="factory-lane'+(lane.progress>=100?' ready':'')+'"><div class="lane-label">LINE '+(i+1)+' ・ '+Math.floor(lane.progress)+'%</div><div class="lane-machine"></div><div class="lane-robot"></div><div class="lane-conveyor"></div></div>').join("");
 }
 function render(){
  $("money").textContent=Math.floor(state.money);
@@ -111,8 +114,8 @@ function render(){
  $("laneUp").disabled=state.money<laneCost();
  $("pct").textContent=Math.floor(state.progress)+"%";
  $("bar").style.width=state.progress+"%";
- $("ship").disabled=!state.laneProgress.some(v=>v>=100);
- const ready=state.laneProgress.filter(v=>v>=100).length;
+ $("ship").disabled=!state.laneData.some(lane=>lane.progress>=100);
+ const ready=state.laneData.filter(lane=>lane.progress>=100).length;
  $("laneStatus").textContent="稼働中 "+state.lanes+"本　・　出荷待ち "+ready+"本";
  renderFactoryLanes();
  $("speedUp").disabled=state.money<speedCost();
@@ -120,11 +123,12 @@ function render(){
 }
 function message(t,good=false){$("event").innerHTML=good?'<span class="bonus">'+t+"</span>":t}
 $("ship").addEventListener("click",()=>{
- const index=state.laneProgress.findIndex(v=>v>=100);
+ const index=state.laneData.findIndex(lane=>lane.progress>=100);
  if(index<0)return;
  const earned=price();
- state.money+=earned;state.robots++;state.laneProgress[index]=0;
- state.progress=state.laneProgress[0]||0;
+ state.money+=earned;state.robots++;state.laneData[index].progress=0;
+ state.laneProgress=state.laneData.map(lane=>lane.progress);
+ state.progress=state.laneData[0]?.progress||0;
  message("📦 レーン"+(index+1)+"から出荷！ +"+earned+" G",true);
  save();
  render();
@@ -139,7 +143,7 @@ $("priceUp").addEventListener("click",()=>{
 });
 $("laneUp").addEventListener("click",()=>{
  const c=laneCost();if(state.money<c)return;
- state.money-=c;state.lanes++;state.laneProgress.push(0);
+ state.money-=c;state.lanes++;state.laneData.push({progress:0});state.laneProgress=state.laneData.map(lane=>lane.progress);
  message("🏭 新しい生産レーンを追加しました！",true);save();render();
 });
 let last=performance.now();
@@ -147,12 +151,11 @@ let timerId=0;
 let backgroundAt=0;
 
 function advanceProduction(dt){
- for(let i=0;i<state.laneProgress.length;i++){
-   if(state.laneProgress[i]<100){
-     state.laneProgress[i]=Math.min(100,state.laneProgress[i]+dt*0.0048*speed());
-   }
+ for(const lane of state.laneData){
+  if(lane.progress<100) lane.progress=Math.min(100,lane.progress+dt*0.0048*speed());
  }
- state.progress=state.laneProgress[0]||0;
+ state.laneProgress=state.laneData.map(lane=>lane.progress);
+ state.progress=state.laneData[0]?.progress||0;
 }
 
 function loop(){
