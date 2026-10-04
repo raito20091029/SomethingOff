@@ -549,7 +549,7 @@ function openChest(){
  chest.active=false;
  chest.respawnAt=Date.now()+15*60*1000;
  chest.lastX=chest.x;chest.lastY=chest.y;
- chest.message=rarity+"：🪙 "+coins+"　"+item+" ×1";showChestReward(rarity,coins,item);sfx("chest");
+ chest.message=rarity+"：🪙 "+coins+"　"+item+" ×1";showChestReward(rarity,coins,item);showItemPickup(item,1);sfx("chest");
  save();hud();updateCoords();
  return true;
 }
