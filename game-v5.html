@@ -45,6 +45,7 @@ body{display:flex;align-items:center;justify-content:center;padding:18px}
 const $=id=>document.getElementById(id);
 const boxes=[...document.querySelectorAll(".box")];
 let state={round:1,coins:0,streak:0,best:Number(localStorage.getItem("so_best")||0),banked:0,luck:0,shield:false,double:false,started:false,chosen:false};
+let boxResults=["bad","good","coin"];
 function save(){localStorage.setItem("so_save",JSON.stringify(state));localStorage.setItem("so_best",String(state.best))}
 function load(){try{const s=JSON.parse(localStorage.getItem("so_save"));if(s&&typeof s==="object")state={...state,...s}}catch{}}
 function update(){
@@ -60,28 +61,13 @@ function startGame(){
 }
 function resetBoxes(){boxes.forEach(b=>{b.disabled=false;b.className="box";b.querySelector(".emoji").textContent="📦"});$("result").style.display="none";$("bank").disabled=true;$("continue").disabled=true}
 function showChoice(){
- state.chosen=false;resetBoxes();
- $("event").innerHTML='<div class="eventTitle">🎁 ROUND '+state.round+' — どれを選ぶ？</div><div class="eventText">選んだ箱を開けるまで中身は秘密。</div>';
-}
-function weightedResult(){
- let r=Math.random();
- const luck=Math.min(.18,state.luck*.03);
- // 連続で当たり続けるほど、ハズレ率を少しずつ上げる救済。
- // 通常時は従来どおり14%。最大で35%まで。
- const pity=Math.min(.21,Math.max(0,state.streak-4)*.035);
- const badChance=Math.min(.35,.14+pity);
- const jackpotChance=Math.max(.01,.08-pity*.45);
- const goodChance=.48+luck;
- const coinChance=.30;
- if(r<badChance)return "bad";
- if(r<badChance+jackpotChance)return "jackpot";
- if(r<badChance+jackpotChance+goodChance)return "good";
- return "coin";
+ state.chosen=false;resetBoxes();prepareBoxResults();
+ $("event").innerHTML='<div class="eventTitle">🎁 ROUND '+state.round+' — どれを選ぶ？</div><div class="eventText">3つの箱には、それぞれ違う運命が入っている。どれを選ぶ？</div>';
 }
 function choose(i){
  if(!state.started||state.chosen)return;
  state.chosen=true;boxes.forEach(b=>b.disabled=true);
- const result=weightedResult();
+ const result=boxResults[i];
  let gain=0,title="",sub="",cls="";
  if(result==="good"){gain=40+state.round*15;state.streak++;title="✨ 大当たり！";sub="コイン +"+gain;cls="good"}
  if(result==="coin"){gain=20+state.round*8;state.streak++;title="🪙 当たり！";sub="コイン +"+gain;cls="neutral"}
