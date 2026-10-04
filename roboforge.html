@@ -134,11 +134,15 @@ function resumeAll(){
 }
 document.addEventListener("visibilitychange",()=>{
  if(document.hidden) pauseAll();
- else resumeAll();
+ else if(document.hasFocus()) resumeAll();
+});
+window.addEventListener("blur",pauseAll);
+window.addEventListener("focus",()=>{
+ if(!document.hidden) resumeAll();
 });
 window.addEventListener("pagehide",pauseAll);
 window.addEventListener("pageshow",()=>{
- if(!document.hidden) resumeAll();
+ if(!document.hidden && document.hasFocus()) resumeAll();
 });
 render();
 frameId=requestAnimationFrame(loop);
