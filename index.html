@@ -183,9 +183,19 @@ function advanceProduction(dt){
  let autoShipped=false;
  for(let i=0;i<state.laneData.length;i++){
   const lane=state.laneData[i];
-  if(lane.progress<100){
-   lane.progress=Math.min(100,lane.progress+dt*0.0048*laneSpeed(lane,i));
-   if(lane.progress>=100 && lane.autoShip){state.money+=Math.floor(lanePrice(lane,i));state.robots++;lane.progress=0;autoShipped=true;}
+  if(lane.progress>=100 && !lane.autoShip)continue;
+  const rate=0.0048*laneSpeed(lane,i);
+  const total=lane.progress+dt*rate;
+  if(lane.autoShip){
+   const completed=Math.floor(total/100);
+   if(completed>0){
+    state.money+=Math.floor(lanePrice(lane,i))*completed;
+    state.robots+=completed;
+    autoShipped=true;
+   }
+   lane.progress=total%100;
+  }else{
+   lane.progress=Math.min(100,total);
   }
  }
  state.laneProgress=state.laneData.map(lane=>lane.progress);
