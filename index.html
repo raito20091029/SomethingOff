@@ -91,17 +91,24 @@ const lanePrice=(lane,index=0)=>25*Math.pow(1.05,index+(lane.priceLv-1));
 const laneCost=()=>Math.floor(250*Math.pow(1.5,state.lanes-1));
 function renderFactoryLanes(){
  const root=$("factoryLanes");
- root.innerHTML=state.laneData.map((lane,i)=>'<div class="factory-lane'+(lane.progress>=100?' ready':'')+'"><div class="lane-label">LINE '+(i+1)+' ・ '+Math.floor(lane.progress)+'% ・ ⚡'+laneSpeed(lane,i).toFixed(2)+'x ・ 💰'+Math.floor(lanePrice(lane,i))+' G</div><div class="lane-machine"></div><div class="lane-robot"></div><div class="lane-conveyor"></div><div class="lane-progress"><div class="lane-progress-row"><span>生産進捗</span><strong>'+Math.floor(lane.progress)+'%</strong><button class="lane-ship" data-lane="'+i+'">📦 出荷 <span>'+Math.floor(lanePrice(lane,i))+' G</span></button></div><div class="lane-progress-track"><div class="lane-progress-bar" style="width:'+Math.floor(lane.progress)+'%"></div></div></div><div class="lane-upgrades"><button class="lane-up" data-lane="'+i+'" data-type="speed"><strong>⚡ 速度アップ</strong><small>Lv.'+lane.speedLv+' → Lv.'+(lane.speedLv+1)+'　'+Math.floor(50*Math.pow(1.65,lane.speedLv-1))+' G</small></button><button class="lane-up" data-lane="'+i+'" data-type="price"><strong>💰 価格アップ</strong><small>Lv.'+lane.priceLv+' → Lv.'+(lane.priceLv+1)+'　'+Math.floor(75*Math.pow(1.7,lane.priceLv-1))+' G</small></button></div></div>').join("");
+ root.innerHTML=state.laneData.map((lane,i)=>'<div class="factory-lane'+(lane.progress>=100?' ready':'')+'" data-lane="'+i+'"><div class="lane-label">LINE '+(i+1)+' ・ <span class="lane-percent">'+Math.floor(lane.progress)+'%</span> ・ ⚡'+laneSpeed(lane,i).toFixed(2)+'x ・ 💰'+Math.floor(lanePrice(lane,i))+' G</div><div class="lane-machine"></div><div class="lane-robot"></div><div class="lane-conveyor"></div><div class="lane-progress"><div class="lane-progress-row"><span>生産進捗</span><strong class="lane-percent">'+Math.floor(lane.progress)+'%</strong><button class="lane-ship" data-lane="'+i+'" '+(lane.progress<100?'disabled':'')+'>📦 出荷 <span>'+Math.floor(lanePrice(lane,i))+' G</span></button></div><div class="lane-progress-track"><div class="lane-progress-bar" style="width:'+Math.floor(lane.progress)+'%"></div></div></div><div class="lane-upgrades"><button class="lane-up" data-lane="'+i+'" data-type="speed"><strong>⚡ 速度アップ</strong><small>Lv.'+lane.speedLv+' → Lv.'+(lane.speedLv+1)+'　'+Math.floor(50*Math.pow(1.65,lane.speedLv-1))+' G</small></button><button class="lane-up" data-lane="'+i+'" data-type="price"><strong>💰 価格アップ</strong><small>Lv.'+lane.priceLv+' → Lv.'+(lane.priceLv+1)+'　'+Math.floor(75*Math.pow(1.7,lane.priceLv-1))+' G</small></button></div></div>').join("");
  root.querySelectorAll(".lane-up").forEach(btn=>{btn.disabled=false;btn.addEventListener("click",handleLaneUpgrade)});
- root.querySelectorAll(".lane-ship").forEach(btn=>btn.addEventListener("click",()=>{
-  const i=Number(btn.dataset.lane),lane=state.laneData[i];
-  if(!lane)return;
-  if(lane.progress<100){message("📦 LINE "+(i+1)+"はまだ完成していません。",false);return;}
-  const earned=Math.floor(lanePrice(lane,i));
-  state.money+=earned;state.robots++;lane.progress=0;
-  state.laneProgress=state.laneData.map(l=>l.progress);state.progress=state.laneData[0]?.progress||0;
-  message("📦 LINE "+(i+1)+"を出荷！ +"+earned+" G",true);save();render();
- }));
+ root.querySelectorAll(".lane-ship").forEach(btn=>btn.addEventListener("click",handleLaneShip));
+}
+function handleLaneShip(e){
+ const btn=e.currentTarget;
+ const i=Number(btn.dataset.lane);
+ const lane=state.laneData[i];
+ if(!lane || lane.progress<100)return;
+ const earned=Math.floor(lanePrice(lane,i));
+ state.money+=earned;
+ state.robots++;
+ lane.progress=0;
+ state.laneProgress=state.laneData.map(l=>l.progress);
+ state.progress=state.laneData[0]?.progress||0;
+ message("📦 LINE "+(i+1)+"を出荷！ +"+earned+" G",true);
+ save();
+ render();
 }
 function handleLaneUpgrade(e){
  const laneIndex=Number(e.currentTarget.dataset.lane);
@@ -114,6 +121,21 @@ function handleLaneUpgrade(e){
  if(type==="speed")lane.speedLv++; else lane.priceLv++;
  message("LINE "+(laneIndex+1)+" の"+(type==="speed"?"生産速度":"出荷価格")+"をLv."+ (type==="speed"?lane.speedLv:lane.priceLv)+" に強化！",true);
  save();render();
+}
+function updateLaneProgress(){
+ const root=$("factoryLanes");
+ root.querySelectorAll(".factory-lane").forEach(el=>{
+  const i=Number(el.dataset.lane);
+  const lane=state.laneData[i];
+  if(!lane)return;
+  const percent=Math.floor(lane.progress);
+  el.classList.toggle("ready",lane.progress>=100);
+  el.querySelectorAll(".lane-percent").forEach(node=>node.textContent=percent+"%");
+  const bar=el.querySelector(".lane-progress-bar");
+  if(bar)bar.style.width=percent+"%";
+  const ship=el.querySelector(".lane-ship");
+  if(ship)ship.disabled=lane.progress<100;
+ });
 }
 function render(){
  $("money").textContent=Math.floor(state.money);
@@ -128,7 +150,7 @@ function render(){
  const ready=state.laneData.filter(lane=>lane.progress>=100).length;
  $("laneStatus").textContent="稼働中 "+state.lanes+"本　・　出荷待ち "+ready+"本";
  $("lanePotential").textContent="次のレーンほどLv.1の生産時間は5%短く、出荷価格は5%高くなります。";
- renderFactoryLanes();
+ updateLaneProgress();
 }
 function message(t,good=false){$("event").innerHTML=good?'<span class="bonus">'+t+"</span>":t}
 $("ship").addEventListener("click",()=>{
