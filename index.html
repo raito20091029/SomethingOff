@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<meta name="roboforge-build" content="20261004-ALL-COSTS-HALF">
+<meta name="roboforge-build" content="20261004-SHIP-AMOUNT-FIX">
 <title>RoboForge</title>
 <style>
 :root{--bg:#07101d;--panel:#0d1a2b;--panel2:#12243a;--line:#203852;--text:#eef6ff;--muted:#8ea5bd;--accent:#48d7ff;--accent2:#7c6cff;--good:#62e6a7;--warn:#ffd166}
@@ -154,7 +154,7 @@ function render(){
  $("incomePerSec").textContent=incomePerSec.toFixed(2);
  $("laneUp").disabled=state.money<laneCost();
  $("ship").disabled=!state.laneData.some(lane=>lane.progress>=100);
- const shipAmount=state.laneData.filter(lane=>lane.progress>=100).reduce((sum,lane,i)=>sum+Math.floor(lanePrice(lane,i)),0);
+ const shipAmount=state.laneData.reduce((sum,lane,i)=>sum+(lane.progress>=100?Math.floor(lanePrice(lane,i)):0),0);
  $("shipAmount").textContent=shipAmount;
  const ready=state.laneData.filter(lane=>lane.progress>=100).length;
  $("laneStatus").textContent="稼働中 "+state.lanes+"本　・　出荷待ち "+ready+"本";
