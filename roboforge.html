@@ -130,8 +130,7 @@ $("priceUp").addEventListener("click",()=>{
  state.money-=c;state.priceLv++;message("💰 出荷設備を強化しました！",true);save();render();
 });
 let last=performance.now();
-let lastRender=0;
-let frameId=0;
+let timerId=0;
 let backgroundAt=0;
 
 function advanceProduction(dt){
@@ -140,23 +139,20 @@ function advanceProduction(dt){
  }
 }
 
-function loop(now){
+function loop(){
+ const now=performance.now();
  const dt=Math.min(1000,now-last);
  last=now;
  advanceProduction(dt);
- if(now-lastRender>=100 || state.progress>=100){
-   render();
-   save();
-   lastRender=now;
- }
- frameId=requestAnimationFrame(loop);
+ render();
+ timerId=setTimeout(loop,100);
 }
 
 function enterBackground(){
  if(backgroundAt)return;
  backgroundAt=performance.now();
- cancelAnimationFrame(frameId);
- frameId=0;
+ clearTimeout(timerId);
+ timerId=0;
 }
 
 function returnToForeground(){
@@ -168,8 +164,7 @@ function returnToForeground(){
  advanceProduction(elapsed);
  render();
  save();
- lastRender=now;
- if(!frameId)frameId=requestAnimationFrame(loop);
+ if(!timerId)timerId=setTimeout(loop,100);
 }
 
 document.addEventListener("visibilitychange",()=>{
@@ -181,6 +176,8 @@ window.addEventListener("focus",()=>{
  if(!document.hidden)returnToForeground();
 });
 
+render();
+timerId=setTimeout(loop,100);
 render();
 frameId=requestAnimationFrame(loop);
 </script>
