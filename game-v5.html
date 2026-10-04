@@ -74,8 +74,7 @@ function choose(i){
  if(result==="coin"){gain=20+state.round*8;state.streak++;title="🪙 当たり！";sub="コイン +"+gain;cls="neutral"}
  if(result==="jackpot"){gain=120+state.round*35;state.streak+=2;title="🌟 JACKPOT！";sub="コイン +"+gain;cls="good"}
  if(result==="bad"){
-   if(state.shield){state.shield=false;gain=0;state.streak=0;title="🛡️ 保険発動！";sub="ハズレを無効化した！";cls="neutral"}
-   else{gain=-Math.max(25,35+state.round*8);state.streak=0;title="💥 ハズレ……";sub="コイン "+gain;cls="bad"}
+   gain=-Math.max(25,35+state.round*8);state.streak=0;title="💥 ハズレ……";sub="コイン "+gain;cls="bad"
  }
  if(state.double){gain*=2;state.double=false;sub+="　✖️2倍！"}
  state.coins=Math.max(0,state.coins+gain);
