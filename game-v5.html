@@ -13,7 +13,6 @@ body{display:flex;align-items:center;justify-content:center;padding:18px}
 .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}button{font:inherit;border:0;border-radius:11px;padding:12px 18px;background:#fff;color:#111;font-weight:800;cursor:pointer}button.secondary{background:#262c3b;color:#fff;border:1px solid #fff2}button.gold{background:#f2c94c}button:disabled{opacity:.45;cursor:not-allowed}
 #startScreen{position:fixed;inset:0;background:#090b10ee;display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}.startPanel{width:min(520px,94vw);text-align:center}.startPanel h2{font-size:32px;margin:0 0 10px}.startPanel p{line-height:1.7;opacity:.78}.startBtn{font-size:20px;padding:15px 55px;margin-top:8px}
 #gameOver{display:none;position:fixed;inset:0;background:#090b10ee;align-items:center;justify-content:center;padding:20px;z-index:20}.overPanel{width:min(500px,94vw);text-align:center}.overPanel h2{font-size:42px;margin:0 0 8px}.big{font-size:30px;font-weight:900}
-#shop{margin-top:16px;padding:13px;background:#0d1017;border:1px solid #fff2;border-radius:14px}.shopTitle{font-weight:900;margin-bottom:8px}.shopBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 #message{min-height:24px;margin-top:12px;color:#f2c94c;font-weight:800}
 @media(max-width:560px){body{padding:10px}.stats{grid-template-columns:repeat(2,1fr)}.boxes{gap:8px}.box{min-height:155px}.box .emoji{font-size:52px;margin:18px 0 10px}.panel{padding:13px}.eventTitle{font-size:21px}}
 </style></head><body>
@@ -34,7 +33,6 @@ body{display:flex;align-items:center;justify-content:center;padding:18px}
     </div>
     <div id="result"><div class="resultMain" id="resultMain"></div><div class="resultSub" id="resultSub"></div></div>
     <div class="actions"><button id="bank" class="gold" disabled>💰 報酬を確定</button><button id="continue" disabled>🔥 もう1回</button></div>
-    <div id="shop"><div class="shopTitle">🛒 強化</div><div class="shopBtns"><button class="secondary" id="doubleBtn">✖️ 次回2倍　250</button></div></div>
     <div id="message"></div>
   </div>
 </div>
@@ -44,83 +42,34 @@ body{display:flex;align-items:center;justify-content:center;padding:18px}
 "use strict";
 const $=id=>document.getElementById(id);
 const boxes=[...document.querySelectorAll(".box")];
-let state={round:1,coins:0,streak:0,best:Number(localStorage.getItem("so_best")||0),banked:0,double:true,started:false,chosen:false};
+let state={round:1,coins:0,streak:0,best:Number(localStorage.getItem("so_best")||0),banked:0,started:false,chosen:false};
 let boxResults=["bad","good","coin"];
 function save(){localStorage.setItem("so_save",JSON.stringify(state));localStorage.setItem("so_best",String(state.best))}
 function load(){try{const s=JSON.parse(localStorage.getItem("so_save"));if(s&&typeof s==="object")state={...state,...s}}catch{}}
-function update(){
- $("round").textContent=state.round;$("coins").textContent=state.coins;$("streak").textContent=state.streak;$("best").textContent=state.best;
- 
- 
- $("doubleBtn").textContent="✖️ 次回2倍　ON";
-}
-function message(t){$("message").textContent=t;setTimeout(()=>{if($("message").textContent===t)$("message").textContent=""},1800)}
-function startGame(){
- state={...state,round:1,coins:0,streak:0,banked:0,double:true,started:true,chosen:false};
- $("startScreen").style.display="none";$("gameOver").style.display="none";resetBoxes();showChoice();update();save();
-}
+function update(){$("round").textContent=state.round;$("coins").textContent=state.coins;$("streak").textContent=state.streak;$("best").textContent=state.best}
+function startGame(){state={...state,round:1,coins:0,streak:0,banked:0,started:true,chosen:false};$("startScreen").style.display="none";$("gameOver").style.display="none";resetBoxes();showChoice();update();save()}
 function resetBoxes(){boxes.forEach(b=>{b.disabled=false;b.className="box";b.querySelector(".emoji").textContent="📦"});$("result").style.display="none";$("bank").disabled=true;$("continue").disabled=true}
 function prepareBoxResults(){boxResults=["bad","good","coin"];const jackpotChance=.08;if(Math.random()<jackpotChance)boxResults[2]="jackpot";for(let i=boxResults.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[boxResults[i],boxResults[j]]=[boxResults[j],boxResults[i]]}}
-function getHint(){
- const labels=["A","B","C"];
- const rank={bad:0,coin:1,good:2,jackpot:3};
- const options=[];
- for(let i=0;i<3;i++)if(boxResults[i]!=="bad")options.push("箱 "+labels[i]+" はハズレではない");
- for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)if(rank[boxResults[i]]!==rank[boxResults[j]]){
-   const better=rank[boxResults[i]]>rank[boxResults[j]]?i:j;
-   const worse=better===i?j:i;
-   options.push("箱 "+labels[better]+" の方が箱 "+labels[worse]+" より良い結果");
- }
- if(boxResults.includes("jackpot")){
-   const j=boxResults.indexOf("jackpot");
-   options.push("JACKPOTは箱 "+labels[j]+" に入っている");
- }
- return options[Math.floor(Math.random()*options.length)];
-}
-function showChoice(){
- state.chosen=false;resetBoxes();prepareBoxResults();
- const hint=getHint();
- $("event").innerHTML='<div class="eventTitle">🎁 ROUND '+state.round+' — どれを選ぶ？</div><div class="eventText">観察して選べ。ヒントは必ず本当の情報だ。</div><div class="hint">🔎 ヒント：'+hint+'</div>';
-}
+function getHint(){const labels=["A","B","C"];const rank={bad:0,coin:1,good:2,jackpot:3};const options=[];for(let i=0;i<3;i++)if(boxResults[i]!=="bad")options.push("箱 "+labels[i]+" はハズレではない");for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)if(rank[boxResults[i]]!==rank[boxResults[j]]){const better=rank[boxResults[i]]>rank[boxResults[j]]?i:j;const worse=better===i?j:i;options.push("箱 "+labels[better]+" の方が箱 "+labels[worse]+" より良い結果")}if(boxResults.includes("jackpot")){const j=boxResults.indexOf("jackpot");options.push("JACKPOTは箱 "+labels[j]+" に入っている")}return options[Math.floor(Math.random()*options.length)]}
+function showChoice(){state.chosen=false;resetBoxes();prepareBoxResults();const hint=getHint();$("event").innerHTML='<div class="eventTitle">🎁 ROUND '+state.round+' — どれを選ぶ？</div><div class="eventText">観察して選べ。ヒントは必ず本当の情報だ。</div><div class="hint">🔎 ヒント：'+hint+'</div>'}
 function choose(i){
  if(!state.started||state.chosen)return;
  state.chosen=true;boxes.forEach(b=>b.disabled=true);
- const result=boxResults[i];
- let gain=0,title="",sub="",cls="";
+ const result=boxResults[i];let gain=0,title="",sub="",cls="";
  if(result==="good"){gain=40+state.round*15;state.streak++;title="✨ 大当たり！";sub="コイン +"+gain;cls="good"}
  if(result==="coin"){gain=20+state.round*8;state.streak++;title="🪙 当たり！";sub="コイン +"+gain;cls="neutral"}
  if(result==="jackpot"){gain=120+state.round*35;state.streak+=2;title="🌟 JACKPOT！";sub="コイン +"+gain;cls="good"}
- if(result==="bad"){
-   gain=-Math.max(25,35+state.round*8);state.streak=0;title="💥 ハズレ……";sub="コイン "+gain;cls="bad"
- }
- if(state.double&&gain>0){gain*=2;sub+="　✖️2倍！"}
+ if(result==="bad"){gain=-Math.max(25,35+state.round*8);state.streak=0;title="💥 ハズレ……";sub="コイン "+gain;cls="bad"}
  state.coins=Math.max(0,state.coins+gain);
  const b=boxes[i];b.classList.add(cls);b.querySelector(".emoji").textContent=result==="bad"?"💣":result==="jackpot"?"🌟":"💰";
  $("resultMain").textContent=title;$("resultSub").textContent=sub;$("result").style.display="block";
  $("bank").disabled=false;$("continue").disabled=false;
  $("event").innerHTML='<div class="eventTitle">結果が出た！</div><div class="eventText">この報酬を確定する？ それともさらに挑戦する？</div>';
  update();save();
- if(state.coins<=0){
-   state.started=false;state.chosen=true;state.banked=0;state.best=Math.max(state.best,state.round);
-   save();
-   $("continue").disabled=true;$("bank").disabled=true;
-   $("overReason").textContent="コインが0になった！ここで終了。";
-   $("overScore").textContent="🪙 0 コイン";
-   $("overBest").textContent="最高記録：ROUND "+state.best;
-   $("gameOver").style.display="flex";
- }
+ if(state.coins<=0){state.started=false;state.chosen=true;state.banked=0;state.best=Math.max(state.best,state.round);save();$("continue").disabled=true;$("bank").disabled=true;$("overReason").textContent="コインが0になった！ここで終了。";$("overScore").textContent="🪙 0 コイン";$("overBest").textContent="最高記録：ROUND "+state.best;$("gameOver").style.display="flex"}
 }
 function nextRound(){state.round++;state.chosen=false;showChoice();update();save()}
-function bank(){
- state.banked=Math.max(state.banked,state.coins);state.best=Math.max(state.best,state.round);
- save();$("overReason").textContent="今回はここで撤退した。";$("overScore").textContent="🪙 "+state.coins+" コイン";$("overBest").textContent="最高記録：ROUND "+state.best;$("gameOver").style.display="flex";
-}
-$("bank").onclick=bank;
-$("continue").onclick=nextRound;
-boxes.forEach(b=>b.addEventListener("click",()=>choose(Number(b.dataset.i))));
-$("start").onclick=startGame;$("again").onclick=startGame;
-
-
-$("doubleBtn").onclick=()=>message("✖️ 次回2倍は常時ONです！");
+function bank(){state.banked=Math.max(state.banked,state.coins);state.best=Math.max(state.best,state.round);save();$("overReason").textContent="今回はここで撤退した。";$("overScore").textContent="🪙 "+state.coins+" コイン";$("overBest").textContent="最高記録：ROUND "+state.best;$("gameOver").style.display="flex"}
+$("bank").onclick=bank;$("continue").onclick=nextRound;boxes.forEach(b=>b.addEventListener("click",()=>choose(Number(b.dataset.i))));$("start").onclick=startGame;$("again").onclick=startGame;
 load();update();
 </script></body></html>
