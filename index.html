@@ -40,7 +40,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
     <div id="event" class="event"></div>
     <div class="factory-status"><span id="laneStatus">稼働中 1本 ・ 出荷待ち 0本</span><span id="lanePotential">次のレーンほどLv.1の生産時間は5%短く、出荷価格は5%高くなります。</span></div>
     <div class="actions">
-      <button class="primary" id="ship">📦 出荷する</button>
+      <button class="primary" id="ship">📦 出荷して受け取る <span id="shipAmount">0</span> G</button>
       <button class="secondary" id="laneUp">🏭 新しいレーン <span id="laneCost">250</span> G</button>
     </div>
   </div>
@@ -114,6 +114,8 @@ function render(){
  $("laneCost").textContent=laneCost();
  $("laneUp").disabled=state.money<laneCost();
  $("ship").disabled=!state.laneData.some(lane=>lane.progress>=100);
+ const shipAmount=state.laneData.filter(lane=>lane.progress>=100).reduce((sum,lane,i)=>sum+Math.floor(lanePrice(lane,i)),0);
+ $("shipAmount").textContent=shipAmount;
  const ready=state.laneData.filter(lane=>lane.progress>=100).length;
  $("laneStatus").textContent="稼働中 "+state.lanes+"本　・　出荷待ち "+ready+"本";
  $("lanePotential").textContent="次のレーンほどLv.1の生産時間は5%短く、出荷価格は5%高くなります。";
@@ -121,6 +123,12 @@ function render(){
 }
 function message(t,good=false){$("event").innerHTML=good?'<span class="bonus">'+t+"</span>":t}
 $("ship").addEventListener("click",()=>{
+  const readyLanes=state.laneData.filter(lane=>lane.progress>=100);
+  if(!readyLanes.length)return;
+  const earned=readyLanes.reduce((sum,lane)=>sum+Math.floor(lanePrice(lane,state.laneData.indexOf(lane))),0);
+  state.money+=earned;
+  state.robots+=readyLanes.length;
+  readyLanes.forEach(lane=>lane.progress=0);
  const index=state.laneData.findIndex(lane=>lane.progress>=100);
  if(index<0)return;
  const earned=Math.floor(lanePrice(state.laneData[index],index));
