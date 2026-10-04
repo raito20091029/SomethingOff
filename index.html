@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<meta name="roboforge-build" content="20261004-SHIP-AMOUNT-FIX">
+<meta name="roboforge-build" content="20261004-BACKGROUND-PERFORMANCE">
 <title>RoboForge</title>
 <style>
 :root{--bg:#07101d;--panel:#0d1a2b;--panel2:#12243a;--line:#203852;--text:#eef6ff;--muted:#8ea5bd;--accent:#48d7ff;--accent2:#7c6cff;--good:#62e6a7;--warn:#ffd166}
@@ -217,16 +217,29 @@ function loop(){
  timerId=setTimeout(loop,100);
 }
 
+function stopLoop(){
+ if(timerId){
+  clearTimeout(timerId);
+  timerId=0;
+ }
+}
+
 function enterBackground(){
  if(backgroundAt)return;
- backgroundAt=performance.now();
+ backgroundAt=Date.now();
+ stopLoop();
+ save();
 }
 
 function returnToForeground(){
  if(!backgroundAt)return;
+ const elapsed=Math.max(0,Date.now()-backgroundAt);
  backgroundAt=0;
+ advanceProduction(elapsed);
  render();
  save();
+ last=performance.now();
+ timerId=setTimeout(loop,100);
 }
 
 document.addEventListener("visibilitychange",()=>{
