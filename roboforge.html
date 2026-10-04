@@ -106,8 +106,6 @@ function handleLaneUpgrade(e){
  if(state.money<cost)return;
  state.money-=cost;
  if(type==="speed")lane.speedLv++; else lane.priceLv++;
- state.speedLv=state.laneData[0].speedLv;
- state.priceLv=state.laneData[0].priceLv;
  message("LINE "+(laneIndex+1)+" の"+(type==="speed"?"生産速度":"出荷価格")+"をLv."+ (type==="speed"?lane.speedLv:lane.priceLv)+" に強化！",true);
  save();render();
 }
