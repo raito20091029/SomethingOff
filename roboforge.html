@@ -116,10 +116,6 @@ function render(){
  $("robots").textContent=state.robots;
  $("speed").textContent=laneSpeed(state.laneData[0]).toFixed(1);
  $("price").textContent=lanePrice(state.laneData[0]);
- $("speedLv").textContent=state.laneData[0].speedLv;
- $("priceLv").textContent=state.laneData[0].priceLv;
- $("speedCost").textContent=Math.floor(50*Math.pow(1.65,state.laneData[0].speedLv-1));
- $("priceCost").textContent=Math.floor(75*Math.pow(1.7,state.laneData[0].priceLv-1));
  $("laneCount").textContent=state.lanes;
  $("laneCost").textContent=laneCost();
  $("laneUp").disabled=state.money<laneCost();
