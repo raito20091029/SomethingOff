@@ -58,6 +58,8 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
   <h2 style="margin-top:22px">⬆️ 工場アップグレード</h2>
   <button class="upgrade" id="speedUp"><strong>⚡ 生産設備 Lv.<span id="speedLv">1</span></strong><small>生産速度を上げる　・　<span id="speedCost">50</span> G</small></button>
   <button class="upgrade" id="priceUp"><strong>💰 出荷設備 Lv.<span id="priceLv">1</span></strong><small>ロボット1体あたりの価格を上げる　・　<span id="priceCost">75</span> G</small></button>
+  <button class="upgrade" id="laneUp"><strong>🏭 生産レーン <span id="laneCount">1</span>本</strong><small>生産ラインを1本追加する　・　<span id="laneCost">250</span> G</small></button>
+  <div id="laneStatus" class="tip" style="margin-top:10px"></div>
   <div class="tip">生産ラインは自動で稼働します。設備を強化して、生産効率を高めていきましょう。</div>
 </section>
 </div>
@@ -66,7 +68,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 <script>
 "use strict";
 const SAVE_KEY="roboforge-save-v1";
-const defaultState={money:100,robots:0,progress:0,speedLv:1,priceLv:1};
+const defaultState={money:100,robots:0,progress:0,speedLv:1,priceLv:1,lanes:1,laneProgress:[0]};
 let state={...defaultState};
 try{
  const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");
@@ -79,6 +81,12 @@ try{
   state.progress=Math.max(0,Math.min(100,state.progress));
   state.speedLv=Math.max(1,Math.floor(state.speedLv));
   state.priceLv=Math.max(1,Math.floor(state.priceLv));
+  state.lanes=Math.max(1,Math.floor(state.lanes));
+  if(!Array.isArray(saved.laneProgress)) state.laneProgress=[state.progress];
+  else state.laneProgress=saved.laneProgress.map(v=>Math.max(0,Math.min(100,Number(v)||0)));
+  while(state.laneProgress.length<state.lanes) state.laneProgress.push(0);
+  state.laneProgress=state.laneProgress.slice(0,state.lanes);
+  state.progress=state.laneProgress[0]||0;
  }
 }catch(e){}
 const $=id=>document.getElementById(id);
@@ -89,6 +97,7 @@ const speed=()=>1+(state.speedLv-1)*0.18;
 const price=()=>25+(state.priceLv-1)*12;
 const speedCost=()=>Math.floor(50*Math.pow(1.65,state.speedLv-1));
 const priceCost=()=>Math.floor(75*Math.pow(1.7,state.priceLv-1));
+const laneCost=()=>Math.floor(250*Math.pow(1.8,state.lanes-1));
 function render(){
  $("money").textContent=Math.floor(state.money);
  $("robots").textContent=state.robots;
@@ -98,18 +107,25 @@ function render(){
  $("priceLv").textContent=state.priceLv;
  $("speedCost").textContent=speedCost();
  $("priceCost").textContent=priceCost();
+ $("laneCount").textContent=state.lanes;
+ $("laneCost").textContent=laneCost();
+ $("laneUp").disabled=state.money<laneCost();
  $("pct").textContent=Math.floor(state.progress)+"%";
  $("bar").style.width=state.progress+"%";
- $("ship").disabled=state.progress<100;
+ $("ship").disabled=!state.laneProgress.some(v=>v>=100);
+ const ready=state.laneProgress.filter(v=>v>=100).length;
+ $("laneStatus").textContent="稼働中 "+state.lanes+"本　・　出荷待ち "+ready+"本";
  $("speedUp").disabled=state.money<speedCost();
  $("priceUp").disabled=state.money<priceCost();
 }
 function message(t,good=false){$("event").innerHTML=good?'<span class="bonus">'+t+"</span>":t}
 $("ship").addEventListener("click",()=>{
- if(state.progress<100)return;
+ const index=state.laneProgress.findIndex(v=>v>=100);
+ if(index<0)return;
  const earned=price();
- state.money+=earned;state.robots++;state.progress=0;
- message("📦 ロボットを出荷！ +"+earned+" G",true);
+ state.money+=earned;state.robots++;state.laneProgress[index]=0;
+ state.progress=state.laneProgress[0]||0;
+ message("📦 レーン"+(index+1)+"から出荷！ +"+earned+" G",true);
  save();
  render();
 });
@@ -121,14 +137,22 @@ $("priceUp").addEventListener("click",()=>{
  const c=priceCost();if(state.money<c)return;
  state.money-=c;state.priceLv++;message("💰 出荷設備を強化しました！",true);save();render();
 });
+$("laneUp").addEventListener("click",()=>{
+ const c=laneCost();if(state.money<c)return;
+ state.money-=c;state.lanes++;state.laneProgress.push(0);
+ message("🏭 新しい生産レーンを追加しました！",true);save();render();
+});
 let last=performance.now();
 let timerId=0;
 let backgroundAt=0;
 
 function advanceProduction(dt){
- if(state.progress<100){
-   state.progress=Math.min(100,state.progress+dt*0.0048*speed());
+ for(let i=0;i<state.laneProgress.length;i++){
+   if(state.laneProgress[i]<100){
+     state.laneProgress[i]=Math.min(100,state.laneProgress[i]+dt*0.0048*speed());
+   }
  }
+ state.progress=state.laneProgress[0]||0;
 }
 
 function loop(){
