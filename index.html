@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<meta name="roboforge-build" content="20261004-PAGE-SCROLL">
+<meta name="roboforge-build" content="20261004-UPGRADE-HALF">
 <title>RoboForge</title>
 <style>
 :root{--bg:#07101d;--panel:#0d1a2b;--panel2:#12243a;--line:#203852;--text:#eef6ff;--muted:#8ea5bd;--accent:#48d7ff;--accent2:#7c6cff;--good:#62e6a7;--warn:#ffd166}
@@ -92,7 +92,7 @@ const lanePrice=(lane,index=0)=>25*Math.pow(1.05,index+(lane.priceLv-1));
 const laneProductionTime=(lane,index=0)=>100/(0.0048*laneSpeed(lane,index));
 const formatProductionTime=ms=>{const seconds=ms/1000;if(seconds<60)return seconds.toFixed(1)+"秒";const minutes=Math.floor(seconds/60);const remain=Math.round(seconds%60);return remain?minutes+"分"+remain+"秒":minutes+"分";};
 const laneCost=()=>Math.floor(456*state.lanes);
-const laneUpgradeBase=(type,index)=>{const base=type==="speed"?50:type==="price"?75:500;return Math.floor(base*Math.pow(1.5,index));};
+const laneUpgradeBase=(type,index)=>{const base=type==="speed"?25:type==="price"?37.5:250;return Math.floor(base*Math.pow(1.5,index));};
 function renderFactoryLanes(){
  const root=$("factoryLanes");
  root.innerHTML=state.laneData.map((lane,i)=>'<div class="factory-lane'+(lane.progress>=100?' ready':'')+'" data-lane="'+i+'"><div class="lane-label">LINE '+(i+1)+' ・ <span class="lane-percent">'+Math.floor(lane.progress)+'%</span> ・ ⏱️'+formatProductionTime(laneProductionTime(lane,i))+' ・ 💰'+Math.floor(lanePrice(lane,i))+' G</div><div class="lane-machine"></div><div class="lane-robot"></div><div class="lane-conveyor"></div><div class="lane-progress"><div class="lane-progress-row"><span>生産進捗</span><strong class="lane-percent">'+Math.floor(lane.progress)+'%</strong><button class="lane-ship" data-lane="'+i+'" '+(lane.progress<100?'disabled':'')+'>📦 出荷 <span>'+Math.floor(lanePrice(lane,i))+' G</span></button></div><div class="lane-progress-track"><div class="lane-progress-bar" style="width:'+Math.floor(lane.progress)+'%"></div></div></div><div class="lane-upgrades"><button class="lane-up" data-lane="'+i+'" data-type="speed"><strong>⚡ 速度アップ</strong><small>Lv.'+lane.speedLv+' → Lv.'+(lane.speedLv+1)+'　'+Math.floor(laneUpgradeBase("speed",i)*Math.pow(1.65,lane.speedLv-1))+' G</small></button><button class="lane-up" data-lane="'+i+'" data-type="price"><strong>💰 価格アップ</strong><small>Lv.'+lane.priceLv+' → Lv.'+(lane.priceLv+1)+'　'+Math.floor(laneUpgradeBase("price",i)*Math.pow(1.7,lane.priceLv-1))+' G</small></button><button class="lane-up" data-lane="'+i+'" data-type="auto" '+(lane.autoShip?'disabled':'')+'><strong>🤖 自動出荷</strong><small>'+(lane.autoShip?'解放済み':laneUpgradeBase("auto",i)+' Gで解放')+'</small></button></div></div>').join("");
