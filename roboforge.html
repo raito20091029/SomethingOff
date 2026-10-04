@@ -89,12 +89,13 @@ const $=id=>document.getElementById(id);
 function save(){
  try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
 }
-const laneSpeed=lane=>1+(lane.speedLv-1)*0.18;
-const lanePrice=lane=>25+(lane.priceLv-1)*12;
-const laneCost=()=>Math.floor(250*Math.pow(1.8,state.lanes-1));
+const laneTimeFactor=laneIndex=>Math.pow(0.95,laneIndex);
+const laneSpeed=lane=>1/Math.pow(0.95,(lane._index||0)+(lane.speedLv-1));
+const lanePrice=lane=>25*Math.pow(1.05,(lane._index||0)+(lane.priceLv-1));
+const laneCost=()=>Math.floor(250*Math.pow(1.5,state.lanes-1));
 function renderFactoryLanes(){
  const root=$("factoryLanes");
- root.innerHTML=state.laneData.map((lane,i)=>'<div class="factory-lane'+(lane.progress>=100?' ready':'')+'"><div class="lane-label">LINE '+(i+1)+' ・ '+Math.floor(lane.progress)+'%</div><div class="lane-machine"></div><div class="lane-robot"></div><div class="lane-conveyor"></div><div class="lane-upgrades"><button class="lane-up" data-lane="'+i+'" data-type="speed">⚡ 速度 Lv.'+lane.speedLv+'<small> '+Math.floor(50*Math.pow(1.65,lane.speedLv-1))+' G</small></button><button class="lane-up" data-lane="'+i+'" data-type="price">💰 価格 Lv.'+lane.priceLv+'<small> '+Math.floor(75*Math.pow(1.7,lane.priceLv-1))+' G</small></button></div></div>').join("");
+ root.innerHTML=state.laneData.map((lane,i)=>{lane._index=i;return '<div class="factory-lane'+(lane.progress>=100?' ready':'')+'"><div class="lane-label">LINE '+(i+1)+' ・ '+Math.floor(lane.progress)+'% ・ ⚡'+laneSpeed(lane).toFixed(2)+'x ・ 💰'+Math.floor(lanePrice(lane))+' G</div><div class="lane-machine"></div><div class="lane-robot"></div><div class="lane-conveyor"></div><div class="lane-upgrades"><button class="lane-up" data-lane="'+i+'" data-type="speed">⚡ 速度 Lv.'+lane.speedLv+'<small> '+Math.floor(50*Math.pow(1.65,lane.speedLv-1))+' G</small></button><button class="lane-up" data-lane="'+i+'" data-type="price">💰 価格 Lv.'+lane.priceLv+'<small> '+Math.floor(75*Math.pow(1.7,lane.priceLv-1))+' G</small></button></div></div>'}).join("");
  root.querySelectorAll(".lane-up").forEach(btn=>btn.addEventListener("click",handleLaneUpgrade));
 }
 function handleLaneUpgrade(e){
