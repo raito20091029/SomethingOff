@@ -49,7 +49,7 @@ function load(){try{const s=JSON.parse(localStorage.getItem("so_save"));if(s&&ty
 function update(){$("round").textContent=state.round;$("coins").textContent=state.coins;$("streak").textContent=state.streak;$("best").textContent=state.best}
 function startGame(){state={...state,round:1,coins:0,streak:0,banked:0,started:true,chosen:false};$("startScreen").style.display="none";$("gameOver").style.display="none";resetBoxes();showChoice();update();save()}
 function resetBoxes(){boxes.forEach(b=>{b.disabled=false;b.className="box";b.querySelector(".emoji").textContent="📦"});$("result").style.display="none";$("bank").disabled=true;$("continue").disabled=true}
-function prepareBoxResults(){boxResults=["bad","good","coin"];if(Math.random()<.08)boxResults[2]="jackpot"for(let i=boxResults.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[boxResults[i],boxResults[j]]=[boxResults[j],boxResults[i]]}}
+function prepareBoxResults(){if(state.round===1){boxResults=["coin","good","coin"];if(Math.random()<.08)boxResults[2]="jackpot"}else{boxResults=["bad","good","coin"];if(Math.random()<.08)boxResults[2]="jackpot"}for(let i=boxResults.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[boxResults[i],boxResults[j]]=[boxResults[j],boxResults[i]]}}
 function choose(i){
  if(!state.started||state.chosen)return;
  state.chosen=true;boxes.forEach(b=>b.disabled=true);
