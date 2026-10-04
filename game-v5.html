@@ -59,7 +59,7 @@ if(runSave&&!runSave.speedBaseVersion){p.speed=safeNum(p.speed,1)+3;runSave.spee
 normalizePlayer();p.level=Math.max(1,parseInt(p.level,10)||1);p.xp=Math.max(0,safeNum(p.xp,permanent.xp));
 let survivalTime=Math.max(0,safeNum(runSave?.survivalTime,0));
 function formatSurvivalTime(sec){const s=Math.max(0,Math.floor(sec)),m=Math.floor(s/60),r=s%60;return String(m).padStart(2,"0")+":"+String(r).padStart(2,"0")}function gameClock(sec){const total=Math.floor(Math.max(0,safeNum(sec,0)))%1440;const minute=(360+total)%1440;const h=Math.floor(minute/60),m=minute%60;let phase="☀️ 昼";if(minute>=300&&minute<360)phase="🌅 朝";else if(minute>=1080&&minute<1140)phase="🌇 夕方";else if(minute>=1140||minute<300)phase="🌙 夜";return{h,m,phase}}
-let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},noDamageKillStreak=Math.max(0,Math.floor(safeNum(runSave?.noDamageKillStreak,0))),projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;let rareShop=runSave?.rareShop&&typeof runSave.rareShop==="object"?runSave.rareShop:{active:false,x:0,y:0,elapsed:0};rareShop.active=!!rareShop.active;rareShop.elapsed=Math.max(0,safeNum(rareShop.elapsed,0));const BUILD_VERSION="20261004-162",INITIAL_ENEMY_COUNT=enemies.length;
+let paused=false,levelUpChoices=0,poison={time:0,tick:0,sourceAtk:0},noDamageKillStreak=Math.max(0,Math.floor(safeNum(runSave?.noDamageKillStreak,0))),projectiles=[],enemies=[],drops=Array.isArray(runSave?.drops)?runSave.drops:[],worldSeed=safeNum(runSave?.worldSeed,Math.floor(Math.random()*99999)),dead=!!runSave?.dead;let rareShop=runSave?.rareShop&&typeof runSave.rareShop==="object"?runSave.rareShop:{active:false,x:0,y:0,elapsed:0};rareShop.active=!!rareShop.active;rareShop.elapsed=Math.max(0,safeNum(rareShop.elapsed,0));const BUILD_VERSION="20261004-163",INITIAL_ENEMY_COUNT=enemies.length;
 let audioCtx=null,audioMaster=null,bgmGain=null,bgmTimer=null,bgmStep=0,audioReady=false;
 const BGM_NOTES=[196,208,220,240,261.63,240,220,196,174.61,185,196,214,233.08,214,196,196];
 function initAudio(){if(audioCtx){if(audioCtx.state==="suspended")audioCtx.resume();return}const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;audioCtx=new AC();audioMaster=audioCtx.createGain();audioMaster.gain.value=.72;setAudioVolume(savedVolume);audioMaster.connect(audioCtx.destination);bgmGain=audioCtx.createGain();bgmGain.gain.value=.0001;bgmGain.connect(audioMaster);audioReady=true}
@@ -361,9 +361,12 @@ const ENEMY_DESPAWN_DISTANCE=1200;const CLOSE_INITIAL_SPAWN=true;
 function fixEnemyHabitats(){
  enemies=enemies.filter(e=>{
   if(Math.hypot(e.x-p.x,e.y-p.y)>ENEMY_DESPAWN_DISTANCE){despawned++;return false}
-  const target=habitatType(e.base);
-  if(!habitatOk(e,e.x,e.y)){const pos=findHabitatPosition(e.base,e.x,e.y);if(!pos||!habitatOk(e,pos.x,pos.y)){fixRemoved++;return false}e.x=pos.x;e.y=pos.y;return true}
-  return true
+  if(!habitatOk(e,e.x,e.y)){
+   const pos=findHabitatPosition(e.base,p.x,p.y);
+   if(!pos||!habitatOk(e,pos.x,pos.y)){fixRemoved++;return false}
+   e.x=pos.x;e.y=pos.y;
+  }
+  return true;
  });
 }
 function sameHabitat(a,b){
@@ -503,6 +506,7 @@ function habitatOk(e,x,y){
  const margin=20;
  const samples=[[0,0]];
  for(let i=0;i<16;i++){const a=i*Math.PI*2/16;samples.push([Math.cos(a)*margin,Math.sin(a)*margin])}
+ if(target==="river"||target==="lake"){for(const [sx,sy] of samples){if(waterAt(x+sx,y+sy)!==target)return false}return true}
  for(const [sx,sy] of samples){if(waterAt(x+sx,y+sy)!=="")return false}
  return true;
 }
