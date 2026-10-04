@@ -234,10 +234,10 @@ function findHabitatPosition(t,ox,oy,minDistance=120){
     else if(side===2){x=ox+(Math.random()*2-1)*(W/2+SPAWN_SCREEN_MARGIN);y=oy-H/2-SPAWN_SCREEN_MARGIN-Math.random()*40}
     else{x=ox+(Math.random()*2-1)*(W/2+SPAWN_SCREEN_MARGIN);y=oy+H/2+SPAWN_SCREEN_MARGIN+Math.random()*40}
     const d=Math.hypot(x-ox,y-oy);
-    if(d>=nearMin&&d<=nearMax&&outsideSpawnScreen(x,y,ox,oy)&&habitatOk(t,x,y))return {x,y};
+    if(d>=nearMin&&d<=nearMax&&(CLOSE_INITIAL_SPAWN&&initialSpawnPending?true:outsideSpawnScreen(x,y,ox,oy))&&habitatOk(t,x,y))return {x,y};
    }
   }
-  for(let n=0;n<700;n++){const a=Math.random()*Math.PI*2,d=nearMin+Math.random()*Math.max(1,nearMax-nearMin),x=ox+Math.cos(a)*d,y=oy+Math.sin(a)*d;if(outsideSpawnScreen(x,y,ox,oy)&&habitatOk(t,x,y))return {x,y}}
+  for(let n=0;n<700;n++){const a=Math.random()*Math.PI*2,d=nearMin+Math.random()*Math.max(1,nearMax-nearMin),x=ox+Math.cos(a)*d,y=oy+Math.sin(a)*d;if((CLOSE_INITIAL_SPAWN&&initialSpawnPending?true:outsideSpawnScreen(x,y,ox,oy))&&habitatOk(t,x,y))return {x,y}}
   return null;
  }
  if(target==="river"){
@@ -246,7 +246,7 @@ function findHabitatPosition(t,ox,oy,minDistance=120){
    const center=riverCenterAt(x),width=riverWidthAt(x);
    const y=center+(Math.random()*2-1)*(width-2);
    const d=Math.hypot(x-ox,y-oy);
-   if(d>=nearMin&&d<=nearMax&&outsideSpawnScreen(x,y,ox,oy)&&habitatOk(t,x,y))return {x,y};
+   if(d>=nearMin&&d<=nearMax&&(CLOSE_INITIAL_SPAWN&&initialSpawnPending?true:outsideSpawnScreen(x,y,ox,oy))&&habitatOk(t,x,y))return {x,y};
   }
   for(let x=ox-nearMax;x<=ox+nearMax;x+=40){
    const center=riverCenterAt(x),width=riverWidthAt(x);
@@ -291,7 +291,7 @@ function spawnForHabitat(h,far=false){
  spawnTry++;
  const pool=(h==="river"?types.filter(t=>t.river):h==="lake"?types.filter(t=>t.lake):types.filter(t=>!t.river&&!t.lake)).filter(canSpawnEnemy);
  if(!pool.length){spawnFail++;return false}
- const t=pool[Math.floor(Math.random()*pool.length)],pos=findHabitatPosition(t,p.x,p.y,far?500:120);
+ const t=pool[Math.floor(Math.random()*pool.length)],pos=findHabitatPosition(t,p.x,p.y,CLOSE_INITIAL_SPAWN&&initialSpawnPending?170:(far?500:120));
  if(!pos){spawnFail++;return false}
  const lv=enemyLevel(t);
  enemies.push({x:pos.x,y:pos.y,hp:t.hp,maxHp:t.hp,atk:t.atk,base:t,name:t.name,lv});
@@ -314,7 +314,7 @@ function refillCurrentHabitat(lim){
  const h=waterAt(p.x,p.y)||"land";
  refillHabitat(h,Math.min(lim.max,Math.max(lim.min,3)));
 }
-const ENEMY_DESPAWN_DISTANCE=1200;
+const ENEMY_DESPAWN_DISTANCE=1200;const CLOSE_INITIAL_SPAWN=true;
 function fixEnemyHabitats(){
  enemies=enemies.filter(e=>{
   if(Math.hypot(e.x-p.x,e.y-p.y)>ENEMY_DESPAWN_DISTANCE){despawned++;return false}
