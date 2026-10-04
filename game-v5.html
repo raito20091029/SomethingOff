@@ -57,7 +57,7 @@ function choose(i){
  if(result==="good"){gain=40+state.round*15;state.streak++;title="✨ 大当たり！";sub="コイン +"+gain;cls="good"}
  if(result==="coin"){gain=20+state.round*8;state.streak++;title="🪙 当たり！";sub="コイン +"+gain;cls="neutral"}
  if(result==="jackpot"){gain=120+state.round*35;state.streak+=2;title="🌟 JACKPOT！";sub="コイン +"+gain;cls="good"}
- if(result==="bad"){gain=-Math.max(25,35+state.round*8);state.streak=0;title="💥 ハズレ……";sub="コイン "+gain;cls="bad"}
+ if(result==="bad"){gain=-Math.max(60,80+state.round*20);state.streak=0;title="💥 ハズレ……";sub="コイン "+gain;cls="bad"}
  state.coins=Math.max(0,state.coins+gain);
  const b=boxes[i];b.classList.add(cls);b.querySelector(".emoji").textContent=result==="bad"?"💣":result==="jackpot"?"🌟":"💰";
  $("resultMain").textContent=title;$("resultSub").textContent=sub;$("result").style.display="block";
