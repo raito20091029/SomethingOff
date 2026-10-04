@@ -120,7 +120,7 @@ function handleLaneUpgrade(e){
  state.money-=cost;
  if(type==="speed")lane.speedLv++; else lane.priceLv++;
  message("LINE "+(laneIndex+1)+" の"+(type==="speed"?"生産速度":"出荷価格")+"をLv."+ (type==="speed"?lane.speedLv:lane.priceLv)+" に強化！",true);
- save();render();
+ save();renderFactoryLanes();render();
 }
 function updateLaneProgress(){
  const root=$("factoryLanes");
@@ -169,7 +169,7 @@ $("ship").addEventListener("click",()=>{
 $("laneUp").addEventListener("click",()=>{
  const c=laneCost();if(state.money<c)return;
  state.money-=c;state.lanes++;state.laneData.push({progress:0,speedLv:1,priceLv:1});state.laneProgress=state.laneData.map(lane=>lane.progress);
- message("🏭 新しい生産レーンを追加しました！",true);save();render();
+ message("🏭 新しい生産レーンを追加しました！",true);save();renderFactoryLanes();render();
 });
 let last=performance.now();
 let timerId=0;
