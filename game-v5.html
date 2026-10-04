@@ -150,14 +150,18 @@ function forestFactorAt(x,y){
 function forestAt(x,y){return forestFactorAt(x,y)>.5&&!waterAt(x,y)}
 function forestEdgeRadius(a){return 1+.12*Math.sin(a*3+worldSeed*.17)+.08*Math.sin(a*7-worldSeed*.11)+.05*Math.sin(a*11+worldSeed*.07)}
 function drawForestTerrain(ox,oy){
- const points=180,edge=.15;
+ // 森の地面は四角いタイルではなく、滑らかな大きな領域として濃く描画。
+ const points=240,edge=.08;
  ctx.save();ctx.beginPath();
  for(let i=0;i<=points;i++){
   const a=i*Math.PI*2/points,r=forestEdgeRadius(a)-edge;
   const sx=FOREST_CX+Math.cos(a)*FOREST_RX*r+ox,sy=FOREST_CY+Math.sin(a)*FOREST_RY*r+oy;
   if(i===0)ctx.moveTo(sx,sy);else ctx.lineTo(sx,sy);
  }
- ctx.closePath();ctx.fillStyle="#3f713a";ctx.fill();ctx.restore();
+ ctx.closePath();
+ ctx.fillStyle="#3f713a";
+ ctx.fill();
+ ctx.restore();
 }
 function worldObjectsNear(px,py){const out=[];const cx=Math.floor(px/WORLD_CELL),cy=Math.floor(py/WORLD_CELL);const range=Math.ceil(Math.max(W,H)/WORLD_CELL)+2;for(let yy=cy-range;yy<=cy+range;yy++)for(let xx=cx-range;xx<=cx+range;xx++){const f=forestFactorAt((xx+.5)*WORLD_CELL,(yy+.5)*WORLD_CELL),threshold=f>.15?.18-f*.14:.62-f*.34;const r=hash2(xx,yy);if(r<threshold)continue;const count=f>.35?(r>.42?5:4):(r>(.92-f*.18)?2:1);for(let i=0;i<count;i++){const aa=hash2(xx*3+i,yy*5+i),bb=hash2(xx*7+i+11,yy*2+i+19);const ox=(xx+aa)*WORLD_CELL,oy=(yy+bb)*WORLD_CELL;if(waterAt(ox,oy))continue;const treeChance=f>.15?.985:.48+f*.34;out.push({x:ox,y:oy,type:hash2(xx*13+i,yy*17+i)<treeChance?"tree":"rock",r:hash2(xx*19+i,yy*23+i)*7+17})}}return out}
 function terrainHeight(x,y){return Math.sin((x+worldSeed)*.0027)*10+Math.sin((y-worldSeed)*.0021)*8+Math.sin((x+y)*.0011)*6}function riverCenterAt(x){return Math.sin((x+worldSeed*300)*0.0012)*420}
