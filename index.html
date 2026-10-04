@@ -111,7 +111,6 @@ function render(){
  $("robots").textContent=state.robots;
  $("speed").textContent=state.lanes;
  $("price").textContent=laneCost();
- $("laneCount").textContent=state.lanes;
  $("laneCost").textContent=laneCost();
  $("laneUp").disabled=state.money<laneCost();
  $("ship").disabled=!state.laneData.some(lane=>lane.progress>=100);
