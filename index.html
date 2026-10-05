@@ -27,7 +27,14 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 .trump-box{display:flex;flex-direction:column;gap:14px}
 .trump-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .trump-card{min-height:130px;border:1px solid rgba(139,156,255,.28);border-radius:16px;background:linear-gradient(145deg,#101b35,#0a1023);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;box-shadow:inset 0 0 24px rgba(98,126,255,.08)}.trump-card.reveal{animation:trumpReveal .35s ease-out}@keyframes trumpReveal{0%{opacity:.2;transform:rotateY(90deg) scale(.9)}100%{opacity:1;transform:rotateY(0) scale(1)}}
-.trump-card.red{color:#ff718d}.trump-card.black{color:#eef2ff}.trump-card.joker-card{font-size:42px!important}.trump-card.empty{color:#7180a7;font-size:20px;cursor:pointer;pointer-events:auto;position:relative;z-index:5;user-select:none}.trump-card.empty:hover{border-color:#6d7cff;transform:translateY(-2px)}
+.trump-card.red{color:#ff718d}.trump-card.black{color:#eef2ff}.trump-card.joker-card{font-size:42px!important}.trump-rules{margin:24px auto 10px;max-width:760px;padding:18px 20px;background:rgba(20,27,55,.72);border:1px solid #303a68;border-radius:14px;text-align:left;box-sizing:border-box}
+.trump-rules h3{margin:0 0 12px;font-size:18px}
+.trump-rules p{margin:7px 0;font-size:14px;line-height:1.5;color:#cbd3ee}
+.trump-rules ul{margin:10px 0;padding-left:20px;columns:2;column-gap:30px}
+.trump-rules li{margin:5px 0;font-size:14px;line-height:1.45;color:#e6eaff}
+.trump-rules-note{margin-top:12px!important;font-weight:700}
+@media(max-width:600px){.trump-rules ul{columns:1}}
+.trump-card.empty{color:#7180a7;font-size:20px;cursor:pointer;pointer-events:auto;position:relative;z-index:5;user-select:none}.trump-card.empty:hover{border-color:#6d7cff;transform:translateY(-2px)}
 .trump-result{min-height:24px;font-size:15px;font-weight:700}
 .trump-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:14px}
 .trump-meta span{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05)}
@@ -111,6 +118,23 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
     </div>
   </div>
 </section>
+<div class="trump-rules">
+  <h3>📖 ルール・コイン獲得方法</h3>
+  <p>・2枚のカードをめくって、条件に当たるとコイン獲得</p>
+  <p>・ラウンドが進むほど倍率アップ（1ラウンド目は×1、以降+0.5）</p>
+  <ul>
+    <li>7＋7：77×25×倍率</li>
+    <li>同じ数字：数字×数字×25×倍率</li>
+    <li>連番：100×倍率</li>
+    <li>合計10：100×倍率</li>
+    <li>差が3：3×（33＋ラウンド数）</li>
+    <li>同じマーク：150×倍率</li>
+    <li>A＋K：500×倍率</li>
+    <li>🃏＋通常カード：通常カードの数字×100×倍率</li>
+    <li>🃏＋🃏：今回の累計が0</li>
+  </ul>
+  <p class="trump-rules-note">💡「途中でやめる」で今回の累計を所持コインに加算します。</p>
+</div>
 </section>
 
 <script>
