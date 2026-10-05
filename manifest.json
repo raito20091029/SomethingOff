@@ -1,13 +1,14 @@
 {
-  "name": "SomethingOff",
-  "short_name": "SomethingOff",
-  "description": "探索と違和感のホラーRPG",
+  "name": "RoboForge",
+  "short_name": "RoboForge",
+  "description": "ロボット工場を経営する放置×運ゲーム",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#050505",
-  "theme_color": "#050505",
+  "background_color": "#07101d",
+  "theme_color": "#0b1220",
   "orientation": "landscape",
   "icons": [
+    {"src":"roboforge-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
     {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
     {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
