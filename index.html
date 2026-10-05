@@ -276,11 +276,16 @@ const formatCompact=n=>{
  const v=Number(n);
  if(!Number.isFinite(v))return "0";
  const a=Math.abs(v);
- if(a>=1e12)return (v/1e12).toFixed(2).replace(/\.?0+$/,"")+"T";
- if(a>=1e9)return (v/1e9).toFixed(2).replace(/\.?0+$/,"")+"B";
- if(a>=1e6)return (v/1e6).toFixed(2).replace(/\.?0+$/,"")+"M";
- if(a>=1e3)return (v/1e3).toFixed(2).replace(/\.?0+$/,"")+"K";
- return Number.isInteger(v)?String(v):v.toFixed(2).replace(/\.?0+$/,"");
+ const compact=(x,suffix)=>{
+  const ax=Math.abs(x);
+  const digits=ax>=100?0:ax>=10?1:2;
+  return x.toFixed(digits).replace(/\\.?0+$/,"")+suffix;
+ };
+ if(a>=1e12)return compact(v/1e12,"T");
+ if(a>=1e9)return compact(v/1e9,"B");
+ if(a>=1e6)return compact(v/1e6,"M");
+ if(a>=1e3)return compact(v/1e3,"K");
+ return Number.isInteger(v)?String(v):v.toFixed(2).replace(/\\.?0+$/,"");
 };
 
 const defaultState={money:100,robots:0,progress:0,speedLv:1,priceLv:1,lanes:1,laneProgress:[0],laneData:[{progress:0,speedLv:1,priceLv:1,autoShip:false}]};
