@@ -199,7 +199,7 @@ function getTrumpReward(a,b){
 }
 function resetTrumpRound(){
  trumpRound=1;trumpBank=0;trumpDrawn=false;
- $("trumpRound").textContent=trumpRound;$("trumpBank").textContent=trumpBank;
+ $("trumpRound").textContent=trumpRound;$("trumpBank").textContent=formatCompact(trumpBank);
  $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
  $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
  $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
@@ -238,9 +238,9 @@ function finishTrumpDraw(){
   $("trumpResult").textContent=result.text;
  }else{
   trumpBank+=result.reward;
-  $("trumpResult").textContent=result.text+"　累計 "+trumpBank+"コイン";
+  $("trumpResult").textContent=result.text+"　累計 "+formatCompact(trumpBank)+"コイン";
  }
- $("trumpBank").textContent=trumpBank;
+ $("trumpBank").textContent=formatCompact(trumpBank);
  $("trumpContinue").disabled=false;$("trumpStop").disabled=false;
 }
 dealTrumpCards();
