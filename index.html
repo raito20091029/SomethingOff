@@ -338,7 +338,7 @@ function handleLaneUpgrade(e){
  const type=e.currentTarget.dataset.type;
  const lane=state.laneData[laneIndex];
  if(!lane)return;
- const cost=type==="speed"?Math.floor(50*Math.pow(1.65,lane.speedLv-1)):Math.floor(75*Math.pow(1.7,lane.priceLv-1));
+ const cost=type==="speed"?Math.floor(laneUpgradeBase("speed",laneIndex)*Math.pow(1.65,lane.speedLv-1)):Math.floor(laneUpgradeBase("price",laneIndex)*Math.pow(1.7,lane.priceLv-1));
  if(state.money<cost){message("LINE "+(laneIndex+1)+" の強化には "+cost+" G 必要です。現在は "+Math.floor(state.money)+" G です。");return;}
  state.money-=cost;
  if(type==="speed")lane.speedLv++; else lane.priceLv++;
