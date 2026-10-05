@@ -1,5 +1,5 @@
-const CACHE='somethingoff-v37';
-const ASSETS=['./','./index.html','./roboforge-live.html','./manifest.json','./icon-192.png','./icon-512.png'];
+const CACHE='roboforge-v38-icon';
+const ASSETS=['./','./index.html','./manifest.json','./roboforge-icon.svg?v=2'];
 self.addEventListener('install',e=>{
  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
