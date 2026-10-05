@@ -287,18 +287,6 @@ function revealTrumpPair(){
 }
 $("trumpCardA").addEventListener("click",revealTrumpPair);
 $("trumpCardB").addEventListener("click",revealTrumpPair);
-$("trumpContinue").addEventListener("click",()=>{
- if(!trumpDrawn)return;
- trumpRound++;
- trumpDrawn=false;
- $("trumpRound").textContent=trumpRound;
- $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
- $("trumpResult").textContent="次のラウンド！";
- $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
- $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
- $("trumpStop").disabled=true;
- dealTrumpCards();
-});
 $("trumpStop").addEventListener("click",()=>{
  if(!trumpDrawn)return;
  finishTrump();
