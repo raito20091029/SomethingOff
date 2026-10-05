@@ -146,6 +146,7 @@ let trumpCoins=0;
 let trumpRound=1;
 let trumpBank=0;
 let trumpDrawn=false;
+const TRUMP_SAVE_KEY="roboforge-card-progress-v1";
 const trumpMultiplier=r=>1+(r-1)*0.5;
 const cardValue=v=>v==="A"?1:v==="J"?11:v==="Q"?12:v==="K"?13:v;
 const cardText=c=>c.joker?"🃏":c.suit+" "+c.value;
@@ -219,6 +220,48 @@ try{trumpCoins=Math.max(0,Math.floor(Number(localStorage.getItem("roboforge-trum
 let trumpPendingCards=null;
 let trumpRevealedA=false;
 let trumpRevealedB=false;
+function saveTrumpProgress(){
+ try{
+  localStorage.setItem(TRUMP_SAVE_KEY,JSON.stringify({
+   round:trumpRound,
+   bank:trumpBank,
+   drawn:trumpDrawn,
+   pendingCards:trumpPendingCards,
+   revealedA:trumpRevealedA,
+   revealedB:trumpRevealedB
+  }));
+ }catch(e){}
+}
+function restoreTrumpProgress(){
+ try{
+  const saved=JSON.parse(localStorage.getItem(TRUMP_SAVE_KEY)||"null");
+  if(saved&&typeof saved==="object"){
+   trumpRound=Math.max(1,Math.floor(Number(saved.round)||1));
+   trumpBank=Math.max(0,Math.floor(Number(saved.bank)||0));
+   trumpDrawn=saved.drawn===true;
+   trumpPendingCards=Array.isArray(saved.pendingCards)&&saved.pendingCards.length===2?saved.pendingCards:null;
+   trumpRevealedA=saved.revealedA===true;
+   trumpRevealedB=saved.revealedB===true;
+  }
+ }catch(e){}
+ $("trumpRound").textContent=trumpRound;
+ $("trumpBank").textContent=formatCompact(trumpBank);
+ $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
+ if(trumpDrawn&&trumpPendingCards){
+  if(trumpRevealedA&&trumpRevealedB){
+   setTrumpCard("trumpCardA",trumpPendingCards[0]);
+   setTrumpCard("trumpCardB",trumpPendingCards[1]);
+   $("trumpStop").disabled=false;
+  }else{
+   $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
+   $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
+   $("trumpStop").disabled=true;
+  }
+ }else{
+  trumpDrawn=false;
+  dealTrumpCards();
+ }
+}
 function dealTrumpCards(){
  trumpPendingCards=drawTrumpPair();
  trumpDrawn=true;
