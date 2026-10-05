@@ -277,6 +277,15 @@ function revealTrumpPair(){
  $("trumpCardA").classList.add("reveal");
  $("trumpCardB").classList.add("reveal");
  finishTrumpDraw();
+ setTimeout(()=>{
+  if(document.getElementById("cardScreen").style.display!=="none"){
+   trumpRound++;
+   trumpDrawn=false;
+   $("trumpRound").textContent=trumpRound;
+   $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
+   dealTrumpCards();
+  }
+ },650);
 }
 $("trumpCardA").addEventListener("click",revealTrumpPair);
 $("trumpCardB").addEventListener("click",revealTrumpPair);
