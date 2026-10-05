@@ -73,6 +73,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
   <div class="home-menu">
     <button id="homeFactory" class="home-button">🏭 ロボット工場</button>
     <button id="homeCard" class="home-button">🎴 カード</button>
+    <button id="homeFactory2" class="home-button" style="display:none">🏭 ロボット工場2</button>
   </div>
 </section>
 
@@ -96,6 +97,35 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 </section>
 
 </div>
+</div>
+</section>
+
+<section id="factory2Screen" class="screen" style="display:none">
+<div class="screen-nav"><button id="factory2Home" class="back-home">← ホーム</button></div>
+<section class="panel trump-panel">
+  <h2>🏭 ロボット工場2</h2>
+  <div class="trump-box">
+    <div class="trump-meta">
+      <span>🤖 完成ロボット <strong id="factory2Robots">0</strong></span>
+      <span>🔎 探索回数 <strong id="factory2Searches">0</strong></span>
+      <span>📦 パーツ <strong id="factory2Parts">0</strong></span>
+    </div>
+    <div id="factory2Result" class="trump-result">探索してパーツを見つけよう！</div>
+    <div class="trump-actions">
+      <button id="factory2Search" class="primary">🔎 パーツを探索する</button>
+    </div>
+  </div>
+</section>
+<div class="trump-rules">
+  <h3>📖 パーツのレアリティ</h3>
+  <ul>
+    <li>⚪ Common：70%</li>
+    <li>🔵 Rare：20%</li>
+    <li>🟣 Epic：8%</li>
+    <li>🟡 Legendary：1.9%</li>
+    <li>❓ ???：0.1%</li>
+  </ul>
+  <p class="trump-rules-note">✨ 工場2は工場本体とは独立した運要素モード。探索で集めたパーツをコレクションしていこう！</p>
 </div>
 </section>
 
@@ -147,6 +177,10 @@ let trumpRound=1;
 let trumpBank=0;
 let trumpDrawn=false;
 const TRUMP_SAVE_KEY="roboforge-card-progress-v1";
+const FACTORY2_SAVE_KEY="roboforge-factory2-progress-v1";
+const FACTORY2_UNLOCK=50000;
+let factory2Searches=0;
+const factory2Parts={common:0,rare:0,epic:0,legendary:0,mystery:0};
 const trumpMultiplier=r=>1+(r-1)*0.5;
 const cardValue=v=>v==="A"?1:v==="J"?11:v==="Q"?12:v==="K"?13:v;
 const cardText=c=>c.joker?"🃏":c.suit+" "+c.value;
@@ -391,10 +425,63 @@ try{
 }catch(e){}
 restoreTrumpProgress();
 $("coins").textContent=formatCompact(state.money);
+function saveFactory2Progress(){
+ try{
+  localStorage.setItem(FACTORY2_SAVE_KEY,JSON.stringify({searches:factory2Searches,parts:factory2Parts}));
+ }catch(e){}
+}
+function restoreFactory2Progress(){
+ try{
+  const saved=JSON.parse(localStorage.getItem(FACTORY2_SAVE_KEY)||"null");
+  if(saved&&typeof saved==="object"){
+   factory2Searches=Math.max(0,Math.floor(Number(saved.searches)||0));
+   if(saved.parts&&typeof saved.parts==="object"){
+    for(const key of Object.keys(factory2Parts)) factory2Parts[key]=Math.max(0,Math.floor(Number(saved.parts[key])||0));
+   }
+  }
+ }catch(e){}
+ renderFactory2();
+}
+function factory2TotalParts(){
+ return Object.values(factory2Parts).reduce((sum,n)=>sum+n,0);
+}
+function renderFactory2(){
+ const robots=Math.max(0,Math.floor(state.robots));
+ const unlocked=robots>=FACTORY2_UNLOCK;
+ $("homeFactory2").style.display=unlocked?"block":"none";
+ $("factory2Robots").textContent=String(robots);
+ $("factory2Searches").textContent=formatCompact(factory2Searches);
+ $("factory2Parts").textContent=formatCompact(factory2TotalParts());
+}
+function factory2FindPart(){
+ const roll=Math.random()*100;
+ let rarity;
+ if(roll<70)rarity="common";
+ else if(roll<90)rarity="rare";
+ else if(roll<98)rarity="epic";
+ else if(roll<99.9)rarity="legendary";
+ else rarity="mystery";
+ factory2Parts[rarity]++;
+ factory2Searches++;
+ const names={common:"Common",rare:"Rare",epic:"Epic",legendary:"Legendary",mystery:"???"};
+ const emojis={common:"⚪",rare:"🔵",epic:"🟣",legendary:"🟡",mystery:"❓"};
+ let text=emojis[rarity]+" "+names[rarity]+" パーツを発見！";
+ if(Math.random()<0.05){
+  const bonusRarity=rarity==="common"?"common":rarity;
+  factory2Parts[bonusRarity]++;
+  text+="　🍀 ラッキー！もう1個ゲット！";
+ }
+ $("factory2Result").textContent=text;
+ saveFactory2Progress();
+ renderFactory2();
+}
+restoreFactory2Progress();
+
 function save(){
  try{
   localStorage.setItem(SAVE_KEY,JSON.stringify(state));
   saveTrumpProgress();
+  saveFactory2Progress();
  }catch(e){}
 }
 window.addEventListener("beforeunload",saveTrumpProgress);
@@ -480,6 +567,7 @@ function render(){
  $("laneStatus").textContent="稼働中 "+state.lanes+"本　・　出荷待ち "+ready+"本";
  $("lanePotential").textContent="次のレーンほどLv.1の生産時間は5%短く、出荷価格は5%高くなります。";
  updateLaneProgress();
+ renderFactory2();
 }
 function message(t,good=false){$("event").innerHTML=good?'<span class="bonus">'+t+"</span>":t}
 $("ship").addEventListener("click",()=>{
@@ -592,14 +680,16 @@ timerId=setTimeout(loop,100);
 
 function showScreen(name){
  if(name!=="card"&&trumpNextTimer){clearTimeout(trumpNextTimer);trumpNextTimer=null;}
- const home=$("homeScreen"),factory=$("factoryScreen"),card=$("cardScreen");
+ const home=$("homeScreen"),factory=$("factoryScreen"),factory2=$("factory2Screen"),card=$("cardScreen");
  const header=document.querySelector("header"),stats=document.querySelector(".stats");
  home.style.display=name==="home"?"flex":"none";
  factory.style.display=name==="factory"?"block":"none";
+ factory2.style.display=name==="factory2"?"block":"none";
  card.style.display=name==="card"?"block":"none";
  header.style.display=name==="factory"?"flex":"none";
  stats.style.display=name==="factory"?"grid":"none";
  if(name==="factory"){render();renderFactoryLanes();updateLaneProgress();}
+ if(name==="factory2"){renderFactory2();}
  if(name==="card"){
   $("coins").textContent=formatCompact(state.money);
   if(!trumpDrawn)dealTrumpCards();
@@ -607,7 +697,16 @@ function showScreen(name){
 }
 $("homeFactory").addEventListener("click",()=>showScreen("factory"));
 $("homeCard").addEventListener("click",()=>showScreen("card"));
+$("homeFactory2").addEventListener("click",()=>showScreen("factory2"));
 $("factoryHome").addEventListener("click",()=>showScreen("home"));
+$("factory2Home").addEventListener("click",()=>showScreen("home"));
+$("factory2Search").addEventListener("click",()=>{
+ if(state.robots<FACTORY2_UNLOCK){
+  $("factory2Result").textContent="完成ロボット5万体で解放されます。";
+  return;
+ }
+ factory2FindPart();
+});
 $("cardHome").addEventListener("click",()=>showScreen("home"));
 showScreen("home");
 </script>
