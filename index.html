@@ -239,6 +239,15 @@ function restoreTrumpProgress(){
   if(saved&&typeof saved==="object"){
    trumpRound=Math.max(1,Math.floor(Number(saved.round)||1));
    trumpBank=Math.max(0,Math.floor(Number(saved.bank)||0));
+   // A zero-bank saved state cannot represent an active later round.
+   // Normalize stale saves left by the previous round-reset bug.
+   if(trumpRound>1&&trumpBank===0){
+    trumpRound=1;
+    trumpDrawn=false;
+    trumpPendingCards=null;
+    trumpRevealedA=false;
+    trumpRevealedB=false;
+   }
    trumpDrawn=saved.drawn===true;
    trumpPendingCards=Array.isArray(saved.pendingCards)&&saved.pendingCards.length===2?saved.pendingCards:null;
    trumpRevealedA=saved.revealedA===true;
