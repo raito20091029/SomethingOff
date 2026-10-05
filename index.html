@@ -457,6 +457,11 @@ function updateLaneProgress(){
   if(bar)bar.style.width=percent+"%";
   const ship=el.querySelector(".lane-ship");
   if(ship)ship.disabled=lane.progress<100;
+  el.querySelectorAll(".lane-up").forEach(btn=>{
+   const type=btn.dataset.type;
+   if(type==="auto") btn.disabled=lane.autoShip||state.money<laneUpgradeBase("auto",i);
+   else btn.disabled=state.money<laneUpgradeCost(type,lane,i);
+  });
  });
 }
 function render(){
