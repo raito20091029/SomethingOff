@@ -218,6 +218,7 @@ function saveTrumpCoins(){
 }
 try{trumpCoins=Math.max(0,Math.floor(Number(localStorage.getItem("roboforge-trump-coins")||0)))}catch(e){trumpCoins=0}
 let trumpPendingCards=null;
+let trumpNextTimer=null;
 let trumpRevealedA=false;
 let trumpRevealedB=false;
 function saveTrumpProgress(){
@@ -311,6 +312,7 @@ function finishTrumpDraw(){
 }
 function revealTrumpPair(){
  if(!trumpDrawn||trumpRevealedA||trumpRevealedB)return;
+ if(trumpNextTimer){clearTimeout(trumpNextTimer);trumpNextTimer=null;}
  const [a,b]=trumpPendingCards;
  trumpRevealedA=true;
  trumpRevealedB=true;
@@ -319,8 +321,9 @@ function revealTrumpPair(){
  $("trumpCardA").classList.add("reveal");
  $("trumpCardB").classList.add("reveal");
  finishTrumpDraw();
- setTimeout(()=>{
-  if(document.getElementById("cardScreen").style.display!=="none"){
+ trumpNextTimer=setTimeout(()=>{
+  trumpNextTimer=null;
+  if(document.getElementById("cardScreen").style.display!=="none"&&trumpRevealedA&&trumpRevealedB){
    trumpRound++;
    trumpDrawn=false;
    $("trumpRound").textContent=trumpRound;
@@ -559,6 +562,7 @@ updateLaneProgress();
 timerId=setTimeout(loop,100);
 
 function showScreen(name){
+ if(name!=="card"&&trumpNextTimer){clearTimeout(trumpNextTimer);trumpNextTimer=null;}
  const home=$("homeScreen"),factory=$("factoryScreen"),card=$("cardScreen");
  const header=document.querySelector("header"),stats=document.querySelector(".stats");
  home.style.display=name==="home"?"flex":"none";
