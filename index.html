@@ -273,7 +273,7 @@ function advanceFactory2Production(dt){
   lane.awakeningRollMs+=dt;
   while(lane.awakeningRollMs>=1000){
    lane.awakeningRollMs-=1000;
-   if(lane.awakeningMs<=0&&Math.random()<0.01){
+   if(lane.awakeningMs<=0&&Math.random()<0.00077){
     lane.awakeningMs=60000;
     $("factory2Event").innerHTML='<span class="bonus">⚡ LINE '+(i+1)+' が覚醒！1分間、生産速度4倍！</span>';
    }
@@ -620,7 +620,7 @@ function advanceProduction(dt){
   lane.awakeningRollMs+=dt;
   while(lane.awakeningRollMs>=1000){
    lane.awakeningRollMs-=1000;
-   if(lane.awakeningMs<=0&&Math.random()<0.01){
+   if(lane.awakeningMs<=0&&Math.random()<0.00077){
     lane.awakeningMs=60000;
     awakeningTriggered=true;
     message("⚡ LINE "+(i+1)+" が覚醒！1分間、生産速度4倍！",true);
