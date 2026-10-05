@@ -105,7 +105,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
     </div>
     <div id="trumpResult" class="trump-result">2枚のカードを引こう！</div>
     <div class="trump-actions">
-      <button id="trumpDraw" class="trump-draw">🎴 カードを引く</button>
+      
       <button id="trumpContinue" class="trump-continue" disabled>▶ 続ける</button>
       <button id="trumpStop" class="trump-stop" disabled>💰 途中でやめる</button>
     </div>
@@ -178,8 +178,8 @@ function resetTrumpRound(){
  $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
  $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
  $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
- $("trumpResult").textContent="2枚のカードを引こう！";
- $("trumpDraw").disabled=false;$("trumpContinue").disabled=true;$("trumpStop").disabled=true;
+ $("trumpResult").textContent="1枚目のカードをタップしてめくろう！";
+ $("trumpContinue").disabled=true;$("trumpStop").disabled=true;
 }
 function finishTrump(){
  state.money+=trumpBank;
@@ -196,6 +196,15 @@ try{trumpCoins=Math.max(0,Math.floor(Number(localStorage.getItem("roboforge-trum
 let trumpPendingCards=null;
 let trumpRevealedA=false;
 let trumpRevealedB=false;
+function dealTrumpCards(){
+ trumpPendingCards=drawTrumpPair();
+ trumpDrawn=true;
+ trumpRevealedA=false;trumpRevealedB=false;
+ $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
+ $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
+ $("trumpResult").textContent="1枚目のカードをタップしてめくろう！";
+ $("trumpContinue").disabled=true;$("trumpStop").disabled=true;
+}
 function finishTrumpDraw(){
  const [a,b]=trumpPendingCards;
  const result=getTrumpReward(a,b);
@@ -209,16 +218,7 @@ function finishTrumpDraw(){
  $("trumpBank").textContent=trumpBank;
  $("trumpContinue").disabled=false;$("trumpStop").disabled=false;
 }
-$("trumpDraw").addEventListener("click",()=>{
- if(trumpDrawn)return;
- trumpPendingCards=drawTrumpPair();
- trumpDrawn=true;
- trumpRevealedA=false;trumpRevealedB=false;
- $("trumpDraw").disabled=true;$("trumpContinue").disabled=true;$("trumpStop").disabled=true;
- $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
- $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
- $("trumpResult").textContent="カードをタップしてめくろう！";
-});
+dealTrumpCards();
 $("trumpCardA").addEventListener("click",()=>{
  if(!trumpDrawn||trumpRevealedA)return;
  const [a]=trumpPendingCards;
@@ -244,7 +244,7 @@ $("trumpContinue").addEventListener("click",()=>{
  $("trumpResult").textContent="次のラウンド！";
  $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
  $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
- $("trumpDraw").disabled=false;$("trumpContinue").disabled=true;$("trumpStop").disabled=true;
+ $("trumpContinue").disabled=true;$("trumpStop").disabled=true;
 });
 $("trumpStop").addEventListener("click",()=>{
  if(!trumpDrawn)return;
