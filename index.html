@@ -152,7 +152,7 @@ function getTrumpReward(a,b){
  if(jokerNormal){
   const normal=a.joker?b:a;
   const reward=cardValue(normal.value)*100*mult;
-  return {type:"jokerNormal",reward,text:"🃏＋"+normal.value+"！ ×"+mult+" → +"+reward+"コイン"};
+  return {type:"jokerNormal",reward,text:"🃏＋"+normal.value+"！ +"+reward+"コイン"};
  }
  const sameValue=!a.joker&&!b.joker&&cardValue(a.value)===cardValue(b.value);
  const luckySeven=sameValue&&cardValue(a.value)===7;
@@ -166,11 +166,11 @@ function getTrumpReward(a,b){
  else if(sameSuit&&consecutive){base=150;type="suitsame";text="✨ 同じマーク＋連番！ +150";}
  else if(sameSuit){base=150;type="suitsame";text="♠♥♦♣ 同じマーク！ +150";}
  else if(consecutive){base=100;type="consecutive";text="🔢 連番！ +100";}
- else if(!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===3){const reward=3*(33+trumpRound);return {type:"diff3",reward,text:"📏 差が3！ +"+reward};}
+ else if(!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===3){const reward=3*(33+trumpRound);return {type:"diff3",reward,text:"📏 差が3！ +"+reward+"コイン"};}
  else if(!a.joker&&!b.joker&&cardValue(a.value)+cardValue(b.value)===10){base=100;type="sum10";text="🔟 合計10！ +100";}
  if(base<=0)return {type:"miss",reward:0,text:"ハズレ！ +0"};
  const reward=base*mult;
- return {type,reward,text:text+" ×"+mult+" → +"+reward+"コイン"};
+ return {type,reward,text:text+" +"+reward+"コイン"};
 }
 function resetTrumpRound(){
  trumpRound=1;trumpBank=0;trumpDrawn=false;
