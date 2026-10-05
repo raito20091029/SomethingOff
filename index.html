@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b1220">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="roboforge-icon.svg?v=2">
-<meta name="roboforge-build" content="20261005-TRUMP-HIT-SOUND">
+<meta name="roboforge-build" content="20261005-FACTORY2-33PCT">
 <title>RoboForge</title>
 <style>
 :root{--bg:#07101d;--panel:#0d1a2b;--panel2:#12243a;--line:#203852;--text:#eef6ff;--muted:#8ea5bd;--accent:#48d7ff;--accent2:#7c6cff;--good:#62e6a7;--warn:#ffd166}
@@ -102,31 +102,22 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 
 <section id="factory2Screen" class="screen" style="display:none">
 <div class="screen-nav"><button id="factory2Home" class="back-home">← ホーム</button></div>
-<section class="panel trump-panel">
+<section class="panel factory">
   <h2>🏭 ロボット工場2</h2>
-  <div class="trump-box">
-    <div class="trump-meta">
-      <span>🤖 完成ロボット <strong id="factory2Robots">0</strong></span>
-      <span>🔎 探索回数 <strong id="factory2Searches">0</strong></span>
-      <span>📦 パーツ <strong id="factory2Parts">0</strong></span>
-    </div>
-    <div id="factory2Result" class="trump-result">探索してパーツを見つけよう！</div>
-    <div class="trump-actions">
-      <button id="factory2Search" class="primary">🔎 パーツを探索する</button>
+  <div class="factory-tools">
+    <div id="factory2Event" class="event"></div>
+    <div class="factory-status"><span id="factory2LaneStatus">稼働中 1本 ・ 出荷待ち 0本</span><span>アップグレードコスト 33%</span></div>
+    <div class="actions">
+      <button class="primary" id="factory2Ship">📦 出荷して受け取る <span id="factory2ShipAmount">0</span> G</button>
+      <button class="secondary" id="factory2LaneUp">🏭 新しいレーン <span id="factory2LaneCost">228</span> G</button>
     </div>
   </div>
+  <div class="floor">
+    <div class="ceiling"></div>
+    <div class="lights"><i class="light on"></i><i class="light on"></i><i class="light"></i><i class="light"></i></div>
+    <div id="factory2Lanes" class="factory-lanes"></div>
+  </div>
 </section>
-<div class="trump-rules">
-  <h3>📖 パーツのレアリティ</h3>
-  <ul>
-    <li>⚪ Common：70%</li>
-    <li>🔵 Rare：20%</li>
-    <li>🟣 Epic：8%</li>
-    <li>🟡 Legendary：1.9%</li>
-    <li>❓ ???：0.1%</li>
-  </ul>
-  <p class="trump-rules-note">✨ 工場2は工場本体とは独立した運要素モード。探索で集めたパーツをコレクションしていこう！</p>
-</div>
 </section>
 
 <section id="cardScreen" class="screen" style="display:none"><div class="screen-nav"><button id="cardHome" class="back-home">← ホーム</button></div>
@@ -179,309 +170,132 @@ let trumpDrawn=false;
 const TRUMP_SAVE_KEY="roboforge-card-progress-v1";
 const FACTORY2_SAVE_KEY="roboforge-factory2-progress-v1";
 const FACTORY2_UNLOCK=50000;
-let factory2Searches=0;
-const factory2Parts={common:0,rare:0,epic:0,legendary:0,mystery:0};
-const trumpMultiplier=r=>1+(r-1)*0.5;
-const cardValue=v=>v==="A"?1:v==="J"?11:v==="Q"?12:v==="K"?13:v;
-const cardText=c=>c.joker?"🃏":c.suit+" "+c.value;
-function buildTrumpDeck(){
- const suits=[["♠","black"],["♥","red"],["♦","red"],["♣","black"]];
- const values=["A",2,3,4,5,6,7,8,9,10,"J","Q","K"];
- const deck=[];
- suits.forEach(([suit,color])=>values.forEach(value=>deck.push({suit,color,value,joker:false})));
- deck.push({joker:true,color:"black"},{joker:true,color:"black"});
- return deck;
+let factory2State={lanes:1,laneProgress:[0],laneData:[{progress:0,speedLv:1,priceLv:1,autoShip:false,awakeningMs:0,awakeningRollMs:0}]};
+function factory2Save(){
+ try{localStorage.setItem(FACTORY2_SAVE_KEY,JSON.stringify(factory2State));}catch(e){}
 }
-function drawTrumpPair(){
- const deck=buildTrumpDeck();
- const a=deck.splice(Math.floor(Math.random()*deck.length),1)[0];
- const b=deck.splice(Math.floor(Math.random()*deck.length),1)[0];
- return [a,b];
-}
-function setTrumpCard(id,card){
- const el=$(id);
- el.className="trump-card "+(card.color||"black")+(card.joker?" joker-card":"");
- el.textContent=cardText(card);
-}
-function getTrumpReward(a,b){
- if(a.joker&&b.joker)return {type:"joker",base:0,text:"🃏 ジョーカー＋ジョーカー！ゲームを強制終了します。"};
- const mult=trumpMultiplier(trumpRound);
- const jokerNormal=(a.joker&&!b.joker)||(b.joker&&!a.joker);
- if(jokerNormal){
-  const normal=a.joker?b:a;
-  const reward=cardValue(normal.value)*100*mult;
-  return {type:"jokerNormal",reward,text:"🃏＋"+normal.value+"！ +"+formatCompact(reward)+"コイン"};
- }
- const sameValue=!a.joker&&!b.joker&&cardValue(a.value)===cardValue(b.value);
- const luckySeven=sameValue&&cardValue(a.value)===7;
- const aceKing=!a.joker&&!b.joker&&((a.value==="A"&&b.value==="K")||(a.value==="K"&&b.value==="A"));
- const consecutive=!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===1;
- const sameSuit=!a.joker&&!b.joker&&a.suit===b.suit;
- let base=0,type="miss",text="ハズレ！";
- if(luckySeven){base=77*25;type="lucky7";text="🎰 ラッキー7！";}
- else if(sameValue){base=cardValue(a.value)*cardValue(b.value)*25;type="same";text="🎯 同じ数字！";}
- else if(aceKing){base=500;type="aceking";text="👑 A＋K！";}
- else if(sameSuit&&consecutive){base=150;type="suitsame";text="✨ 同じマーク＋連番！";}
- else if(sameSuit){base=150;type="suitsame";text="♠♥♦♣ 同じマーク！";}
- else if(consecutive){base=100;type="consecutive";text="🔢 連番！";}
- else if(!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===7){const reward=777*trumpRound;return {type:"diff7",reward,text:"📏 差が7！ +"+formatCompact(reward)+"コイン"};}
- else if(!a.joker&&!b.joker&&cardValue(a.value)+cardValue(b.value)===10){base=100;type="sum10";text="🔟 合計10！";}
- if(base<=0)return {type:"miss",reward:0,text:"ハズレ！ +0"};
- const reward=base*mult;
- return {type,reward,text:text+" +"+formatCompact(reward)+"コイン"};
-}
-function resetTrumpRound(){
- trumpRound=1;trumpBank=0;trumpDrawn=false;
- $("trumpRound").textContent=trumpRound;$("trumpBank").textContent=formatCompact(trumpBank);
- $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
- $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
- $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
- $("trumpResult").textContent="1枚目のカードをタップしてめくろう！";
- $("trumpStop").disabled=true;
-}
-function finishTrump(){
- state.money+=trumpBank;
- $("coins").textContent=formatCompact(state.money);
- trumpBank=0;trumpRound=1;trumpDrawn=false;
- resetTrumpRound();
- save();
- $("trumpResult").textContent="💰 コインを確定！また挑戦できるよ。";
-}
-function saveTrumpCoins(){
- try{localStorage.setItem("roboforge-trump-coins",String(Math.max(0,Math.floor(trumpCoins))));}catch(e){}
-}
-try{trumpCoins=Math.max(0,Math.floor(Number(localStorage.getItem("roboforge-trump-coins")||0)))}catch(e){trumpCoins=0}
-let trumpPendingCards=null;
-let trumpNextTimer=null;
-let trumpRevealedA=false;
-let trumpRevealedB=false;
-function saveTrumpProgress(){
- try{
-  localStorage.setItem(TRUMP_SAVE_KEY,JSON.stringify({
-   round:trumpRound,
-   bank:trumpBank,
-   drawn:trumpDrawn,
-   pendingCards:trumpPendingCards,
-   revealedA:trumpRevealedA,
-   revealedB:trumpRevealedB
-  }));
- }catch(e){}
-}
-function restoreTrumpProgress(){
- try{
-  const saved=JSON.parse(localStorage.getItem(TRUMP_SAVE_KEY)||"null");
-  if(saved&&typeof saved==="object"){
-   trumpRound=Math.max(1,Math.floor(Number(saved.round)||1));
-   trumpBank=Math.max(0,Math.floor(Number(saved.bank)||0));
-   // A zero-bank saved state cannot represent an active later round.
-   // Normalize stale saves left by the previous round-reset bug.
-   if(trumpRound>1&&trumpBank===0){
-    trumpRound=1;
-    trumpDrawn=false;
-    trumpPendingCards=null;
-    trumpRevealedA=false;
-    trumpRevealedB=false;
-   }
-   trumpDrawn=saved.drawn===true;
-   trumpPendingCards=Array.isArray(saved.pendingCards)&&saved.pendingCards.length===2?saved.pendingCards:null;
-   trumpRevealedA=saved.revealedA===true;
-   trumpRevealedB=saved.revealedB===true;
-  }
- }catch(e){}
- $("trumpRound").textContent=trumpRound;
- $("trumpBank").textContent=formatCompact(trumpBank);
- $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
- if(trumpDrawn&&trumpPendingCards){
-  if(trumpRevealedA&&trumpRevealedB){
-   setTrumpCard("trumpCardA",trumpPendingCards[0]);
-   setTrumpCard("trumpCardB",trumpPendingCards[1]);
-   $("trumpStop").disabled=false;
-  }else{
-   $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
-   $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
-   $("trumpStop").disabled=true;
-  }
- }else{
-  trumpDrawn=false;
-  dealTrumpCards();
- }
-}
-function dealTrumpCards(){
- trumpPendingCards=drawTrumpPair();
- trumpDrawn=true;
- trumpRevealedA=false;trumpRevealedB=false;
- $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
- $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
- $("trumpResult").textContent="1枚目のカードをタップしてめくろう！";
- $("trumpStop").disabled=true;
-  saveTrumpProgress();
-}
-function playTrumpHitSound(){
- try{
-  const AudioContext=window.AudioContext||window.webkitAudioContext;
-  if(!AudioContext)return;
-  const ctx=window.__rfAudioContext||(window.__rfAudioContext=new AudioContext());
-  if(ctx.state==="suspended")ctx.resume();
-  const now=ctx.currentTime;
-  const gain=ctx.createGain();
-  gain.gain.setValueAtTime(0.0001,now);
-  gain.gain.exponentialRampToValueAtTime(0.18,now+0.015);
-  gain.gain.exponentialRampToValueAtTime(0.0001,now+0.42);
-  gain.connect(ctx.destination);
-  [660,880,1100].forEach((freq,index)=>{
-   const osc=ctx.createOscillator();
-   osc.type="sine";
-   osc.frequency.setValueAtTime(freq,now+index*0.035);
-   osc.connect(gain);
-   osc.start(now+index*0.035);
-   osc.stop(now+0.46);
-  });
- }catch(e){}
-}
-function finishTrumpDraw(){
- const [a,b]=trumpPendingCards;
- const result=getTrumpReward(a,b);
- if(result.type==="joker"){
-  trumpBank=0;
-  $("trumpResult").textContent=result.text;
- }else{
-  trumpBank+=result.reward;
-  if(result.reward>0)playTrumpHitSound();
-  $("trumpResult").textContent=result.text+"　累計 "+formatCompact(trumpBank)+"コイン";
- }
- $("trumpBank").textContent=formatCompact(trumpBank);
- $("trumpStop").disabled=false;
-  saveTrumpProgress();
-}
-function revealTrumpPair(){
- if(!trumpDrawn)return;
- if(trumpRevealedA&&trumpRevealedB){
-  trumpRound++;
-  trumpDrawn=false;
-  trumpRevealedA=false;
-  trumpRevealedB=false;
-  $("trumpRound").textContent=trumpRound;
-  $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
-  dealTrumpCards();
-  return;
- }
- if(trumpNextTimer){clearTimeout(trumpNextTimer);trumpNextTimer=null;}
- const [a,b]=trumpPendingCards;
- trumpRevealedA=true;
- trumpRevealedB=true;
- setTrumpCard("trumpCardA",a);
- setTrumpCard("trumpCardB",b);
- $("trumpCardA").classList.add("reveal");
- $("trumpCardB").classList.add("reveal");
- finishTrumpDraw();
- trumpNextTimer=null;
-}
-$("trumpCardA").addEventListener("click",revealTrumpPair);
-$("trumpCardB").addEventListener("click",revealTrumpPair);
-$("trumpStop").addEventListener("click",()=>{
- if(!trumpDrawn)return;
- finishTrump();
-});
-const SAVE_KEY="roboforge-save-v1";
-const formatCompact=n=>{
- const v=Number(n);
- if(!Number.isFinite(v))return "0";
- const a=Math.abs(v);
- const compact=(x,suffix)=>{
-  const ax=Math.abs(x);
-  const digits=ax>=100?0:ax>=10?1:2;
-  return x.toFixed(digits).replace(/\\.?0+$/,"")+suffix;
- };
- if(a>=1e12)return compact(v/1e12,"T");
- if(a>=1e9)return compact(v/1e9,"B");
- if(a>=1e6)return compact(v/1e6,"M");
- if(a>=1e3)return compact(v/1e3,"K");
- return Number.isInteger(v)?String(v):v.toFixed(2).replace(/\\.?0+$/,"");
-};
-
-const defaultState={money:100,robots:0,progress:0,speedLv:1,priceLv:1,lanes:1,laneProgress:[0],laneData:[{progress:0,speedLv:1,priceLv:1,autoShip:false,awakeningMs:0,awakeningRollMs:0}]};
-let state={...defaultState};
-try{
- const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");
- if(saved && typeof saved==="object"){
-  for(const key of Object.keys(defaultState)){
-   if(Number.isFinite(Number(saved[key]))) state[key]=Number(saved[key]);
-  }
-  state.money=Math.max(0,state.money);
-  state.robots=Math.max(0,Math.floor(state.robots));
-  state.progress=Math.max(0,Math.min(100,state.progress));
-  state.speedLv=Math.max(1,Math.floor(state.speedLv));
-  state.priceLv=Math.max(1,Math.floor(state.priceLv));
-  state.lanes=Math.max(1,Math.floor(state.lanes));
-  const oldProgress=Array.isArray(saved.laneProgress)?saved.laneProgress.map(v=>Math.max(0,Math.min(100,Number(v)||0))):[Math.max(0,Math.min(100,Number(saved.progress)||0))];
-  if(Array.isArray(saved.laneData)) state.laneData=saved.laneData.map(v=>({progress:Math.max(0,Math.min(100,Number(v?.progress)||0)),speedLv:Math.max(1,Math.floor(Number(v?.speedLv)||1)),priceLv:Math.max(1,Math.floor(Number(v?.priceLv)||1)),autoShip:v?.autoShip===true,awakeningMs:Math.max(0,Number(v?.awakeningMs)||0),awakeningRollMs:Math.max(0,Number(v?.awakeningRollMs)||0)}));
-  else state.laneData=oldProgress.map((progress,i)=>({progress,speedLv:i===0?state.speedLv:1,priceLv:i===0?state.priceLv:1,autoShip:false,awakeningMs:0,awakeningRollMs:0}));
-  while(state.laneData.length<state.lanes) state.laneData.push({progress:0,speedLv:1,priceLv:1,autoShip:false,awakeningMs:0,awakeningRollMs:0});
-  state.laneData=state.laneData.slice(0,state.lanes);
-  state.lanes=state.laneData.length;
-  state.laneProgress=state.laneData.map(lane=>lane.progress);
-  state.progress=state.laneData[0]?.progress||0;
- }
-}catch(e){}
-restoreTrumpProgress();
-$("coins").textContent=formatCompact(state.money);
-function saveFactory2Progress(){
- try{
-  localStorage.setItem(FACTORY2_SAVE_KEY,JSON.stringify({searches:factory2Searches,parts:factory2Parts}));
- }catch(e){}
-}
-function restoreFactory2Progress(){
+function factory2Restore(){
  try{
   const saved=JSON.parse(localStorage.getItem(FACTORY2_SAVE_KEY)||"null");
   if(saved&&typeof saved==="object"){
-   factory2Searches=Math.max(0,Math.floor(Number(saved.searches)||0));
-   if(saved.parts&&typeof saved.parts==="object"){
-    for(const key of Object.keys(factory2Parts)) factory2Parts[key]=Math.max(0,Math.floor(Number(saved.parts[key])||0));
-   }
+   if(Array.isArray(saved.laneData)) factory2State.laneData=saved.laneData.map(v=>({
+    progress:Math.max(0,Math.min(100,Number(v?.progress)||0)),
+    speedLv:Math.max(1,Math.floor(Number(v?.speedLv)||1)),
+    priceLv:Math.max(1,Math.floor(Number(v?.priceLv)||1)),
+    autoShip:v?.autoShip===true,
+    awakeningMs:Math.max(0,Number(v?.awakeningMs)||0),
+    awakeningRollMs:Math.max(0,Number(v?.awakeningRollMs)||0)
+   }));
+   while(factory2State.laneData.length<Math.max(1,Math.floor(Number(saved.lanes)||1))) factory2State.laneData.push({progress:0,speedLv:1,priceLv:1,autoShip:false,awakeningMs:0,awakeningRollMs:0});
+   factory2State.laneData=factory2State.laneData.slice(0,Math.max(1,Math.floor(Number(saved.lanes)||factory2State.laneData.length)));
+   factory2State.lanes=factory2State.laneData.length;
+   factory2State.laneProgress=factory2State.laneData.map(l=>l.progress);
   }
  }catch(e){}
- renderFactory2();
 }
-function factory2TotalParts(){
- return Object.values(factory2Parts).reduce((sum,n)=>sum+n,0);
+function factory2Unlocked(){return state.robots>=FACTORY2_UNLOCK;}
+function factory2LaneCost(){return Math.floor(228*factory2State.lanes);}
+function factory2UpgradeCost(type,lane,index){
+ const normal=laneUpgradeCost(type,lane,index);
+ return Math.max(1,Math.floor(normal*0.33));
 }
+function factory2LaneSpeed(lane,index=0){return 1/Math.pow(0.95,index+(lane.speedLv-1));}
+function factory2LanePrice(lane,index=0){return 25*Math.pow(1.05,index+(lane.priceLv-1));}
+function factory2LaneProductionTime(lane,index=0){return 100/(0.0048*factory2LaneSpeed(lane,index));}
 function renderFactory2(){
- const robots=Math.max(0,Math.floor(state.robots));
- const unlocked=robots>=FACTORY2_UNLOCK;
+ const unlocked=factory2Unlocked();
  $("homeFactory2").style.display=unlocked?"block":"none";
- $("factory2Robots").textContent=String(robots);
- $("factory2Searches").textContent=formatCompact(factory2Searches);
- $("factory2Parts").textContent=formatCompact(factory2TotalParts());
+ if(!unlocked)return;
+ $("factory2LaneStatus").textContent="稼働中 "+factory2State.lanes+"本　・　出荷待ち "+factory2State.laneData.filter(l=>l.progress>=100).length+"本";
+ $("factory2LaneCost").textContent=formatCompact(factory2LaneCost());
+ $("factory2ShipAmount").textContent=formatCompact(factory2State.laneData.reduce((sum,lane,i)=>sum+(lane.progress>=100?Math.floor(factory2LanePrice(lane,i)):0),0));
+ $("factory2LaneUp").disabled=state.money<factory2LaneCost();
+ updateFactory2Lanes();
 }
-function factory2FindPart(){
- const roll=Math.random()*100;
- let rarity;
- if(roll<70)rarity="common";
- else if(roll<90)rarity="rare";
- else if(roll<98)rarity="epic";
- else if(roll<99.9)rarity="legendary";
- else rarity="mystery";
- factory2Parts[rarity]++;
- factory2Searches++;
- const names={common:"Common",rare:"Rare",epic:"Epic",legendary:"Legendary",mystery:"???"};
- const emojis={common:"⚪",rare:"🔵",epic:"🟣",legendary:"🟡",mystery:"❓"};
- let text=emojis[rarity]+" "+names[rarity]+" パーツを発見！";
- if(Math.random()<0.05){
-  const bonusRarity=rarity==="common"?"common":rarity;
-  factory2Parts[bonusRarity]++;
-  text+="　🍀 ラッキー！もう1個ゲット！";
+function renderFactory2Lanes(){
+ const root=$("factory2Lanes");
+ const ranking=[...factory2State.laneData.keys()].sort((a,b)=>factory2LanePrice(factory2State.laneData[b],b)/(factory2LaneProductionTime(factory2State.laneData[b],b)/1000)-factory2LanePrice(factory2State.laneData[a],a)/(factory2LaneProductionTime(factory2State.laneData[a],a)/1000));
+ const rankByLane=new Map(ranking.map((idx,rank)=>[idx,rank+1]));
+ root.innerHTML=factory2State.laneData.map((lane,i)=>'<div class="factory-lane'+(lane.progress>=100?' ready':'')+(lane.awakeningMs>0?' awakened':'')+'" data-lane="'+i+'"><div class="lane-rank">効率 '+rankByLane.get(i)+'位<small>'+formatCompact(factory2LanePrice(lane,i)/(factory2LaneProductionTime(lane,i)/1000))+' G/秒</small></div><div class="lane-label">LINE '+(i+1)+' ・ <span class="factory2-lane-percent">'+Math.floor(lane.progress)+'%</span> ・ ⏱️'+formatProductionTime(factory2LaneProductionTime(lane,i))+' ・ 💰'+formatCompact(factory2LanePrice(lane,i))+' G</div><div class="lane-awakening" '+(lane.awakeningMs>0?'':'hidden')+'>⚡ 覚醒 '+Math.ceil(lane.awakeningMs/1000)+'秒</div><div class="lane-machine"></div><div class="lane-robot"></div><div class="lane-conveyor"></div><div class="lane-progress"><div class="lane-progress-row"><span>生産進捗</span><strong class="factory2-lane-percent">'+Math.floor(lane.progress)+'%</strong><button class="lane-ship factory2-lane-ship" data-lane="'+i+'" '+(lane.progress<100?'disabled':'')+'>📦 出荷 <span>'+formatCompact(factory2LanePrice(lane,i))+' G</span></button></div><div class="lane-progress-track"><div class="lane-progress-bar" style="width:'+Math.floor(lane.progress)+'%"></div></div></div><div class="lane-upgrades"><button class="lane-up factory2-lane-up" data-lane="'+i+'" data-type="speed"><strong>⚡ 速度アップ</strong><small>Lv.'+lane.speedLv+' → Lv.'+(lane.speedLv+1)+'　'+formatCompact(factory2UpgradeCost("speed",lane,i))+' G</small></button><button class="lane-up factory2-lane-up" data-lane="'+i+'" data-type="price"><strong>💰 価格アップ</strong><small>Lv.'+lane.priceLv+' → Lv.'+(lane.priceLv+1)+'　'+formatCompact(factory2UpgradeCost("price",lane,i))+' G</small></button><button class="lane-up factory2-lane-up" data-lane="'+i+'" data-type="auto" '+(lane.autoShip?'disabled':'')+'><strong>🤖 自動出荷</strong><small>'+(lane.autoShip?'解放済み':formatCompact(factory2UpgradeCost("auto",lane,i))+' Gで解放')+'</small></button></div></div>').join("");
+ root.querySelectorAll(".factory2-lane-up").forEach(btn=>btn.addEventListener("click",handleFactory2Upgrade));
+ root.querySelectorAll(".factory2-lane-ship").forEach(btn=>btn.addEventListener("click",handleFactory2Ship));
+}
+function updateFactory2Lanes(){
+ const root=$("factory2Lanes");
+ root.querySelectorAll(".factory-lane").forEach(el=>{
+  const i=Number(el.dataset.lane),lane=factory2State.laneData[i];
+  if(!lane)return;
+  const percent=Math.floor(lane.progress);
+  el.classList.toggle("ready",lane.progress>=100);
+  el.classList.toggle("awakened",lane.awakeningMs>0);
+  const label=el.querySelector(".lane-awakening");
+  if(label){label.hidden=lane.awakeningMs<=0;if(lane.awakeningMs>0)label.textContent="⚡ 覚醒 "+Math.ceil(lane.awakeningMs/1000)+"秒";}
+  el.querySelectorAll(".factory2-lane-percent").forEach(n=>n.textContent=percent+"%");
+  const bar=el.querySelector(".lane-progress-bar");if(bar)bar.style.width=percent+"%";
+  const ship=el.querySelector(".factory2-lane-ship");if(ship)ship.disabled=lane.progress<100;
+  el.querySelectorAll(".factory2-lane-up").forEach(btn=>{const type=btn.dataset.type;btn.disabled=type==="auto"?lane.autoShip||state.money<factory2UpgradeCost("auto",lane,i):state.money<factory2UpgradeCost(type,lane,i);});
+ });
+ $("factory2LaneUp").disabled=state.money<factory2LaneCost();
+}
+function handleFactory2Ship(e){
+ const i=Number(e.currentTarget.dataset.lane),lane=factory2State.laneData[i];
+ if(!lane||lane.progress<100)return;
+ const earned=Math.floor(factory2LanePrice(lane,i));
+ state.money+=earned;state.robots++;lane.progress=0;
+ factory2State.laneProgress=factory2State.laneData.map(l=>l.progress);
+ $("factory2Event").innerHTML='<span class="bonus">📦 LINE '+(i+1)+'を出荷！ +'+formatCompact(earned)+' G</span>';
+ factory2Save();save();renderFactory2();render();
+}
+function handleFactory2Upgrade(e){
+ const i=Number(e.currentTarget.dataset.lane),type=e.currentTarget.dataset.type,lane=factory2State.laneData[i];
+ if(!lane)return;
+ const cost=factory2UpgradeCost(type,lane,i);
+ if(state.money<cost)return;
+ state.money-=cost;
+ if(type==="speed")lane.speedLv++;else if(type==="price")lane.priceLv++;else lane.autoShip=true;
+ $("factory2Event").innerHTML='<span class="bonus">🏭 LINE '+(i+1)+' の'+(type==="speed"?"生産速度":type==="price"?"出荷価格":"自動出荷")+'を強化！</span>';
+ factory2Save();save();renderFactory2();render();
+}
+function handleFactory2AutoLane(){
+ const cost=factory2LaneCost();if(state.money<cost)return;
+ state.money-=cost;factory2State.lanes++;factory2State.laneData.push({progress:0,speedLv:1,priceLv:1,autoShip:false,awakeningMs:0,awakeningRollMs:0});
+ factory2State.laneProgress=factory2State.laneData.map(l=>l.progress);
+ factory2Save();save();renderFactory2();renderFactory2Lanes();
+}
+function advanceFactory2Production(dt){
+ if(!factory2Unlocked())return;
+ let autoShipped=false;
+ for(let i=0;i<factory2State.laneData.length;i++){
+  const lane=factory2State.laneData[i];
+  lane.awakeningMs=Math.max(0,Number(lane.awakeningMs)||0);
+  lane.awakeningRollMs=Math.max(0,Number(lane.awakeningRollMs)||0);
+  lane.awakeningMs=Math.max(0,lane.awakeningMs-dt);
+  lane.awakeningRollMs+=dt;
+  while(lane.awakeningRollMs>=1000){
+   lane.awakeningRollMs-=1000;
+   if(lane.awakeningMs<=0&&Math.random()<0.01){
+    lane.awakeningMs=60000;
+    $("factory2Event").innerHTML='<span class="bonus">⚡ LINE '+(i+1)+' が覚醒！1分間、生産速度4倍！</span>';
+   }
+  }
+  if(lane.progress>=100&&!lane.autoShip)continue;
+  const total=lane.progress+dt*0.0048*factory2LaneSpeed(lane,i)*(lane.awakeningMs>0?4:1);
+  if(lane.autoShip){
+   const completed=Math.floor(total/100);
+   if(completed>0){state.money+=Math.floor(factory2LanePrice(lane,i))*completed;state.robots+=completed;autoShipped=true;}
+   lane.progress=total%100;
+  }else lane.progress=Math.min(100,total);
  }
- $("factory2Result").textContent=text;
- saveFactory2Progress();
- renderFactory2();
+ factory2State.laneProgress=factory2State.laneData.map(l=>l.progress);
+ if(autoShipped)factory2Save();
 }
-restoreFactory2Progress();
+
 
 function save(){
  try{
   localStorage.setItem(SAVE_KEY,JSON.stringify(state));
   saveTrumpProgress();
-  saveFactory2Progress();
+  factory2Save();
  }catch(e){}
 }
 window.addEventListener("beforeunload",saveTrumpProgress);
@@ -676,6 +490,8 @@ window.addEventListener("focus",()=>{
 render();
 renderFactoryLanes();
 updateLaneProgress();
+renderFactory2();
+if(factory2Unlocked()){renderFactory2Lanes();updateFactory2Lanes();}
 timerId=setTimeout(loop,100);
 
 function showScreen(name){
@@ -689,7 +505,7 @@ function showScreen(name){
  header.style.display=name==="factory"?"flex":"none";
  stats.style.display=name==="factory"?"grid":"none";
  if(name==="factory"){render();renderFactoryLanes();updateLaneProgress();}
- if(name==="factory2"){renderFactory2();}
+ if(name==="factory2"){renderFactory2();renderFactory2Lanes();updateFactory2Lanes();}
  if(name==="card"){
   $("coins").textContent=formatCompact(state.money);
   if(!trumpDrawn)dealTrumpCards();
@@ -700,13 +516,16 @@ $("homeCard").addEventListener("click",()=>showScreen("card"));
 $("homeFactory2").addEventListener("click",()=>showScreen("factory2"));
 $("factoryHome").addEventListener("click",()=>showScreen("home"));
 $("factory2Home").addEventListener("click",()=>showScreen("home"));
-$("factory2Search").addEventListener("click",()=>{
- if(state.robots<FACTORY2_UNLOCK){
-  $("factory2Result").textContent="完成ロボット5万体で解放されます。";
-  return;
- }
- factory2FindPart();
+$("factory2Ship").addEventListener("click",()=>{
+ const ready=factory2State.laneData.map((lane,index)=>({lane,index})).filter(x=>x.lane.progress>=100);
+ if(!ready.length)return;
+ const earned=ready.reduce((sum,x)=>sum+Math.floor(factory2LanePrice(x.lane,x.index)),0);
+ state.money+=earned;state.robots+=ready.length;
+ ready.forEach(x=>x.lane.progress=0);
+ factory2State.laneProgress=factory2State.laneData.map(l=>l.progress);
+ factory2Save();save();renderFactory2();render();
 });
+$("factory2LaneUp").addEventListener("click",handleFactory2AutoLane);
 $("cardHome").addEventListener("click",()=>showScreen("home"));
 showScreen("home");
 </script>
