@@ -142,7 +142,7 @@ function drawTrumpPair(){
 }
 function setTrumpCard(id,card){
  const el=$(id);
- el.className="trump-card "+(card.color||"black");
+ el.className="trump-card "+(card.color||"black")+(card.joker?" joker-card":"");
  el.textContent=cardText(card);
 }
 function getTrumpReward(a,b){
