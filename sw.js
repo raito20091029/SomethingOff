@@ -1,4 +1,4 @@
-const CACHE='roboforge-v43-robot-factory2';
+const CACHE='roboforge-v44-save-recovery';
 const ASSETS=['./','./index.html','./manifest.json','./roboforge-icon.svg?v=2','./roboforge-title-bg.svg?v=1'];
 self.addEventListener('install',e=>{
  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
