@@ -160,7 +160,7 @@ function getTrumpReward(a,b){
  const consecutive=!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===1;
  const sameSuit=!a.joker&&!b.joker&&a.suit===b.suit;
  let base=0,type="miss",text="ハズレ！";
- if(luckySeven){base=777;type="lucky7";text="🎰 ラッキー7！ +777";}
+ if(luckySeven){base=77*25;type="lucky7";text="🎰 ラッキー7！";}
  else if(sameValue){base=cardValue(a.value)*cardValue(b.value)*25;type="same";text="🎯 同じ数字！";}
  else if(aceKing){base=500;type="aceking";text="👑 A＋K！ +500";}
  else if(sameSuit&&consecutive){base=150;type="suitsame";text="✨ 同じマーク＋連番！ +150";}
