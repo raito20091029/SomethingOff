@@ -241,22 +241,19 @@ function finishTrumpDraw(){
  $("trumpContinue").disabled=false;$("trumpStop").disabled=false;
 }
 dealTrumpCards();
-$("trumpCardA").addEventListener("click",()=>{
- if(!trumpDrawn||trumpRevealedA)return;
- const [a]=trumpPendingCards;
+function revealTrumpPair(){
+ if(!trumpDrawn||trumpRevealedA||trumpRevealedB)return;
+ const [a,b]=trumpPendingCards;
  trumpRevealedA=true;
- setTrumpCard("trumpCardA",a);
- $("trumpCardA").classList.add("reveal");
- $("trumpResult").textContent="2枚目のカードをタップしてめくろう！";
-});
-$("trumpCardB").addEventListener("click",()=>{
- if(!trumpDrawn||!trumpRevealedA||trumpRevealedB)return;
- const [,b]=trumpPendingCards;
  trumpRevealedB=true;
+ setTrumpCard("trumpCardA",a);
  setTrumpCard("trumpCardB",b);
+ $("trumpCardA").classList.add("reveal");
  $("trumpCardB").classList.add("reveal");
  finishTrumpDraw();
-});
+}
+$("trumpCardA").addEventListener("click",revealTrumpPair);
+$("trumpCardB").addEventListener("click",revealTrumpPair);
 $("trumpContinue").addEventListener("click",()=>{
  if(!trumpDrawn)return;
  trumpRound++;
