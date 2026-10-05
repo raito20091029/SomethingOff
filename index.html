@@ -129,6 +129,12 @@ function setTrumpCard(id,card){
 function getTrumpReward(a,b){
  if(a.joker&&b.joker)return {type:"joker",base:0,text:"🃏 ジョーカー！今回の累計コインは0になります。"};
  const mult=trumpMultiplier(trumpRound);
+ const jokerNormal=(a.joker&&!b.joker)||(b.joker&&!a.joker);
+ if(jokerNormal){
+  const normal=a.joker?b:a;
+  const reward=cardValue(normal.value)*100*mult;
+  return {type:"jokerNormal",reward,text:"🃏＋"+normal.value+"！ ×"+mult+" → +"+reward+"コイン"};
+ }
  const sameValue=!a.joker&&!b.joker&&cardValue(a.value)===cardValue(b.value);
  const luckySeven=sameValue&&cardValue(a.value)===7;
  const aceKing=!a.joker&&!b.joker&&((a.value==="A"&&b.value==="K")||(a.value==="K"&&b.value==="A"));
