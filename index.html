@@ -164,37 +164,42 @@ const $=id=>document.getElementById(id);
 
 const SAVE_KEY="roboforge-save-v1";
 const defaultState=()=>({
- money:100,
- robots:0,
- lanes:1,
- progress:0,
- laneProgress:[0],
+ money:100,robots:0,lanes:1,progress:0,laneProgress:[0],
  laneData:[{progress:0,speedLv:1,priceLv:1,autoShip:false,awakeningMs:0,awakeningRollMs:0}]
 });
+const normalizeState=saved=>{
+ if(!saved||typeof saved!=="object")return null;
+ const laneData=Array.isArray(saved.laneData)&&saved.laneData.length?saved.laneData:defaultState().laneData;
+ const normalized={...defaultState(),...saved,laneData:laneData.map(v=>({
+  progress:Math.max(0,Math.min(100,Number(v?.progress)||0)),
+  speedLv:Math.max(1,Math.floor(Number(v?.speedLv)||1)),
+  priceLv:Math.max(1,Math.floor(Number(v?.priceLv)||1)),
+  autoShip:v?.autoShip===true,
+  awakeningMs:Math.max(0,Number(v?.awakeningMs)||0),
+  awakeningRollMs:Math.max(0,Number(v?.awakeningRollMs)||0)
+ }))};
+ normalized.lanes=normalized.laneData.length;
+ normalized.laneProgress=normalized.laneData.map(l=>l.progress);
+ normalized.progress=normalized.laneData[0]?.progress||0;
+ return normalized;
+};
 let state=defaultState();
 try{
- const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||"null");
- if(saved&&typeof saved==="object"){
-  state={...defaultState(),...saved};
-  if(!Array.isArray(state.laneData)||!state.laneData.length){
-   state.laneData=defaultState().laneData;
-  }else{
-   state.laneData=state.laneData.map(v=>({
-    progress:Math.max(0,Math.min(100,Number(v?.progress)||0)),
-    speedLv:Math.max(1,Math.floor(Number(v?.speedLv)||1)),
-    priceLv:Math.max(1,Math.floor(Number(v?.priceLv)||1)),
-    autoShip:v?.autoShip===true,
-    awakeningMs:Math.max(0,Number(v?.awakeningMs)||0),
-    awakeningRollMs:Math.max(0,Number(v?.awakeningRollMs)||0)
-   }));
-  }
-  state.lanes=state.laneData.length;
-  state.laneProgress=state.laneData.map(l=>l.progress);
-  state.progress=state.laneData[0]?.progress||0;
+ const candidates=[
+  localStorage.getItem(SAVE_KEY),
+  localStorage.getItem("roboforge-save"),
+  localStorage.getItem("roboforge-save-v0"),
+  localStorage.getItem("roboforge-state"),
+  localStorage.getItem("RoboForge-save-v1")
+ ].map(v=>{try{return v?JSON.parse(v):null}catch(e){return null}}).filter(Boolean);
+ const valid=candidates.filter(v=>Number(v.money)>100||Number(v.robots)>0||(Array.isArray(v.laneData)&&v.laneData.some(l=>Number(l.progress)>0||Number(l.speedLv)>1||Number(l.priceLv)>1||l.autoShip)));
+ if(valid.length)state=normalizeState(valid.sort((a,b)=>(Number(b.robots)||0)-(Number(a.robots)||0))[0]);
+ else{
+  const current=normalizeState(candidates[0]);
+  if(current)state=current;
  }
-}catch(e){
- console.warn("RoboForge save restore failed",e);
-}
+}catch(e){console.warn("RoboForge save restore failed",e);}
+
 
 /* Trump luck mini-game */
 let trumpCoins=0;
