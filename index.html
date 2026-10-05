@@ -427,9 +427,12 @@ timerId=setTimeout(loop,100);
 
 function showScreen(name){
  const home=$("homeScreen"),factory=$("factoryScreen"),card=$("cardScreen");
+ const header=document.querySelector("header"),stats=document.querySelector(".stats");
  home.style.display=name==="home"?"flex":"none";
  factory.style.display=name==="factory"?"block":"none";
  card.style.display=name==="card"?"block":"none";
+ header.style.display=name==="factory"?"flex":"none";
+ stats.style.display=name==="factory"?"grid":"none";
  if(name==="factory"){render();renderFactoryLanes();updateLaneProgress();}
  if(name==="card"){$("coins").textContent=Math.floor(state.money);}
 }
