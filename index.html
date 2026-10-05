@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<meta name="roboforge-build" content="20261004-INTERNAL-LANE-SCROLL">
+<meta name="roboforge-build" content="20261005-TRUMP-LUCK-RULES">
 <title>RoboForge</title>
 <style>
 :root{--bg:#07101d;--panel:#0d1a2b;--panel2:#12243a;--line:#203852;--text:#eef6ff;--muted:#8ea5bd;--accent:#48d7ff;--accent2:#7c6cff;--good:#62e6a7;--warn:#ffd166}
@@ -21,6 +21,21 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 /* Production lanes scroll internally; the rest of the page stays fixed. */
 .factory-lanes{position:relative;left:auto;right:auto;top:auto;bottom:auto;display:flex;flex-direction:column;justify-content:flex-start;gap:8px;overflow-y:auto;overflow-x:visible;padding:0 0 12px 62px;min-height:0;height:calc(100vh - 470px);overscroll-behavior:contain;scrollbar-width:auto;}
 .floor{height:auto;min-height:0;padding:64px 2% 28px;overflow:visible;}
+
+/* Trump luck mini-game */
+.trump-panel{margin-top:18px}
+.trump-box{display:flex;flex-direction:column;gap:14px}
+.trump-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.trump-card{min-height:130px;border:1px solid rgba(139,156,255,.28);border-radius:16px;background:linear-gradient(145deg,#101b35,#0a1023);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;box-shadow:inset 0 0 24px rgba(98,126,255,.08)}
+.trump-card.red{color:#ff718d}.trump-card.black{color:#eef2ff}.trump-card.empty{color:#7180a7;font-size:20px}
+.trump-result{min-height:24px;font-size:15px;font-weight:700}
+.trump-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:14px}
+.trump-meta span{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05)}
+.trump-actions{display:flex;gap:10px;flex-wrap:wrap}
+.trump-actions button{padding:10px 14px;border:0;border-radius:10px;font-weight:800;cursor:pointer}
+.trump-draw{background:#6d7cff;color:white}.trump-continue{background:#27365d;color:#fff}.trump-stop{background:#2d4a3d;color:#dfffe9}
+.trump-actions button:disabled{opacity:.45;cursor:not-allowed}
+@media (min-width:900px){.trump-panel{max-width:760px;margin-left:auto;margin-right:auto}}
 </style>
 </head>
 <body>
@@ -61,7 +76,107 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 </div>
 
 <script>
-"use strict";
+"use strict";\n
+/* Trump luck mini-game */
+let trumpCoins=0;
+let trumpRound=1;
+let trumpBank=0;
+let trumpDrawn=false;
+const trumpMultiplier=r=>r===1?1:r===2?1.5:r===3?2:r===4?3:4;
+const cardValue=v=>v==="A"?1:v==="J"?11:v==="Q"?12:v==="K"?13:v;
+const cardText=c=>c.joker?"🃏":c.value;
+function buildTrumpDeck(){
+ const suits=[["♠","black"],["♥","red"],["♦","red"],["♣","black"]];
+ const values=["A",2,3,4,5,6,7,8,9,10,"J","Q","K"];
+ const deck=[];
+ suits.forEach(([suit,color])=>values.forEach(value=>deck.push({suit,color,value,joker:false})));
+ deck.push({joker:true,color:"black"},{joker:true,color:"black"});
+ return deck;
+}
+function drawTrumpPair(){
+ const deck=buildTrumpDeck();
+ const a=deck.splice(Math.floor(Math.random()*deck.length),1)[0];
+ const b=deck.splice(Math.floor(Math.random()*deck.length),1)[0];
+ return [a,b];
+}
+function setTrumpCard(id,card){
+ const el=$(id);
+ el.className="trump-card "+(card.color||"black");
+ el.textContent=cardText(card);
+}
+function getTrumpReward(a,b){
+ if(a.joker&&b.joker)return {type:"joker",base:0,text:"🃏 ジョーカー！今回の累計コインは0になります。"};
+ const mult=trumpMultiplier(trumpRound);
+ const sameValue=!a.joker&&!b.joker&&cardValue(a.value)===cardValue(b.value);
+ const luckySeven=sameValue&&cardValue(a.value)===7;
+ const aceKing=!a.joker&&!b.joker&&((a.value==="A"&&b.value==="K")||(a.value==="K"&&b.value==="A"));
+ const consecutive=!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===1;
+ const sameSuit=!a.joker&&!b.joker&&a.suit===b.suit;
+ let base=0,type="miss",text="ハズレ！";
+ if(luckySeven){base=777;type="lucky7";text="🎰 ラッキー7！ +777";}
+ else if(sameValue){base=cardValue(a.value)*cardValue(b.value)*25;type="same";text="🎯 同じ数字！";}
+ else if(aceKing){base=500;type="aceking";text="👑 A＋K！ +500";}
+ else if(sameSuit&&consecutive){base=150;type="suitsame";text="✨ 同じマーク＋連番！ +150";}
+ else if(sameSuit){base=150;type="suitsame";text="♠♥♦♣ 同じマーク！ +150";}
+ else if(consecutive){base=100;type="consecutive";text="🔢 連番！ +100";}
+ if(base<=0)return {type:"miss",reward:0,text:"ハズレ！ +0"};
+ const reward=base*mult;
+ return {type,reward,text:text+" ×"+mult+" → +"+reward+"コイン"};
+}
+function resetTrumpRound(){
+ trumpRound=1;trumpBank=0;trumpDrawn=false;
+ $("trumpRound").textContent=trumpRound;$("trumpBank").textContent=trumpBank;
+ $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
+ $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
+ $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
+ $("trumpResult").textContent="2枚のカードを引こう！";
+ $("trumpDraw").disabled=false;$("trumpContinue").disabled=true;$("trumpStop").disabled=true;
+}
+function finishTrump(){
+ trumpCoins+=trumpBank;
+ $("coins").textContent=Math.floor(trumpCoins);
+ trumpBank=0;trumpRound=1;trumpDrawn=false;
+ saveTrumpCoins();
+ resetTrumpRound();
+ $("trumpResult").textContent="💰 コインを確定！また挑戦できるよ。";
+}
+function saveTrumpCoins(){
+ try{localStorage.setItem("roboforge-trump-coins",String(Math.max(0,Math.floor(trumpCoins))));}catch(e){}
+}
+try{trumpCoins=Math.max(0,Math.floor(Number(localStorage.getItem("roboforge-trump-coins")||0)))}catch(e){trumpCoins=0}
+$("trumpDraw").addEventListener("click",()=>{
+ if(trumpDrawn)return;
+ const [a,b]=drawTrumpPair();
+ setTrumpCard("trumpCardA",a);setTrumpCard("trumpCardB",b);
+ const result=getTrumpReward(a,b);
+ if(result.type==="joker"){
+  trumpBank=0;
+  $("trumpResult").textContent=result.text;
+ }else{
+  trumpBank+=result.reward;
+  $("trumpResult").textContent=result.text+"　累計 "+trumpBank+"コイン";
+ }
+ $("trumpBank").textContent=trumpBank;
+ trumpDrawn=true;
+ $("trumpDraw").disabled=true;$("trumpContinue").disabled=false;$("trumpStop").disabled=false;
+});
+$("trumpContinue").addEventListener("click",()=>{
+ if(!trumpDrawn)return;
+ trumpRound++;
+ trumpDrawn=false;
+ $("trumpRound").textContent=trumpRound;
+ $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
+ $("trumpResult").textContent="次のラウンド！";
+ $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
+ $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
+ $("trumpDraw").disabled=false;$("trumpContinue").disabled=true;$("trumpStop").disabled=true;
+});
+$("trumpStop").addEventListener("click",()=>{
+ if(!trumpDrawn)return;
+ finishTrump();
+});
+$("coins").textContent=trumpCoins;
+
 const SAVE_KEY="roboforge-save-v1";
 const defaultState={money:100,robots:0,progress:0,speedLv:1,priceLv:1,lanes:1,laneProgress:[0],laneData:[{progress:0,speedLv:1,priceLv:1,autoShip:false}]};
 let state={...defaultState};
