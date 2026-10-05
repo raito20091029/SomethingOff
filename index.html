@@ -128,11 +128,11 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
     <li>🔢 同じ数字：数字 × 数字 × 25 × ラウンド倍率（5＋5、10＋10、K＋Kなど）</li>
     <li>➡️ 連続する数字：100 × ラウンド倍率（4＋5、7＋8、Q＋Kなど）</li>
     <li>🔟 合計が10：100 × ラウンド倍率（3＋7、4＋6、A＋9など）</li>
-    <li>📏 数字の差が3：3 × （33＋ラウンド数）（2＋5、7＋10など）</li>
+    <li>📏 数字の差が7：777 × ラウンド数（1＋8、3＋10、6＋Kなど）</li>
     <li>♠️ 同じマーク：150 × ラウンド倍率（♠＋♠、♥＋♥など）</li>
     <li>👑 A＋K：500 × ラウンド倍率</li>
     <li>🃏 ジョーカー＋通常カード：通常カードの数字 × 100 × ラウンド倍率</li>
-    <li>💥 ジョーカー＋ジョーカー：今回の累計コインが0</li>
+    <li>💥 ジョーカー＋ジョーカー：ゲームを強制終了し、今回の累計コインを確定</li>
   </ul>
   <p class="trump-rules-note">✨ ラウンド1は×1。ラウンドが1つ進むごとに倍率が0.5ずつ上がります。</p>
 </div></div>
@@ -171,7 +171,7 @@ function setTrumpCard(id,card){
  el.textContent=cardText(card);
 }
 function getTrumpReward(a,b){
- if(a.joker&&b.joker)return {type:"joker",base:0,text:"🃏 ジョーカー！今回の累計コインは0になります。"};
+ if(a.joker&&b.joker)return {type:"joker",base:0,text:"🃏 ジョーカー＋ジョーカー！ゲームを強制終了します。"};
  const mult=trumpMultiplier(trumpRound);
  const jokerNormal=(a.joker&&!b.joker)||(b.joker&&!a.joker);
  if(jokerNormal){
@@ -191,7 +191,7 @@ function getTrumpReward(a,b){
  else if(sameSuit&&consecutive){base=150;type="suitsame";text="✨ 同じマーク＋連番！";}
  else if(sameSuit){base=150;type="suitsame";text="♠♥♦♣ 同じマーク！";}
  else if(consecutive){base=100;type="consecutive";text="🔢 連番！";}
- else if(!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===3){const reward=3*(33+trumpRound);return {type:"diff3",reward,text:"📏 差が3！ +"+formatCompact(reward)+"コイン"};}
+ else if(!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===7){const reward=777*trumpRound;return {type:"diff7",reward,text:"📏 差が7！ +"+formatCompact(reward)+"コイン"};}
  else if(!a.joker&&!b.joker&&cardValue(a.value)+cardValue(b.value)===10){base=100;type="sum10";text="🔟 合計10！";}
  if(base<=0)return {type:"miss",reward:0,text:"ハズレ！ +0"};
  const reward=base*mult;
