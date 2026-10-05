@@ -320,7 +320,17 @@ function finishTrumpDraw(){
   saveTrumpProgress();
 }
 function revealTrumpPair(){
- if(!trumpDrawn||trumpRevealedA||trumpRevealedB)return;
+ if(!trumpDrawn)return;
+ if(trumpRevealedA&&trumpRevealedB){
+  trumpRound++;
+  trumpDrawn=false;
+  trumpRevealedA=false;
+  trumpRevealedB=false;
+  $("trumpRound").textContent=trumpRound;
+  $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
+  dealTrumpCards();
+  return;
+ }
  if(trumpNextTimer){clearTimeout(trumpNextTimer);trumpNextTimer=null;}
  const [a,b]=trumpPendingCards;
  trumpRevealedA=true;
@@ -330,16 +340,7 @@ function revealTrumpPair(){
  $("trumpCardA").classList.add("reveal");
  $("trumpCardB").classList.add("reveal");
  finishTrumpDraw();
- trumpNextTimer=setTimeout(()=>{
-  trumpNextTimer=null;
-  if(document.getElementById("cardScreen").style.display!=="none"&&trumpRevealedA&&trumpRevealedB){
-   trumpRound++;
-   trumpDrawn=false;
-   $("trumpRound").textContent=trumpRound;
-   $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
-   dealTrumpCards();
-  }
- },650);
+ trumpNextTimer=null;
 }
 $("trumpCardA").addEventListener("click",revealTrumpPair);
 $("trumpCardB").addEventListener("click",revealTrumpPair);
