@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b1220">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="roboforge-icon.svg?v=2">
-<meta name="roboforge-build" content="20261005-TRUMP-LUCK-RULES">
+<meta name="roboforge-build" content="20261005-TRUMP-HIT-SOUND">
 <title>RoboForge</title>
 <style>
 :root{--bg:#07101d;--panel:#0d1a2b;--panel2:#12243a;--line:#203852;--text:#eef6ff;--muted:#8ea5bd;--accent:#48d7ff;--accent2:#7c6cff;--good:#62e6a7;--warn:#ffd166}
@@ -230,6 +230,28 @@ function dealTrumpCards(){
  $("trumpResult").textContent="1枚目のカードをタップしてめくろう！";
  $("trumpContinue").disabled=true;$("trumpStop").disabled=true;
 }
+function playTrumpHitSound(){
+ try{
+  const AudioContext=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContext)return;
+  const ctx=window.__rfAudioContext||(window.__rfAudioContext=new AudioContext());
+  if(ctx.state==="suspended")ctx.resume();
+  const now=ctx.currentTime;
+  const gain=ctx.createGain();
+  gain.gain.setValueAtTime(0.0001,now);
+  gain.gain.exponentialRampToValueAtTime(0.18,now+0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001,now+0.42);
+  gain.connect(ctx.destination);
+  [660,880,1100].forEach((freq,index)=>{
+   const osc=ctx.createOscillator();
+   osc.type="sine";
+   osc.frequency.setValueAtTime(freq,now+index*0.035);
+   osc.connect(gain);
+   osc.start(now+index*0.035);
+   osc.stop(now+0.46);
+  });
+ }catch(e){}
+}
 function finishTrumpDraw(){
  const [a,b]=trumpPendingCards;
  const result=getTrumpReward(a,b);
@@ -238,6 +260,7 @@ function finishTrumpDraw(){
   $("trumpResult").textContent=result.text;
  }else{
   trumpBank+=result.reward;
+  if(result.reward>0)playTrumpHitSound();
   $("trumpResult").textContent=result.text+"　累計 "+formatCompact(trumpBank)+"コイン";
  }
  $("trumpBank").textContent=formatCompact(trumpBank);
