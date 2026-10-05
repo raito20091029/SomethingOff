@@ -210,6 +210,7 @@ function finishTrump(){
  $("coins").textContent=formatCompact(state.money);
  trumpBank=0;trumpRound=1;trumpDrawn=false;
  save();
+  saveTrumpProgress();
  resetTrumpRound();
  $("trumpResult").textContent="💰 コインを確定！また挑戦できるよ。";
 }
@@ -270,6 +271,7 @@ function dealTrumpCards(){
  $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
  $("trumpResult").textContent="1枚目のカードをタップしてめくろう！";
  $("trumpStop").disabled=true;
+  saveTrumpProgress();
 }
 function playTrumpHitSound(){
  try{
@@ -306,6 +308,7 @@ function finishTrumpDraw(){
  }
  $("trumpBank").textContent=formatCompact(trumpBank);
  $("trumpStop").disabled=false;
+  saveTrumpProgress();
 }
 dealTrumpCards();
 function revealTrumpPair(){
