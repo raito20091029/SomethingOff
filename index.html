@@ -98,6 +98,85 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 </section>
 
 <script>
+"use strict";
+
+
+/* Trump luck mini-game */
+.trump-panel{margin-top:18px}
+.trump-box{display:flex;flex-direction:column;gap:14px}
+.trump-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.trump-card{min-height:130px;border:1px solid rgba(139,156,255,.28);border-radius:16px;background:linear-gradient(145deg,#101b35,#0a1023);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;box-shadow:inset 0 0 24px rgba(98,126,255,.08)}
+.trump-card.red{color:#ff718d}.trump-card.black{color:#eef2ff}.trump-card.empty{color:#7180a7;font-size:20px}
+.trump-result{min-height:24px;font-size:15px;font-weight:700}
+.trump-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:14px}
+.trump-meta span{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05)}
+.trump-actions{display:flex;gap:10px;flex-wrap:wrap}
+.trump-actions button{padding:10px 14px;border:0;border-radius:10px;font-weight:800;cursor:pointer}
+.trump-draw{background:#6d7cff;color:white}.trump-continue{background:#27365d;color:#fff}.trump-stop{background:#2d4a3d;color:#dfffe9}
+.trump-actions button:disabled{opacity:.45;cursor:not-allowed}
+@media (min-width:900px){.trump-panel{max-width:760px;margin-left:auto;margin-right:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="brand"><div class="logo">🤖</div><div><div class="title">RoboForge</div><div class="sub">Build the factory. Forge the future.</div></div></div>
+  <div class="money">💰 <span id="money">100</span> G</div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="label">完成ロボット</div><div class="value" id="robots">0</div></div>
+  <div class="stat"><div class="label">稼働レーン</div><div class="value"><span id="speed">1</span> 本</div></div>
+  <div class="stat"><div class="label">次のレーン</div><div class="value"><span id="price">456</span> G</div></div>
+  <div class="stat"><div class="label">工場収益 / 秒</div><div class="value">💰 <span id="incomePerSec">0.00</span> G</div></div>
+</div>
+
+<div class="grid">
+<section class="panel factory">
+  <h2>🏭 生産ライン</h2>
+  <div class="factory-tools">
+    <div id="event" class="event"></div>
+    <div class="factory-status"><span id="laneStatus">稼働中 1本 ・ 出荷待ち 0本</span><span id="lanePotential">次のレーンほどLv.1の生産時間は5%短く、出荷価格は5%高くなります。</span></div>
+    <div class="actions">
+      <button class="primary" id="ship">📦 出荷して受け取る <span id="shipAmount">0</span> G</button>
+      <button class="secondary" id="laneUp">🏭 新しいレーン <span id="laneCost">250</span> G</button>
+    </div>
+  </div>
+  <div class="floor">
+    <div class="ceiling"></div>
+    <div class="lights"><i class="light on"></i><i class="light on"></i><i class="light"></i><i class="light"></i></div>
+    <div id="factoryLanes" class="factory-lanes"></div>
+  </div>
+</section>
+
+
+</div>
+</div>
+
+<section class="panel trump-panel">
+  <h2>🎴 運試し</h2>
+  <div class="trump-box">
+    <div class="trump-meta">
+      <span>🪙 所持コイン <strong id="coins">0</strong></span>
+      <span>🎴 ラウンド <strong id="trumpRound">1</strong></span>
+      <span>💰 今回の累計 <strong id="trumpBank">0</strong></span>
+      <span>✨ 倍率 <strong id="trumpMultiplier">×1</strong></span>
+    </div>
+    <div class="trump-cards">
+      <div id="trumpCardA" class="trump-card empty">？</div>
+      <div id="trumpCardB" class="trump-card empty">？</div>
+    </div>
+    <div id="trumpResult" class="trump-result">2枚のカードを引こう！</div>
+    <div class="trump-actions">
+      <button id="trumpDraw" class="trump-draw">🎴 カードを引く</button>
+      <button id="trumpContinue" class="trump-continue" disabled>▶ 続ける</button>
+      <button id="trumpStop" class="trump-stop" disabled>💰 途中でやめる</button>
+    </div>
+  </div>
+</section>
+
+<script>
 "use strict";\n
 /* Trump luck mini-game */
 let trumpCoins=0;
