@@ -207,6 +207,7 @@ function resetTrumpRound(){
 }
 function finishTrump(){
  state.money+=trumpBank;
+restoreTrumpProgress();
  $("coins").textContent=formatCompact(state.money);
  trumpBank=0;trumpRound=1;trumpDrawn=false;
  save();
