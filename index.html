@@ -207,7 +207,6 @@ function resetTrumpRound(){
 }
 function finishTrump(){
  state.money+=trumpBank;
-restoreTrumpProgress();
  $("coins").textContent=formatCompact(state.money);
  trumpBank=0;trumpRound=1;trumpDrawn=false;
  save();
@@ -379,6 +378,7 @@ try{
   state.progress=state.laneData[0]?.progress||0;
  }
 }catch(e){}
+restoreTrumpProgress();
 $("coins").textContent=formatCompact(state.money);
 function save(){
  try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
