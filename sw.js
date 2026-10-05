@@ -1,4 +1,4 @@
-const CACHE='roboforge-v41-svg-title';
+const CACHE='roboforge-v42-card-save';
 const ASSETS=['./','./index.html','./manifest.json','./roboforge-icon.svg?v=2','./roboforge-title-bg.svg?v=1'];
 self.addEventListener('install',e=>{
  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
