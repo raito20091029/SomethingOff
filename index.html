@@ -176,6 +176,9 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 
 const $=id=>document.getElementById(id);
 
+const ROBOFORGE_BUILD="2026-10-05-fix1";
+document.documentElement.dataset.roboforgeBuild=ROBOFORGE_BUILD;
+document.title="RoboForge • "+ROBOFORGE_BUILD;
 const SAVE_KEY="roboforge-save-v1";
 const defaultState=()=>({
  money:100,robots:0,lanes:1,progress:0,laneProgress:[0],
