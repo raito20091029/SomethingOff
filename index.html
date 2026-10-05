@@ -75,6 +75,28 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 </div>
 </div>
 
+<section class="panel trump-panel">
+  <h2>🎴 運試し</h2>
+  <div class="trump-box">
+    <div class="trump-meta">
+      <span>🪙 所持コイン <strong id="coins">0</strong></span>
+      <span>🎴 ラウンド <strong id="trumpRound">1</strong></span>
+      <span>💰 今回の累計 <strong id="trumpBank">0</strong></span>
+      <span>✨ 倍率 <strong id="trumpMultiplier">×1</strong></span>
+    </div>
+    <div class="trump-cards">
+      <div id="trumpCardA" class="trump-card empty">？</div>
+      <div id="trumpCardB" class="trump-card empty">？</div>
+    </div>
+    <div id="trumpResult" class="trump-result">2枚のカードを引こう！</div>
+    <div class="trump-actions">
+      <button id="trumpDraw" class="trump-draw">🎴 カードを引く</button>
+      <button id="trumpContinue" class="trump-continue" disabled>▶ 続ける</button>
+      <button id="trumpStop" class="trump-stop" disabled>💰 途中でやめる</button>
+    </div>
+  </div>
+</section>
+
 <script>
 "use strict";\n
 /* Trump luck mini-game */
