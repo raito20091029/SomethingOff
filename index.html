@@ -185,19 +185,31 @@ const normalizeState=saved=>{
 };
 let state=defaultState();
 try{
- const candidates=[
-  localStorage.getItem(SAVE_KEY),
-  localStorage.getItem("roboforge-save"),
-  localStorage.getItem("roboforge-save-v0"),
-  localStorage.getItem("roboforge-state"),
-  localStorage.getItem("RoboForge-save-v1")
- ].map(v=>{try{return v?JSON.parse(v):null}catch(e){return null}}).filter(Boolean);
+ const candidates=[];
+ for(let i=0;i<localStorage.length;i++){
+  const key=localStorage.key(i);
+  try{
+   const raw=localStorage.getItem(key);
+   if(!raw)continue;
+   const parsed=JSON.parse(raw);
+   const collect=v=>{
+    if(!v||typeof v!=="object")return;
+    if(("money" in v||"robots" in v)&&("laneData" in v||"lanes" in v))candidates.push(v);
+    for(const value of Object.values(v)){
+     if(value&&typeof value==="object"&&!Array.isArray(value))collect(value);
+    }
+   };
+   collect(parsed);
+  }catch(e){}
+ }
  const valid=candidates.filter(v=>Number(v.money)>100||Number(v.robots)>0||(Array.isArray(v.laneData)&&v.laneData.some(l=>Number(l.progress)>0||Number(l.speedLv)>1||Number(l.priceLv)>1||l.autoShip)));
  if(valid.length)state=normalizeState(valid.sort((a,b)=>(Number(b.robots)||0)-(Number(a.robots)||0))[0]);
  else{
-  const current=normalizeState(candidates[0]);
+  const raw=localStorage.getItem(SAVE_KEY);
+  const current=raw?normalizeState(JSON.parse(raw)):null;
   if(current)state=current;
  }
+}catch(e){console.warn("RoboForge save restore failed",e);}
 }catch(e){console.warn("RoboForge save restore failed",e);}
 
 
