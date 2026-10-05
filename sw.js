@@ -1,5 +1,5 @@
-const CACHE='roboforge-v39-title-bg';
-const ASSETS=['./','./index.html','./manifest.json','./roboforge-icon.svg?v=2','./roboforge-title-bg.webp?v=1'];
+const CACHE='roboforge-v40-title-bg';
+const ASSETS=['./','./index.html','./manifest.json','./roboforge-icon.svg?v=2','./roboforge-title-bg.webp?v=2'];
 self.addEventListener('install',e=>{
  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
