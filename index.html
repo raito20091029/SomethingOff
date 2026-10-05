@@ -36,6 +36,9 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 .trump-draw{background:#6d7cff;color:white}.trump-continue{background:#27365d;color:#fff}.trump-stop{background:#2d4a3d;color:#dfffe9}
 .trump-actions button:disabled{opacity:.45;cursor:not-allowed}
 @media (min-width:900px){.trump-panel{max-width:760px;margin-left:auto;margin-right:auto}}
+
+.screen{width:100%;min-height:100vh}.home-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}.home-logo{font-size:72px;margin-bottom:8px}.home-screen h1{font-size:42px;margin:0;font-weight:950;letter-spacing:1px}.home-screen p{font-size:18px;color:var(--muted);margin:8px 0 28px}.home-menu{width:min(520px,100%);display:grid;gap:14px}.home-button{padding:20px;border:1px solid #31516e;border-radius:16px;background:linear-gradient(135deg,#10243a,#172c4b);font-size:20px;font-weight:900;box-shadow:0 10px 30px #0004}.home-button:hover{border-color:var(--accent);transform:translateY(-1px)}.screen-nav{position:fixed;top:10px;left:10px;z-index:200}.back-home{padding:9px 13px;border:1px solid #31516e;border-radius:10px;background:#0c1c2d;font-weight:800}.mode-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.mode-header h1{font-size:24px;margin:0}.factory-screen-inner,.card-screen-inner{width:100%}
+@media(max-width:600px){.home-screen h1{font-size:34px}.home-button{font-size:18px;padding:17px}}
 </style>
 </head>
 <body>
@@ -53,6 +56,17 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
   <div class="stat"><div class="label">工場収益 / 秒</div><div class="value">💰 <span id="incomePerSec">0.00</span> G</div></div>
 </div>
 
+<section id="homeScreen" class="screen home-screen">
+  <div class="home-logo">🤖</div>
+  <h1>RoboForge</h1>
+  <p>ロボット工場</p>
+  <div class="home-menu">
+    <button id="homeFactory" class="home-button">🏭 ロボット工場</button>
+    <button id="homeCard" class="home-button">🎴 カード</button>
+  </div>
+</section>
+
+<section id="factoryScreen" class="screen" style="display:none"><div class="screen-nav"><button id="factoryHome" class="back-home">← ホーム</button></div>
 <div class="grid">
 <section class="panel factory">
   <h2>🏭 生産ライン</h2>
@@ -71,10 +85,11 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
   </div>
 </section>
 
-
 </div>
 </div>
+</section>
 
+<section id="cardScreen" class="screen" style="display:none"><div class="screen-nav"><button id="cardHome" class="back-home">← ホーム</button></div>
 <section class="panel trump-panel">
   <h2>🎴 運試し</h2>
   <div class="trump-box">
@@ -96,6 +111,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
     </div>
   </div>
 </section>
+</section>
 
 <script>
 "use strict";
@@ -107,7 +123,7 @@ let trumpCoins=0;
 let trumpRound=1;
 let trumpBank=0;
 let trumpDrawn=false;
-const trumpMultiplier=r=>r===1?1:r===2?1.5:r===3?2:r===4?3:4;
+const trumpMultiplier=r=>1+(r-1)*0.5;
 const cardValue=v=>v==="A"?1:v==="J"?11:v==="Q"?12:v==="K"?13:v;
 const cardText=c=>c.joker?"🃏":c.value;
 function buildTrumpDeck(){
@@ -150,6 +166,8 @@ function getTrumpReward(a,b){
  else if(sameSuit&&consecutive){base=150;type="suitsame";text="✨ 同じマーク＋連番！ +150";}
  else if(sameSuit){base=150;type="suitsame";text="♠♥♦♣ 同じマーク！ +150";}
  else if(consecutive){base=100;type="consecutive";text="🔢 連番！ +100";}
+ else if(!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===3){const reward=3*(33+trumpRound);return {type:"diff3",reward,text:"📏 差が3！ +"+reward};}
+ else if(!a.joker&&!b.joker&&cardValue(a.value)+cardValue(b.value)===10){base=100;type="sum10";text="🔟 合計10！ +100";}
  if(base<=0)return {type:"miss",reward:0,text:"ハズレ！ +0"};
  const reward=base*mult;
  return {type,reward,text:text+" ×"+mult+" → +"+reward+"コイン"};
@@ -164,10 +182,10 @@ function resetTrumpRound(){
  $("trumpDraw").disabled=false;$("trumpContinue").disabled=true;$("trumpStop").disabled=true;
 }
 function finishTrump(){
- trumpCoins+=trumpBank;
- $("coins").textContent=Math.floor(trumpCoins);
+ state.money+=trumpBank;
+ $("coins").textContent=Math.floor(state.money);
  trumpBank=0;trumpRound=1;trumpDrawn=false;
- saveTrumpCoins();
+ save();
  resetTrumpRound();
  $("trumpResult").textContent="💰 コインを確定！また挑戦できるよ。";
 }
@@ -206,8 +224,6 @@ $("trumpStop").addEventListener("click",()=>{
  if(!trumpDrawn)return;
  finishTrump();
 });
-$("coins").textContent=trumpCoins;
-
 const SAVE_KEY="roboforge-save-v1";
 const defaultState={money:100,robots:0,progress:0,speedLv:1,priceLv:1,lanes:1,laneProgress:[0],laneData:[{progress:0,speedLv:1,priceLv:1,autoShip:false}]};
 let state={...defaultState};
@@ -233,6 +249,7 @@ try{
   state.progress=state.laneData[0]?.progress||0;
  }
 }catch(e){}
+$("coins").textContent=Math.floor(state.money);
 function save(){
  try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
 }
@@ -407,6 +424,20 @@ render();
 renderFactoryLanes();
 updateLaneProgress();
 timerId=setTimeout(loop,100);
+
+function showScreen(name){
+ const home=$("homeScreen"),factory=$("factoryScreen"),card=$("cardScreen");
+ home.style.display=name==="home"?"flex":"none";
+ factory.style.display=name==="factory"?"block":"none";
+ card.style.display=name==="card"?"block":"none";
+ if(name==="factory"){render();renderFactoryLanes();updateLaneProgress();}
+ if(name==="card"){$("coins").textContent=Math.floor(state.money);}
+}
+$("homeFactory").addEventListener("click",()=>showScreen("factory"));
+$("homeCard").addEventListener("click",()=>showScreen("card"));
+$("factoryHome").addEventListener("click",()=>showScreen("home"));
+$("cardHome").addEventListener("click",()=>showScreen("home"));
+showScreen("home");
 </script>
 </body>
 </html>
