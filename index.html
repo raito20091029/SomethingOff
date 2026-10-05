@@ -125,7 +125,7 @@ let trumpBank=0;
 let trumpDrawn=false;
 const trumpMultiplier=r=>1+(r-1)*0.5;
 const cardValue=v=>v==="A"?1:v==="J"?11:v==="Q"?12:v==="K"?13:v;
-const cardText=c=>c.joker?"🃏":c.value;
+const cardText=c=>c.joker?"🃏":c.suit+" "+c.value;
 function buildTrumpDeck(){
  const suits=[["♠","black"],["♥","red"],["♦","red"],["♣","black"]];
  const values=["A",2,3,4,5,6,7,8,9,10,"J","Q","K"];
