@@ -26,7 +26,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;ma
 .trump-panel{margin-top:18px}
 .trump-box{display:flex;flex-direction:column;gap:14px}
 .trump-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.trump-card{min-height:130px;border:1px solid rgba(139,156,255,.28);border-radius:16px;background:linear-gradient(145deg,#101b35,#0a1023);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;box-shadow:inset 0 0 24px rgba(98,126,255,.08)}
+.trump-card{min-height:130px;border:1px solid rgba(139,156,255,.28);border-radius:16px;background:linear-gradient(145deg,#101b35,#0a1023);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;box-shadow:inset 0 0 24px rgba(98,126,255,.08)}.trump-card.reveal{animation:trumpReveal .35s ease-out}@keyframes trumpReveal{0%{opacity:.2;transform:rotateY(90deg) scale(.9)}100%{opacity:1;transform:rotateY(0) scale(1)}}
 .trump-card.red{color:#ff718d}.trump-card.black{color:#eef2ff}.trump-card.empty{color:#7180a7;font-size:20px}
 .trump-result{min-height:24px;font-size:15px;font-weight:700}
 .trump-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:14px}
@@ -195,19 +195,32 @@ function saveTrumpCoins(){
 try{trumpCoins=Math.max(0,Math.floor(Number(localStorage.getItem("roboforge-trump-coins")||0)))}catch(e){trumpCoins=0}
 $("trumpDraw").addEventListener("click",()=>{
  if(trumpDrawn)return;
- const [a,b]=drawTrumpPair();
- setTrumpCard("trumpCardA",a);setTrumpCard("trumpCardB",b);
- const result=getTrumpReward(a,b);
- if(result.type==="joker"){
-  trumpBank=0;
-  $("trumpResult").textContent=result.text;
- }else{
-  trumpBank+=result.reward;
-  $("trumpResult").textContent=result.text+"　累計 "+trumpBank+"コイン";
- }
- $("trumpBank").textContent=trumpBank;
  trumpDrawn=true;
- $("trumpDraw").disabled=true;$("trumpContinue").disabled=false;$("trumpStop").disabled=false;
+ $("trumpDraw").disabled=true;$("trumpContinue").disabled=true;$("trumpStop").disabled=true;
+ const [a,b]=drawTrumpPair();
+ const cardA=$("trumpCardA"),cardB=$("trumpCardB");
+ cardA.className="trump-card empty";cardA.textContent="？";
+ cardB.className="trump-card empty";cardB.textContent="？";
+ $("trumpResult").textContent="1枚目をめくっています…";
+ setTimeout(()=>{
+  setTrumpCard("trumpCardA",a);
+  cardA.classList.add("reveal");
+  $("trumpResult").textContent="2枚目をめくっています…";
+  setTimeout(()=>{
+   setTrumpCard("trumpCardB",b);
+   cardB.classList.add("reveal");
+   const result=getTrumpReward(a,b);
+   if(result.type==="joker"){
+    trumpBank=0;
+    $("trumpResult").textContent=result.text;
+   }else{
+    trumpBank+=result.reward;
+    $("trumpResult").textContent=result.text+"　累計 "+trumpBank+"コイン";
+   }
+   $("trumpBank").textContent=trumpBank;
+   $("trumpContinue").disabled=false;$("trumpStop").disabled=false;
+  },700);
+ },500);
 });
 $("trumpContinue").addEventListener("click",()=>{
  if(!trumpDrawn)return;
