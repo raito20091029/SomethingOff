@@ -689,13 +689,17 @@ window.addEventListener("focus",()=>{
  if(!document.hidden)returnToForeground();
 });
 
-restoreTrumpProgress();
-factory2Restore();
-render();
-renderFactoryLanes();
-updateLaneProgress();
-renderFactory2();
-if(factory2Unlocked()){renderFactory2Lanes();updateFactory2Lanes();}
+try{
+ restoreTrumpProgress();
+ factory2Restore();
+ render();
+ renderFactoryLanes();
+ updateLaneProgress();
+ renderFactory2();
+ if(factory2Unlocked()){renderFactory2Lanes();updateFactory2Lanes();}
+}catch(e){
+ console.warn("RoboForge startup initialization failed",e);
+}
 timerId=setTimeout(loop,100);
 
 function showScreen(name){
