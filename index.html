@@ -203,13 +203,15 @@ try{
   }catch(e){}
  }
  const valid=candidates.filter(v=>Number(v.money)>100||Number(v.robots)>0||(Array.isArray(v.laneData)&&v.laneData.some(l=>Number(l.progress)>0||Number(l.speedLv)>1||Number(l.priceLv)>1||l.autoShip)));
- if(valid.length)state=normalizeState(valid.sort((a,b)=>(Number(b.robots)||0)-(Number(a.robots)||0))[0]);
+ if(valid.length){
+  state=normalizeState(valid.sort((a,b)=>((Number(b.robots)||0)-(Number(a.robots)||0))||((Number(b.money)||0)-(Number(a.money)||0))||((Number(b.lanes)||0)-(Number(a.lanes)||0)))[0]);
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));localStorage.setItem("roboforge-save-recovery-v1",JSON.stringify(state));}catch(e){}
+}
  else{
   const raw=localStorage.getItem(SAVE_KEY);
   const current=raw?normalizeState(JSON.parse(raw)):null;
   if(current)state=current;
  }
-}catch(e){console.warn("RoboForge save restore failed",e);}
 }catch(e){console.warn("RoboForge save restore failed",e);}
 
 
