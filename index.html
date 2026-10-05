@@ -706,8 +706,8 @@ function showScreen(name){
  factory.style.display=name==="factory"?"block":"none";
  factory2.style.display=name==="factory2"?"block":"none";
  card.style.display=name==="card"?"block":"none";
- header.style.display=name==="factory"?"flex":"none";
- stats.style.display=name==="factory"?"grid":"none";
+ header.style.display=name==="factory"||name==="factory2"?"flex":"none";
+ stats.style.display=name==="factory"||name==="factory2"?"grid":"none";
  if(name==="factory"){render();renderFactoryLanes();updateLaneProgress();}
  if(name==="factory2"){renderFactory2();renderFactory2Lanes();updateFactory2Lanes();}
  if(name==="card"){
