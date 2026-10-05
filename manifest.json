@@ -2,7 +2,7 @@
   "name": "RoboForge",
   "short_name": "RoboForge",
   "description": "ロボット工場を経営する放置×運ゲーム",
-  "start_url": "./",
+  "start_url": "./?rfbuild=2026-10-05-fix2",
   "display": "standalone",
   "background_color": "#07101d",
   "theme_color": "#0b1220",
