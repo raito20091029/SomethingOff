@@ -291,6 +291,208 @@ function advanceFactory2Production(dt){
 }
 
 
+const trumpMultiplier=r=>1+(r-1)*0.5;
+const cardValue=v=>v==="A"?1:v==="J"?11:v==="Q"?12:v==="K"?13:v;
+const cardText=c=>c.joker?"🃏":c.suit+" "+c.value;
+function buildTrumpDeck(){
+ const suits=[["♠","black"],["♥","red"],["♦","red"],["♣","black"]];
+ const values=["A",2,3,4,5,6,7,8,9,10,"J","Q","K"];
+ const deck=[];
+ suits.forEach(([suit,color])=>values.forEach(value=>deck.push({suit,color,value,joker:false})));
+ deck.push({joker:true,color:"black"},{joker:true,color:"black"});
+ return deck;
+}
+function drawTrumpPair(){
+ const deck=buildTrumpDeck();
+ const a=deck.splice(Math.floor(Math.random()*deck.length),1)[0];
+ const b=deck.splice(Math.floor(Math.random()*deck.length),1)[0];
+ return [a,b];
+}
+function setTrumpCard(id,card){
+ const el=$(id);
+ el.className="trump-card "+(card.color||"black")+(card.joker?" joker-card":"");
+ el.textContent=cardText(card);
+}
+function getTrumpReward(a,b){
+ if(a.joker&&b.joker)return {type:"joker",base:0,text:"🃏 ジョーカー＋ジョーカー！ゲームを強制終了します。"};
+ const mult=trumpMultiplier(trumpRound);
+ const jokerNormal=(a.joker&&!b.joker)||(b.joker&&!a.joker);
+ if(jokerNormal){
+  const normal=a.joker?b:a;
+  const reward=cardValue(normal.value)*100*mult;
+  return {type:"jokerNormal",reward,text:"🃏＋"+normal.value+"！ +"+formatCompact(reward)+"コイン"};
+ }
+ const sameValue=!a.joker&&!b.joker&&cardValue(a.value)===cardValue(b.value);
+ const luckySeven=sameValue&&cardValue(a.value)===7;
+ const aceKing=!a.joker&&!b.joker&&((a.value==="A"&&b.value==="K")||(a.value==="K"&&b.value==="A"));
+ const consecutive=!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===1;
+ const sameSuit=!a.joker&&!b.joker&&a.suit===b.suit;
+ let base=0,type="miss",text="ハズレ！";
+ if(luckySeven){base=77*25;type="lucky7";text="🎰 ラッキー7！";}
+ else if(sameValue){base=cardValue(a.value)*cardValue(b.value)*25;type="same";text="🎯 同じ数字！";}
+ else if(aceKing){base=500;type="aceking";text="👑 A＋K！";}
+ else if(sameSuit&&consecutive){base=150;type="suitsame";text="✨ 同じマーク＋連番！";}
+ else if(sameSuit){base=150;type="suitsame";text="♠♥♦♣ 同じマーク！";}
+ else if(consecutive){base=100;type="consecutive";text="🔢 連番！";}
+ else if(!a.joker&&!b.joker&&Math.abs(cardValue(a.value)-cardValue(b.value))===7){const reward=777*trumpRound;return {type:"diff7",reward,text:"📏 差が7！ +"+formatCompact(reward)+"コイン"};}
+ else if(!a.joker&&!b.joker&&cardValue(a.value)+cardValue(b.value)===10){base=100;type="sum10";text="🔟 合計10！";}
+ if(base<=0)return {type:"miss",reward:0,text:"ハズレ！ +0"};
+ const reward=base*mult;
+ return {type,reward,text:text+" +"+formatCompact(reward)+"コイン"};
+}
+function resetTrumpRound(){
+ trumpRound=1;trumpBank=0;trumpDrawn=false;
+ $("trumpRound").textContent=trumpRound;$("trumpBank").textContent=formatCompact(trumpBank);
+ $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
+ $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
+ $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
+ $("trumpResult").textContent="1枚目のカードをタップしてめくろう！";
+ $("trumpStop").disabled=true;
+}
+function finishTrump(){
+ state.money+=trumpBank;
+ $("coins").textContent=formatCompact(state.money);
+ trumpBank=0;trumpRound=1;trumpDrawn=false;
+ resetTrumpRound();
+ save();
+ $("trumpResult").textContent="💰 コインを確定！また挑戦できるよ。";
+}
+function saveTrumpCoins(){
+ try{localStorage.setItem("roboforge-trump-coins",String(Math.max(0,Math.floor(trumpCoins))));}catch(e){}
+}
+try{trumpCoins=Math.max(0,Math.floor(Number(localStorage.getItem("roboforge-trump-coins")||0)))}catch(e){trumpCoins=0}
+let trumpPendingCards=null;
+let trumpNextTimer=null;
+let trumpRevealedA=false;
+let trumpRevealedB=false;
+function saveTrumpProgress(){
+ try{
+  localStorage.setItem(TRUMP_SAVE_KEY,JSON.stringify({
+   round:trumpRound,
+   bank:trumpBank,
+   drawn:trumpDrawn,
+   pendingCards:trumpPendingCards,
+   revealedA:trumpRevealedA,
+   revealedB:trumpRevealedB
+  }));
+ }catch(e){}
+}
+function restoreTrumpProgress(){
+ try{
+  const saved=JSON.parse(localStorage.getItem(TRUMP_SAVE_KEY)||"null");
+  if(saved&&typeof saved==="object"){
+   trumpRound=Math.max(1,Math.floor(Number(saved.round)||1));
+   trumpBank=Math.max(0,Math.floor(Number(saved.bank)||0));
+   // A zero-bank saved state cannot represent an active later round.
+   // Normalize stale saves left by the previous round-reset bug.
+   if(trumpRound>1&&trumpBank===0){
+    trumpRound=1;
+    trumpDrawn=false;
+    trumpPendingCards=null;
+    trumpRevealedA=false;
+    trumpRevealedB=false;
+   }
+   trumpDrawn=saved.drawn===true;
+   trumpPendingCards=Array.isArray(saved.pendingCards)&&saved.pendingCards.length===2?saved.pendingCards:null;
+   trumpRevealedA=saved.revealedA===true;
+   trumpRevealedB=saved.revealedB===true;
+  }
+ }catch(e){}
+ $("trumpRound").textContent=trumpRound;
+ $("trumpBank").textContent=formatCompact(trumpBank);
+ $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
+ if(trumpDrawn&&trumpPendingCards){
+  if(trumpRevealedA&&trumpRevealedB){
+   setTrumpCard("trumpCardA",trumpPendingCards[0]);
+   setTrumpCard("trumpCardB",trumpPendingCards[1]);
+   $("trumpStop").disabled=false;
+  }else{
+   $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
+   $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
+   $("trumpStop").disabled=true;
+  }
+ }else{
+  trumpDrawn=false;
+  dealTrumpCards();
+ }
+}
+function dealTrumpCards(){
+ trumpPendingCards=drawTrumpPair();
+ trumpDrawn=true;
+ trumpRevealedA=false;trumpRevealedB=false;
+ $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
+ $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
+ $("trumpResult").textContent="1枚目のカードをタップしてめくろう！";
+ $("trumpStop").disabled=true;
+  saveTrumpProgress();
+}
+function playTrumpHitSound(){
+ try{
+  const AudioContext=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContext)return;
+  const ctx=window.__rfAudioContext||(window.__rfAudioContext=new AudioContext());
+  if(ctx.state==="suspended")ctx.resume();
+  const now=ctx.currentTime;
+  const gain=ctx.createGain();
+  gain.gain.setValueAtTime(0.0001,now);
+  gain.gain.exponentialRampToValueAtTime(0.18,now+0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001,now+0.42);
+  gain.connect(ctx.destination);
+  [660,880,1100].forEach((freq,index)=>{
+   const osc=ctx.createOscillator();
+   osc.type="sine";
+   osc.frequency.setValueAtTime(freq,now+index*0.035);
+   osc.connect(gain);
+   osc.start(now+index*0.035);
+   osc.stop(now+0.46);
+  });
+ }catch(e){}
+}
+function finishTrumpDraw(){
+ const [a,b]=trumpPendingCards;
+ const result=getTrumpReward(a,b);
+ if(result.type==="joker"){
+  trumpBank=0;
+  $("trumpResult").textContent=result.text;
+ }else{
+  trumpBank+=result.reward;
+  if(result.reward>0)playTrumpHitSound();
+  $("trumpResult").textContent=result.text+"　累計 "+formatCompact(trumpBank)+"コイン";
+ }
+ $("trumpBank").textContent=formatCompact(trumpBank);
+ $("trumpStop").disabled=false;
+  saveTrumpProgress();
+}
+function revealTrumpPair(){
+ if(!trumpDrawn)return;
+ if(trumpRevealedA&&trumpRevealedB){
+  trumpRound++;
+  trumpDrawn=false;
+  trumpRevealedA=false;
+  trumpRevealedB=false;
+  $("trumpRound").textContent=trumpRound;
+  $("trumpMultiplier").textContent="×"+trumpMultiplier(trumpRound);
+  dealTrumpCards();
+  return;
+ }
+ if(trumpNextTimer){clearTimeout(trumpNextTimer);trumpNextTimer=null;}
+ const [a,b]=trumpPendingCards;
+ trumpRevealedA=true;
+ trumpRevealedB=true;
+ setTrumpCard("trumpCardA",a);
+ setTrumpCard("trumpCardB",b);
+ $("trumpCardA").classList.add("reveal");
+ $("trumpCardB").classList.add("reveal");
+ finishTrumpDraw();
+ trumpNextTimer=null;
+}
+$("trumpCardA").addEventListener("click",revealTrumpPair);
+$("trumpCardB").addEventListener("click",revealTrumpPair);
+$("trumpStop").addEventListener("click",()=>{
+ if(!trumpDrawn)return;
+ finishTrump();
+});
+
 function save(){
  try{
   localStorage.setItem(SAVE_KEY,JSON.stringify(state));
@@ -298,7 +500,7 @@ function save(){
   factory2Save();
  }catch(e){}
 }
-window.addEventListener("beforeunload",saveTrumpProgress);
+window.addEventListener("beforeunload",()=>{saveTrumpProgress();factory2Save();});
 const laneSpeed=(lane,index=0)=>1/Math.pow(0.95,index+(lane.speedLv-1));
 const lanePrice=(lane,index=0)=>25*Math.pow(1.05,index+(lane.priceLv-1));
 const laneProductionTime=(lane,index=0)=>100/(0.0048*laneSpeed(lane,index));
@@ -487,6 +689,8 @@ window.addEventListener("focus",()=>{
  if(!document.hidden)returnToForeground();
 });
 
+restoreTrumpProgress();
+factory2Restore();
 render();
 renderFactoryLanes();
 updateLaneProgress();
