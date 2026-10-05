@@ -204,7 +204,7 @@ function resetTrumpRound(){
  $("trumpCardA").className="trump-card empty";$("trumpCardA").textContent="？";
  $("trumpCardB").className="trump-card empty";$("trumpCardB").textContent="？";
  $("trumpResult").textContent="1枚目のカードをタップしてめくろう！";
- $("trumpContinue").disabled=true;$("trumpStop").disabled=true;
+ $("trumpStop").disabled=true;
 }
 function finishTrump(){
  state.money+=trumpBank;
@@ -264,7 +264,7 @@ function finishTrumpDraw(){
   $("trumpResult").textContent=result.text+"　累計 "+formatCompact(trumpBank)+"コイン";
  }
  $("trumpBank").textContent=formatCompact(trumpBank);
- $("trumpContinue").disabled=false;$("trumpStop").disabled=false;
+ $("trumpStop").disabled=false;
 }
 dealTrumpCards();
 function revealTrumpPair(){
